@@ -9,11 +9,43 @@ module Deja
       def get_or_create(*args)
 
       end
-      
-      # ideally we load related nodes as well, may split into separate method
-      def load_entity(neo_id)
-        @neo.execute_cypher(neo_id) do |start_node|
-          start_node
+
+      def load_entity(neo_id, relations = :all)
+        case relations
+        when :all
+          @neo.execute_cypher(neo_id) do |start_node|
+            start_node(neoid).ret <=> node.ret
+          end
+          break
+        when :outgoing
+          @neo.execute_cypher(neo_id) do |start_node|
+            start_node(neoid).ret >> node.ret
+          end
+          break
+        when :incoming
+          @neo.execute_cypher(neo_id) do |start_node|
+            start_node(neoid).ret << node.ret
+          end
+          break
+        when :none
+          @neo.execute_cypher(neo_id) do |start_node|
+            start_node
+          end
+          break
+        # Assumes array of relationship types - should integrate type + directionality in future
+        when Array
+          @neo.execute_cypher(neo_id) do |start_node|
+            start_node(neo_id).ret - relations.join('|').ret - node.ret
+          end
+          break
+        else
+          if(relations.is_a?(Symbol))
+            @neo.execute_cypher(neo_id) do |start_node|
+              start_node(neo_id).ret - relations.ret - node.ret
+            end
+          else
+            raise Deja::Error::InvalidParameter
+          end
         end
       end
 
