@@ -1,4 +1,3 @@
 = Welcome to Deja.rb
-====
 
 This is a loose translation of the {Neo4j embedded ruby gem}[https://github.com/andreasronge/neo4j] using cypher over REST in place of JRuby and native Java.
