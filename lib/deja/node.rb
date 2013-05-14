@@ -6,7 +6,10 @@ module Deja
     include ActiveModel::Observing
     include ActiveModel::MassAssignmentSecurity
 
+    include Deja::Bridge
     include Deja::Finders
+    include Deja::Error
+    
 
     #
     # Dynamic attribute method generators
