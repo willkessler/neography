@@ -9,7 +9,8 @@ module Deja
       def get_or_create(*args)
 
       end
-
+      
+      # ideally we load related nodes as well, may split into separate method
       def load_entity(neo_id)
         @neo.execute_cypher(neo_id) do |start_node|
           start_node
