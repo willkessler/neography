@@ -17,7 +17,7 @@ module Deja
         get_all_outgoing_nodes(neo_id) if relations == :outgoing
         get_all_incoming_nodes(neo_id) if relations == :incoming
         get_single_node(neo_id) if relations == :none
-        get_node_with_relationship(neo_id)
+        get_node_with_relationship(neo_id, relations)
       end
 
       def get_all_related_nodes(neo_id)
