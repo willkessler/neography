@@ -4,12 +4,13 @@ module Deja
 
     include ActiveModel::Dirty
     include ActiveModel::Observing
+    include ActiveModel::Validations
     include ActiveModel::MassAssignmentSecurity
 
     include Deja::Bridge
     include Deja::Finders
     include Deja::Error
-    
+
 
     #
     # Dynamic attribute method generators
