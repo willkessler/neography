@@ -6,7 +6,23 @@ module Deja
     extend ActiveSupport::Concern
 
     module ClassMethods
-      def get_or_create(*args)
+
+      def create_node(attributes)
+        new_node = @neo.execute_cypher() do
+          node.new(attributes)
+        end
+      end
+
+      def create_relationship(start_node, end_node, name, attributes)
+        new_relationship = @neo.execute_cypher() do
+          create_path{
+            node(start_node.id) > rel(name) > node(end_node.id)
+          }
+        end
+      end
+
+
+      def create_node_with_relationship(relationship, attributes)
 
       end
 
@@ -54,14 +70,6 @@ module Deja
         @neo.execute_cypher(neo_id) do |start_node|
           start_node(neo_id).ret - relations.join('|').ret - node.ret
         end
-      end
-
-      def new(*args)
-
-      end
-
-      def unique_factory_key
-
       end
     end
   end
