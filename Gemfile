@@ -1,9 +1,4 @@
 source 'https://rubygems.org'
 
-gem 'rspec', '~>2.13.0'
-
-gem 'neography'
-gem 'neo4j-cypher'
-
-gem 'activemodel'
-gem 'activesupport'
+# Specify your gem's dependencies in deja.gemspec
+gemspec
