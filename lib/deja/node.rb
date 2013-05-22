@@ -11,17 +11,13 @@ module Deja
     include Deja::Finders
     include Deja::Error
 
-
-    #
-    # Dynamic attribute method generators
-    #
     def initialize(*args)
-      field = args.first
-
-      if
 
     end
 
-  end
+    def save()
 
+    end
+  end
 end
+

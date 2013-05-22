@@ -13,12 +13,26 @@ module Deja
         end
       end
 
+      def update_node(node_id, attributes)
+        updated_node = @neo.execute_cypher() do
+          node(node_id).tap do |n|
+            attributes.each_with_index do |(key, value), index|
+              n[key] = value
+            end
+          end
+        end
+      end
+
       def create_relationship(start_node, end_node, name, attributes)
         new_relationship = @neo.execute_cypher() do
           create_path{
             node(start_node.id) > rel(name) > node(end_node.id)
           }
         end
+      end
+
+      def update_relationship(rel_id, attributes)
+
       end
 
 
