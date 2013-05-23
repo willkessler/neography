@@ -9,5 +9,6 @@ module Deja
   extend ActiveSupport::Autoload
   autoload :Node
   autoload :Error
+  autoload :Bridge
   @neo = Neography::Rest.new()
 end

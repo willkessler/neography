@@ -1,3 +1,4 @@
+require 'spec_helper'
 require 'rake/testtask'
 
 describe Bridge do
@@ -6,7 +7,7 @@ describe Bridge do
       :id => 36,
       :name => 'Investment',
       :relationships => [{
-        :recieved_investment => nil
+        :recieved_investment => nil,
         :direction => 'outgoing'
       },
       {
@@ -36,17 +37,12 @@ describe Bridge do
     @investment[:relationships][1][:made_investment] = @node
 
   end
-  describe ".get_all_related_nodes"
+  
+  describe ".get_all_related_nodes" do
     subject { node }
 
     context "with node id" do
 
     end
-
-
-
-
-
-
   end
 end

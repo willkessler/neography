@@ -40,7 +40,7 @@ module Deja
 
       end
 
-      def load_entity(neo_id, *relations = :all)
+      def load_entity(neo_id, relations = :all)
         get_node_with_relationships(neo_id, relations) if relations.is_a? Array
         raise Deja::Error::InvalidParameter unless relations.is_a? Symbol
         get_all_related_nodes(neo_id) if relations == :all
