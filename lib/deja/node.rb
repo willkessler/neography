@@ -11,6 +11,15 @@ module Deja
     include Deja::Finders
     include Deja::Error
 
+    begin
+        @neo = Neography::Rest.new()
+    rescue Neography::NeographyError
+        exec('rake neo4j:start') if @neo.get_root[:reference_node]
+        # Sets the test Neography connection
+        @neo = Neography::Rest.new()
+    end
+
+
     def initialize(*args)
 
     end

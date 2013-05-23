@@ -11,10 +11,11 @@ module Deja
         node_lookup.is_a?(Hash)
       end
 
-      def create_node(attributes)
-        new_node = @neo.execute_cypher() do
-          node.new(attributes)
+      def create_node(*attributes)
+        create_query = Neo4j::Cypher.query() do
+          node.new(attributes[0]).neo_id
         end
+        @neo.execute_query(create_query)
       end
 
       def update_node(node_id, attributes)
