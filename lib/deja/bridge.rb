@@ -13,7 +13,7 @@ module Deja
 
       def create_node(*attributes)
         create_query = Neo4j::Cypher.query() do
-          node.new(attributes[0]).neo_id
+          node.new(attributes.first).neo_id
         end
         @neo.execute_query(create_query)
       end
@@ -46,12 +46,16 @@ module Deja
 
       end
 
-      def create_relationship(start_node, end_node, name, attributes)
-        new_relationship = @neo.execute_cypher() do
+      def create_relationship(start_node, end_node, name, attributes = nil)
+        create_query = Neo4j::Cypher.query() do
+          relation = rel(name)
           create_path{
-            node(start_node.id) > rel(name) > node(end_node.id)
+            node(start_node) > relation.as(:r).neo_id.ret > node(end_node)
           }
+
         end
+        puts create_query
+        @neo.execute_query(create_query)
       end
 
       def update_relationship(rel_id, attributes)
