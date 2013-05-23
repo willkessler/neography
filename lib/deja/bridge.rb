@@ -7,6 +7,10 @@ module Deja
 
     module ClassMethods
 
+      def is_index?(node_lookup)
+        node_lookup.is_a?(Hash)
+      end
+
       def create_node(attributes)
         new_node = @neo.execute_cypher() do
           node.new(attributes)
@@ -14,6 +18,10 @@ module Deja
       end
 
       def update_node(node_id, attributes)
+        is_index?(node_id) ? update_node_by_index(node_id) : update_node_by_id(node_id)
+      end
+
+      def update_node_by_id(id)
         updated_node = @neo.execute_cypher() do
           node(node_id).tap do |n|
             attributes.each_with_index do |(key, value), index|
@@ -21,6 +29,20 @@ module Deja
             end
           end
         end
+      end
+
+      def update_node_by_index(index_hash)
+        updated_node = @neo.execute_cypher() do
+          node(node_id).tap do |n|
+            attributes.each_with_index do |(key, value), index|
+              n[key] = value
+            end
+          end
+        end
+      end
+
+      def delete_node(node_id)
+
       end
 
       def create_relationship(start_node, end_node, name, attributes)
