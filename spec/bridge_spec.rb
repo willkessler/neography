@@ -4,31 +4,44 @@ require 'rake/testtask'
 
 describe Bridge do
   before :each do
-
   end
 
   describe ".create_node" do
+    context "with no attributes" do
+      it "should raise an exception" do
+        expect(Deja::Node.create_node()).to raise_error
+      end
+    end
+
+    context "with nil attribute" do
+      it "should raise an exception" do
+        expect(Deja::Node.create_node(nil)).to raise_error
+      end
+    end
+
     context "with one attribute" do
       it "returns a response hash" do
-        response = Deja::Node.create_node({:name => 'Jerry Wang'})
+        response = Deja::Node.create_node(:name => 'Jerry Wang')
         response.should be_a(Hash)
       end
 
       it "returns a node id" do
-        response = Deja::Node.create_node({:name => 'Jerry Wang'})
+        response = Deja::Node.create_node(:name => 'Jerry Wang')
         response['data'].first.first.should be_a_kind_of(Fixnum)
       end
     end
-    # context 'when execute_query fails' do
-    #   before :each do
-    #     error_response = JSON.parse()
-    #     Neography::Rest.any_instance.stub(:execute_query).and_return(nil)
-    #   end
 
-    #   it 'raises an exception' do
-    #   end
+    context "with multiple attributes" do
+      it "returns a response hash" do
+        response = Deja::Node.create_node(:name => 'Jerry Wang', :type => 'Person', :permalink => 'jerry_wang')
+        response.should be_a(Hash)
+      end
+      it "returns a node id" do
+        response = Deja::Node.create_node(:name => 'Jerry Wang', :type => 'Person', :permalink => 'jerry_wang')
+        response['data'].first.first.should be_a_kind_of(Fixnum)
+      end
+    end
 
-    # end
   end
 
   describe ".create_relationship" do

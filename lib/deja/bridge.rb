@@ -11,9 +11,11 @@ module Deja
         node_lookup.is_a?(Hash)
       end
 
-      def create_node(*attributes)
+      def create_node(attributes = {})
+        raise Deja::Error::ImvalidParemeter unless attributes
+        raise Deja::Error::NoParameter if attributes.empty?
         create_query = Neo4j::Cypher.query() do
-          node.new(attributes.first).neo_id
+          node.new(attributes).neo_id
         end
         @neo.execute_query(create_query)
       end
@@ -46,7 +48,7 @@ module Deja
 
       end
 
-      def create_relationship(start_node, end_node, name, attributes = nil)
+      def create_relationship(start_node, end_node, name, attributes = {})
         create_query = Neo4j::Cypher.query() do
           relation = rel(name)
           create_path{
