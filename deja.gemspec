@@ -22,4 +22,5 @@ Gem::Specification.new do |s|
   s.add_dependency "neo4j-cypher"
   s.add_dependency "activemodel"
   s.add_dependency "activesupport"
+  s.add_dependency "oj"
 end

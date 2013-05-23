@@ -6,6 +6,7 @@ PATH
       activesupport
       neo4j-cypher
       neography
+      oj
 
 GEM
   remote: https://rubygems.org/
@@ -30,8 +31,9 @@ GEM
       os (>= 0.9.6)
       rake (>= 0.8.7)
       rubyzip (>= 0.9.7)
+    oj (2.0.13)
     os (0.9.6)
-    rake (0.9.6)
+    rake (10.0.4)
     rspec (2.13.0)
       rspec-core (~> 2.13.0)
       rspec-expectations (~> 2.13.0)
