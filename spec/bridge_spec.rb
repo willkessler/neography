@@ -78,7 +78,7 @@ describe Bridge do
         read_rel.should be_a(Hash)
         response = Deja::Node.delete_node(@first_node['data'].first.first)
         expect{Deja::Node.get_single_node(@first_node['data'].first.first)}.to raise_error(Deja::Error::NodeDoesNotExist)
-        expect{Deja::Node.get_single_relationship(@relationship['data'].first.first)}.to raise_error
+        expect{Deja::Node.get_single_relationship(@relationship['data'].first.first)}.to raise_error(Deja::Error::RelationshipDoesNotExist)
       end
     end
   end
