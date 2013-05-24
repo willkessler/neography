@@ -9,5 +9,17 @@ module Deja
         super('No parameters passed')
       end
     end
+
+    class NodeDoesNotExist < StandardError
+      def initialize
+        super ('could not find a node that matches your query')
+      end
+    end
+
+    class RelationshipDoesNotExist < StandardError
+      def initialize
+        super ('could not find a relationship that matches your query')
+      end
+    end
   end
 end

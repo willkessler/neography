@@ -12,12 +12,12 @@ module Deja
       end
 
       def create_node(attributes = {})
-        raise Deja::Error::ImvalidParemeter unless attributes
+        raise Deja::Error::InvalidParameter unless attributes
         raise Deja::Error::NoParameter if attributes.empty?
         create_query = Neo4j::Cypher.query() do
           node.new(attributes).neo_id
         end
-        @neo.execute_query(create_query)
+        Deja.neo.execute_query(create_query)
       end
 
       def update_node(node_id, attributes)
@@ -45,7 +45,10 @@ module Deja
       end
 
       def delete_node(node_id)
-
+        delete_query = Neo4j::Cypher.query() do
+          node(node_id).del.both(rel().as(:r).del)
+        end
+        Deja.neo.execute_query(delete_query)
       end
 
       def create_relationship(start_node, end_node, name, attributes = {})
@@ -56,14 +59,16 @@ module Deja
           }
 
         end
-        puts create_query
-        @neo.execute_query(create_query)
+        Deja.neo.execute_query(create_query)
       end
 
       def update_relationship(rel_id, attributes)
 
       end
 
+      def delete_relationship(rel_id)
+
+      end
 
       def create_node_with_relationship(relationship, attributes)
 
@@ -77,6 +82,28 @@ module Deja
         get_all_incoming_nodes(neo_id) if relations == :incoming
         get_single_node(neo_id) if relations == :none
         get_node_with_relationship(neo_id, relations)
+      end
+
+      def get_single_node(neo_id)
+        read_query = Neo4j::Cypher.query() do
+          node(neo_id)
+        end
+        begin
+          Deja.neo.execute_query(read_query)
+        rescue
+          raise Deja::Error::NodeDoesNotExist
+        end
+      end
+
+      def get_single_relationship(rel_id)
+        read_query = Neo4j::Cypher.query() do
+          rel(rel_id)
+        end
+        begin
+          Deja.neo.execute_query(read_query)
+        rescue
+          raise Deja::Error::RelationshipDoesNotExist
+        end
       end
 
       def get_all_related_nodes(neo_id)
@@ -94,12 +121,6 @@ module Deja
       def get_all_incoming_nodes(neo_id)
         @neo.execute_cypher(neo_id) do |start_node|
           start_node(neoid).ret << node.ret
-        end
-      end
-
-      def get_single_node(neo_id)
-        @neo.execute_cypher(neo_id) do |start_node|
-          start_node
         end
       end
 
