@@ -9,7 +9,6 @@ include Deja
 # Start Neo4j server
 begin
   @neo = Neography::Rest.new(:directory => '/deja-test')
-  # @neo.connection.get('/deja-test') # attempts get request
   @neo.connection.get('/deja-test')
 rescue Errno::ECONNREFUSED => e
   cmd = ''
