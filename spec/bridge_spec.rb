@@ -43,6 +43,11 @@ describe Bridge do
     end
   end
 
+
+  describe ".get_single_node" do
+
+  end
+
   describe ".create_relationship" do
     before :each do
       @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
@@ -83,5 +88,25 @@ describe Bridge do
     end
   end
 
+  describe ".delete_relationship" do
+    before :each do
+      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
+      @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
+      @relationship = Deja::Relationship.create_relationship(@first_node['data'].first.first, @second_node['data'].first.first, :friends)
+    end
+
+    context "given a relationship" do
+      it "should delete a single relationship" do
+        read_rel = Deja::Relationship.get_single_relationship(@relationship['data'].first.first)
+        read_rel.should be_a(Hash)
+        response = Deja::Node.delete_relationship(@relationship['data'].first.first)
+        expect{Deja::Node.get_single_relationship(@relationship['data'].first.first)}.to raise_error(Deja::Error::RelationshipDoesNotExist)
+      end
+
+      it "should throw an error if relationship id doesn't exist" do
+        expect{Deja::Relationship.get_single_relationship(@relationship['data'].first.first + 1)}.to raise_error(Deja::Error::RelationshipDoesNotExist)
+      end
+    end
+  end
 
 end

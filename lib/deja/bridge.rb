@@ -67,7 +67,14 @@ module Deja
       end
 
       def delete_relationship(rel_id)
-
+        delete_query = Neo4j::Cypher.query() do
+          rel(rel_id).del
+        end
+        begin
+          Deja.neo.execute_query(delete_query)
+        rescue
+          raise Deja::Error::RelationshipDoesNotExist
+        end
       end
 
       def create_node_with_relationship(relationship, attributes)
