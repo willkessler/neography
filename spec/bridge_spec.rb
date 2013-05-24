@@ -45,6 +45,23 @@ describe Bridge do
 
 
   describe ".get_single_node" do
+    before :each do
+      @node = Deja::Node.create_node({:name => 'get_single'})
+    end
+
+    context "given a node id" do
+      it "should return a single node" do
+        response = Deja::Node.get_single_node(@node['data'].first.first)
+        response.should be_a(Hash)
+        response['data'].first.first['data']['name'].should eq('get_single')
+      end
+
+      it "should throw an error if node id doesn't exist" do
+
+      end
+
+    end
+
 
   end
 
@@ -95,7 +112,7 @@ describe Bridge do
       @relationship = Deja::Relationship.create_relationship(@first_node['data'].first.first, @second_node['data'].first.first, :friends)
     end
 
-    context "given a relationship" do
+    context "given a relationship id" do
       it "should delete a single relationship" do
         read_rel = Deja::Relationship.get_single_relationship(@relationship['data'].first.first)
         read_rel.should be_a(Hash)
