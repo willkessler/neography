@@ -57,7 +57,7 @@ describe Bridge do
       end
 
       it "should throw an error if node id doesn't exist" do
-
+        expect{Deja::Node.get_single_node(@node['data'].first.first + 1)}.to raise_error(Deja::Error::NodeDoesNotExist)
       end
 
     end
