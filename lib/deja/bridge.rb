@@ -119,6 +119,8 @@ module Deja
         end
       end
 
+
+
       def get_all_outgoing_nodes(neo_id)
         @neo.execute_cypher(neo_id) do |start_node|
           start_node(neoid).ret >> node.ret

@@ -57,12 +57,28 @@ describe Bridge do
       end
 
       it "should throw an error if node id doesn't exist" do
-        expect{Deja::Node.get_single_node(@node['data'].first.first + 1)}.to raise_error(Deja::Error::NodeDoesNotExist)
+        expect{Deja::Node.get_single_node(@node['data'].first.first + 5)}.to raise_error(Deja::Error::NodeDoesNotExist)
       end
+    end
+  end
 
+  describe ".get_single_relationship" do
+    before :each do
+      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
+      @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
+      @relationship = Deja::Relationship.create_relationship(@first_node['data'].first.first, @second_node['data'].first.first, :friends)
     end
 
+    context "given a relationship id" do
+      it "should return a single relationship" do
+        response = Deja::Relationship.get_single_relationship(@relationship['data'].first.first)
+        response.should be_a(Hash)
+      end
 
+      it "should throw an error if relationship id doesn't exist" do
+        expect{Deja::Relationship.get_single_relationship(@relationship['data'].first.first + 5)}.to raise_error(Deja::Error::RelationshipDoesNotExist)
+      end
+    end
   end
 
   describe ".create_relationship" do
