@@ -163,8 +163,5 @@ module Deja
         end
       end
     end
-
-    module InstanceMethods
-    end
   end
 end
