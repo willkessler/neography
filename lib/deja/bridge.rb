@@ -113,18 +113,36 @@ module Deja
         end
       end
 
-      def get_all_related_nodes(neo_id)
-        @neo.execute_cypher(neo_id) do |start_node|
-          start_node(neoid).ret <=> node.ret
+      def get_node_with_related_nodes(neo_id)
+        read_query = Neo4j::Cypher.query() do
+          node(neo_id).ret.both(rel.ret).ret
+        end
+        begin
+          Deja.neo.execute_query(read_query)
+        rescue
+          raise Deja::Error::NodeDoesNotExist
         end
       end
 
+      def get_related_nodes(neo_id)
+        read_query = Neo4j::Cypher.query() do
+          node(neo_id).both(rel.ret).ret
+        end
+        begin
+          Deja.neo.execute_query(read_query)
+        rescue
+          raise Deja::Error::NodeDoesNotExist
+        end
+      end
 
-
-      def get_all_outgoing_nodes(neo_id)
+      def get_node_with_outgoing_nodes(neo_id)
         @neo.execute_cypher(neo_id) do |start_node|
           start_node(neoid).ret >> node.ret
         end
+      end
+
+      def get_outgoing_nodes(neo_id)
+
       end
 
       def get_all_incoming_nodes(neo_id)
@@ -144,6 +162,9 @@ module Deja
           start_node(neo_id).ret - relations.join('|').ret - node.ret
         end
       end
+    end
+
+    module InstanceMethods
     end
   end
 end

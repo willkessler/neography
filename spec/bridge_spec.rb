@@ -43,6 +43,24 @@ describe Bridge do
     end
   end
 
+  describe ".create_relationship" do
+    before :each do
+      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
+      @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
+    end
+
+    context "with no attributes" do
+      it "returns a response hash" do
+        response = Deja::Node.create_relationship(@first_node['data'].first.first, @second_node['data'].first.first, :friends)
+        response.should be_a(Hash)
+      end
+
+      it "returns a relationship id" do
+        response = Deja::Node.create_relationship(@first_node['data'].first.first, @second_node['data'].first.first, :friends)
+        response['data'].first.first.should be_a_kind_of(Fixnum)
+      end
+    end
+  end
 
   describe ".get_single_node" do
     before :each do
@@ -58,6 +76,24 @@ describe Bridge do
 
       it "should throw an error if node id doesn't exist" do
         expect{Deja::Node.get_single_node(@node['data'].first.first + 5)}.to raise_error(Deja::Error::NodeDoesNotExist)
+      end
+    end
+  end
+
+  describe ".get_all_related_nodes" do
+    before :each do
+      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
+      @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
+      @third_node = Deja::Node.create_node({:name => 'Mike Myers'})
+      @first_relationship = Deja::Relationship.create_relationship(@first_node['data'].first.first, @second_node['data'].first.first, :friends)
+      @second_relationship = Deja::Relationship.create_relationship(@first_node['data'].first.first, @third_node['data'].first.first, :enemies)
+    end
+
+    context "given a node id" do
+      it "should return multiple nodes" do
+        response = Deja::Node.get_all_related_nodes(@first_node['data'].first.first)
+        response.should be_a(Hash)
+        puts response
       end
     end
   end
@@ -81,24 +117,9 @@ describe Bridge do
     end
   end
 
-  describe ".create_relationship" do
-    before :each do
-      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
-      @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
-    end
 
-    context "with no attributes" do
-      it "returns a response hash" do
-        response = Deja::Node.create_relationship(@first_node['data'].first.first, @second_node['data'].first.first, :friends)
-        response.should be_a(Hash)
-      end
 
-      it "returns a relationship id" do
-        response = Deja::Node.create_relationship(@first_node['data'].first.first, @second_node['data'].first.first, :friends)
-        response['data'].first.first.should be_a_kind_of(Fixnum)
-      end
-    end
-  end
+
 
 
   describe ".delete_node" do
