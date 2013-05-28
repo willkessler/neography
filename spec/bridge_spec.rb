@@ -80,7 +80,7 @@ describe Bridge do
     end
   end
 
-  describe ".get_all_related_nodes" do
+  describe ".get_node_with_related_nodes" do
     before :each do
       @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
       @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
@@ -91,9 +91,8 @@ describe Bridge do
 
     context "given a node id" do
       it "should return multiple nodes" do
-        response = Deja::Node.get_all_related_nodes(@first_node['data'].first.first)
+        response = Deja::Node.get_node_with_related_nodes(@first_node['data'].first.first)
         response.should be_a(Hash)
-        puts response
       end
     end
   end
