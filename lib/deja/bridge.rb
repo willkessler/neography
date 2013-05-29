@@ -90,13 +90,13 @@ module Deja
       end
 
       def load_entity(neo_id, relations = :all)
-        get_node_with_relationships(neo_id, relations) if relations.is_a? Array
+        return get_node_with_relationships(neo_id, relations) if relations.is_a? Array
         raise Deja::Error::InvalidParameter unless relations.is_a? Symbol
         return get_node_with_related_nodes(neo_id) if relations == :all
-        get_all_outgoing_nodes(neo_id)      if relations == :outgoing
-        get_all_incoming_nodes(neo_id)      if relations == :incoming
-        get_single_node(neo_id)             if relations == :none
-        #get_node_with_relationship(neo_id, relations) if relations != :all
+        return get_all_outgoing_nodes(neo_id)      if relations == :outgoing
+        return get_all_incoming_nodes(neo_id)      if relations == :incoming
+        return get_single_node(neo_id)             if relations == :none
+        return get_node_with_relationship(neo_id, relations) if relations != :all
       end
 
       def get_single_node(neo_id)
