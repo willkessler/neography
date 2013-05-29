@@ -3,15 +3,15 @@ module Deja
     extend ActiveSupport::Concern
 
     module ClassMethods
-      def load(id)
-        self.new(sane_hash(load_entity(id)))
-      end
-
-      def load_many(ids = [])
+      def load(*ids)
         nodes = ids.map do |id|
-          self.new(sane_hash(load_entity(id)))
+          self.new(sane_hash(load_entity(id)).merge!(:id => id))
         end
-        nodes
+        if ids.length == 1
+          nodes.first
+        else
+          nodes
+        end
       end
 
       def find(*args, &block)

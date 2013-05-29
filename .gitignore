@@ -1,4 +1,5 @@
 .rvmrc
 .DS_Store
 deja_test.rb
+test.rb
 neo4j

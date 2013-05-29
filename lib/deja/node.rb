@@ -31,6 +31,11 @@ module Deja
         #update
       end
     end
+
+    def get_related_nodes()
+      Deja::Node.get_related_nodes(@id)
+    end
+
   end
 end
 

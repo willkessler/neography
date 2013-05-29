@@ -124,6 +124,7 @@ module Deja
       def get_node_with_related_nodes(neo_id)
         read_query = Neo4j::Cypher.query() do
           node(neo_id).ret.both(rel.ret).ret
+          node(neo_id).neo_id.ret
         end
         begin
           Deja.neo.execute_query(read_query)
