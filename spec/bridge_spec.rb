@@ -7,8 +7,8 @@ describe Bridge do
   end
 
   describe ".sane_hash" do
-    context "given a hash returned from neo4j"
-      it "should return a hash capable of initializing a node"
+    context "given a hash returned from neo4j" do
+      it "should return a hash capable of initializing a node" do
 
       end
     end
@@ -101,6 +101,7 @@ describe Bridge do
     context "given a node id" do
       it "should return multiple nodes" do
         response = Deja::Node.get_node_with_related_nodes(@first_node['data'].first.first)
+        puts response
         response.should be_a(Hash)
       end
     end
