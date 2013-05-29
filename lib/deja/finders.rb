@@ -5,7 +5,7 @@ module Deja
     module ClassMethods
       def load(*ids)
         nodes = ids.map do |id|
-          load_entity(id)
+          self.new(sane_hash(load_entity(id)))
         end
         if ids.length == 1
           nodes.first

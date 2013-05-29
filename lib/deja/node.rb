@@ -11,12 +11,25 @@ module Deja
     include Deja::Finders
     include Deja::Error
 
-    def initialize(*args)
+    attr_accessor :id
 
+    def initialize(opts={})
+      opts.each { |k,v| instance_variable_set("@#{k}", v) }
     end
 
     def save()
-
+      node_attributes = {}
+      instance_variables.each do |var|
+        unless var == 'id' && !@id
+          node_attributes[var.to_sym] = send(var.to_sym)
+        end
+      end
+      unless @id
+        #create
+        Deja::Node.create_single_node(node_attributes)
+      else
+        #update
+      end
     end
   end
 end
