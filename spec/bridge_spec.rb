@@ -6,6 +6,15 @@ describe Bridge do
   before :each do
   end
 
+  describe ".sane_hash" do
+    context "given a hash returned from neo4j"
+      it "should return a hash capable of initializing a node"
+
+      end
+    end
+  end
+
+
   describe ".create_node" do
     context "with no attributes" do
       it "should raise an exception" do
@@ -95,6 +104,18 @@ describe Bridge do
         response.should be_a(Hash)
       end
     end
+  end
+
+  describe ".get_node_with_relationships" do
+    before :each do
+      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
+      @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
+      @third_node = Deja::Node.create_node({:name => 'Mike Myers'})
+      @first_relationship = Deja::Relationship.create_relationship(@first_node['data'].first.first, @second_node['data'].first.first, :friends)
+      @second_relationship = Deja::Relationship.create_relationship(@first_node['data'].first.first, @third_node['data'].first.first, :enemies)
+    end
+
+
   end
 
   describe ".get_single_relationship" do
