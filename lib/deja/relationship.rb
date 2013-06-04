@@ -11,11 +11,13 @@ module Deja
     include Deja::Finders
     include Deja::Error
 
-    attr_accessor :label, :node
+    attr_accessor :label, :start_node, :end_node, :direction
 
-    def initialize(label, node)
+    def initialize(label, direction, start_node, end_node)
         @label = label
-        @node = node
+        @direction = direction
+        @start_node = start_node
+        @end_node = end_node
     end
 
     def save()
