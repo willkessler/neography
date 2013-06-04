@@ -5,7 +5,12 @@ module Deja
     module ClassMethods
       def load(*ids)
         nodes = ids.map do |id|
-          self.new(sane_hash(load_entity(id)).merge!(:id => id))
+          sane_hash = sane_hash(load_entity(id))
+
+          node_instance = self.new(sane_hash.first)
+          rel_instance = Deja::Relationship.new(sane_hash[1][:type], self.new(sane_hash[2]))
+          node_instance.relationships.merge!(rel_instance.label.to_sym => rel_instance)
+          node_instance
         end
         if ids.length == 1
           nodes.first

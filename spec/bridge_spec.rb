@@ -65,8 +65,21 @@ describe Bridge do
       end
 
       it "returns a relationship id" do
-        response = Deja::Node.create_relationship(@first_node['data'].first.first, @second_node['data'].first.first, :friends)
+        response = Deja::Node.create_relationship(@first_node['data'].firßst.first, @second_node['data'].first.first, :friends)
         response['data'].first.first.should be_a_kind_of(Fixnum)
+      end
+    end
+  end
+
+
+  describe ".update_node_by_id" do
+    before :each do
+
+    end
+
+    context "given an existing node id" do
+      it "should return a response hash" do
+        response = Deja::update_node_by_id(@node)
       end
     end
   end
