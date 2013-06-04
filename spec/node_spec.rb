@@ -26,7 +26,6 @@ describe Node do
         @person.save
         @person.id.should_not be_nil
         @person.id.should be_a_kind_of(Fixnum)
-        puts @person.id
       end
     end
 
@@ -38,6 +37,18 @@ describe Node do
         @person.save
         expect(@person.id).to eq(old_id)
         expect(@person.name).to eq('Mike Meyers')
+      end
+    end
+  end
+
+  describe ".delete" do
+    context "with a node which already exists in the graph" do
+      it "should delete the node from the graph" do
+        @person.save
+        old_id = @person.id
+        @person.delete
+        expect(@person.id).to be_nil
+        expect{Person.load(old_id)}.to raise_error(Deja::Error::NodeDoesNotExist)
       end
     end
   end

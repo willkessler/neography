@@ -31,7 +31,11 @@ module Deja
         create_query = Neo4j::Cypher.query() do
           node.new(attributes).neo_id
         end
-        Deja.neo.execute_query(create_query)['data'].first.first
+        begin
+          Deja.neo.execute_query(create_query)['data'].first.first
+        rescue
+          raise Deja::Error::CreationFailure
+        end
       end
 
       def update_node(node, attributes)
@@ -46,7 +50,11 @@ module Deja
             end
           end
         end
-        Deja.neo.execute_query(update_query)
+        begin
+          Deja.neo.execute_query(update_query)
+        rescue
+          raise Deja::Error::NodeDoesNotExist
+        end
       end
 
       def update_node_by_index(index_hash, attributes)
@@ -57,14 +65,22 @@ module Deja
             end
           end
         end
-        Deja.neo.execute_query(update_query)
+        begin
+          Deja.neo.execute_query(update_query)
+        rescue
+          raise Deja::Error::NodeDoesNotExist
+        end
       end
 
       def delete_node(node_id)
         delete_query = Neo4j::Cypher.query() do
           node(node_id).del.both(rel().as(:r).del)
         end
-        Deja.neo.execute_query(delete_query)
+        begin
+          Deja.neo.execute_query(delete_query)
+        rescue
+          raise Deja::Error::NodeDoesNotExist
+        end
       end
 
       def create_relationship(start_node, end_node, name, attributes = {})

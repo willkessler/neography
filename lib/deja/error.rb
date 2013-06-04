@@ -6,7 +6,7 @@ module Deja
 
     class NoParameter < StandardError
       def initialize
-        super('No parameters passed')
+        super ('No parameters passed')
       end
     end
 
@@ -19,6 +19,12 @@ module Deja
     class RelationshipDoesNotExist < StandardError
       def initialize
         super ('could not find a relationship that matches your query')
+      end
+    end
+
+    class CreationFailure < StandardError
+      def initialize
+        super ('there was an issue with creating this graph entity')
       end
     end
   end

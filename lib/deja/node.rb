@@ -21,7 +21,7 @@ module Deja
 
     def self.relationship(name, label, end_node_type)
       @relationships = {}
-      @relationships[:label] = Deja::Relationship.new(:label, eval(end_node_type).new())
+      @relationships[:label] = Deja::Relationship.new(:label, :both, eval(end_node_type).new(), self)
       class_eval %Q"
         def #{name}
           relationships[:label]
