@@ -12,9 +12,15 @@ module Deja
       end
 
       def sane_hash(hash)
-        clean_hash = {}
-        hash['data'].first.first['data'].each do |key, value|
-          clean_hash[key.to_sym] = value
+        clean_hash = []
+        hash['data'].first.each do |record|
+          attr_hash = {}
+          attr_hash[:id] = record['self'].split('/').last.to_i
+          attr_hash[:type] = record['type'] if record['type']
+          record['data'].each do |key, value|
+            attr_hash[key.to_sym] = value
+          end
+          clean_hash << attr_hash
         end
         clean_hash
       end
@@ -123,8 +129,8 @@ module Deja
 
       def get_node_with_related_nodes(neo_id)
         read_query = Neo4j::Cypher.query() do
-          node(neo_id).ret.both(rel.ret).ret
-          node(neo_id).neo_id.ret
+          relation = rel()
+          node(neo_id).ret.both(relation.ret).ret
         end
         begin
           Deja.neo.execute_query(read_query)
@@ -145,18 +151,46 @@ module Deja
       end
 
       def get_node_with_outgoing_nodes(neo_id)
-        @neo.execute_cypher(neo_id) do |start_node|
-          start_node(neoid).ret >> node.ret
+        read query = Neo4j::Cypher.query() do
+          node(neo_id).ret >> node.ret
+        end
+        begin
+          Deja.neo.execute_query(read_query)
+        rescue
+          raise Deja::Error::NodeDoesNotExist
         end
       end
 
       def get_outgoing_nodes(neo_id)
-
+        read_query = Neo4j::Cypher.query() do
+          node(neo_id) >> node.ret
+        end
+        begin
+          Deja.neo.execute_query(read_query)
+        rescue
+          raise Deja::Error::NodeDoesNotExist
+        end
       end
 
-      def get_all_incoming_nodes(neo_id)
-        @neo.execute_cypher(neo_id) do |start_node|
-          start_node(neoid).ret << node.ret
+      def get_node_with_incoming_nodes(neo_id)
+        read query = Neo4j::Cypher.query() do
+          node(neo_id).ret << node.ret
+        end
+        begin
+          Deja.neo.execute_query(read_query)
+        rescue
+          raise Deja::Error::NodeDoesNotExist
+        end
+      end
+
+      def get_incoming_nodes(neo_id)
+        read_query = Neo4j::Cypher.query() do
+          node(neo_id) << node.ret
+        end
+        begin
+          Deja.neo.execute_query(read_query)
+        rescue
+          raise Deja::Error::NodeDoesNotExist
         end
       end
 

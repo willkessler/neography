@@ -11,10 +11,22 @@ module Deja
     include Deja::Finders
     include Deja::Error
 
-    attr_accessor :id
+    attr_accessor :id, :relationships
 
-    def initialize(opts={})
+    @relationships = {}
+
+    def initialize(opts = {})
+      @relationships = {}
       opts.each { |k,v| instance_variable_set("@#{k}", v) }
+    end
+
+    def self.relationship(name, label, end_node_type)
+      @relationships = {}
+      @relationships[:label] = Deja::Relationship.new(:label, eval(end_node_type).new())
+      class_eval %Q"
+        def #{name}
+          relationships[:label]
+        end"
     end
 
     def save()

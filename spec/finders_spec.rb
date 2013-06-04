@@ -2,9 +2,17 @@ require 'deja'
 require 'spec_helper'
 require 'rake/testtask'
 
-class Person < Deja::Node
+class Company < Deja::Node
   attr_accessor :name, :permalink
 end
+
+class Person < Deja::Node
+  attr_accessor :name, :permalink
+
+  relationship :Investments, :invested_in, 'Company'
+end
+
+
 
 describe Finders do
 
@@ -12,6 +20,9 @@ describe Finders do
     before :each do
       @node = Deja::Node.create_node(:name => 'Jerry Wang', :permalink => 'jerry_wang')
       @second_node = Deja::Node.create_node(:name => 'Willy Wonka', :permalink => 'willy_wonka')
+      @third_node = Deja::Node.create_node(:name => 'Fuck tha police', :permalink => 'f_police')
+      @relationship = Deja::Relationship.create_relationship(@node['data'].first.first, @second_node['data'].first.first, :invested_in)
+      @other_relationship = Deja::Relationship.create_relationship(@node['data'].first.first, @third_node['data'].first.first, :friends)
     end
 
     context "given a single node id" do
@@ -20,6 +31,13 @@ describe Finders do
         person_node.id.should eq(@node['data'].first.first)
         person_node.name.should eq('Jerry Wang')
         person_node.permalink.should eq('jerry_wang')
+      end
+    end
+
+    context "given a node id with associated nodes" do
+      it "should return node objects with relationships" do
+        person_node = Person.load(@node['data'].first.first)
+        puts person_node.relationships
       end
     end
 
