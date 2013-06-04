@@ -31,31 +31,33 @@ module Deja
         create_query = Neo4j::Cypher.query() do
           node.new(attributes).neo_id
         end
-        Deja.neo.execute_query(create_query)
+        Deja.neo.execute_query(create_query)['data'].first.first
       end
 
-      def update_node(node_id, attributes)
-        is_index?(node_id) ? update_node_by_index(node_id) : update_node_by_id(node_id)
+      def update_node(node, attributes)
+        is_index?(node) ? update_node_by_index(node, attributes) : update_node_by_id(node, attributes)
       end
 
-      def update_node_by_id(id)
-        updated_node = @neo.execute_cypher() do
+      def update_node_by_id(node_id, attributes)
+        update_query = Neo4j::Cypher.query do
           node(node_id).tap do |n|
             attributes.each_with_index do |(key, value), index|
               n[key] = value
             end
           end
         end
+        Deja.neo.execute_query(update_query)
       end
 
-      def update_node_by_index(index_hash)
-        updated_node = @neo.execute_cypher() do
+      def update_node_by_index(index_hash, attributes)
+        update_query = Neo4j::Cypher.query do
           node(node_id).tap do |n|
             attributes.each_with_index do |(key, value), index|
               n[key] = value
             end
           end
         end
+        Deja.neo.execute_query(update_query)
       end
 
       def delete_node(node_id)
@@ -71,9 +73,8 @@ module Deja
           create_path{
             node(start_node) > relation.as(:r).neo_id.ret > node(end_node)
           }
-
         end
-        Deja.neo.execute_query(create_query)
+        Deja.neo.execute_query(create_query)['data'].first.first
       end
 
       def update_relationship(rel_id, attributes)
