@@ -8,7 +8,7 @@ module Deja
           sane_hash = sane_hash(load_entity(id))
 
           node_instance = self.new(sane_hash.first)
-          rel_instance = Deja::Relationship.new(sane_hash[1][:type], self.new(sane_hash[2]))
+          rel_instance = Deja::Relationship.new(sane_hash[1][:type], :both, self.new(sane_hash[2]), self)
           node_instance.relationships.merge!(rel_instance.label.to_sym => rel_instance)
           node_instance
         end

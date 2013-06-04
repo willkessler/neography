@@ -212,14 +212,24 @@ module Deja
       end
 
       def get_node_with_relationship(neo_id, relationship)
-        @neo.execute_cypher(neo_id) do |start_node|
+        read_query = Neo4j::Cypher.query() do
           start_node(neo_id).ret - relationship.ret - node.ret
+        end
+        begin
+          Deja.neo.execute_query(read_query)
+        rescue
+          raise Deja::Error::NodeDoesNotExist
         end
       end
 
       def get_node_with_relationships(neo_id, relations = {})
-        @neo.execute_cypher(neo_id) do |start_node|
+        read_query = Neo4j::Cypher.query() do
           start_node(neo_id).ret - relations.join('|').ret - node.ret
+        end
+        begin
+          Deja.neo.execute_query(read_query)
+        rescue
+          raise Deja::Error::NodeDoesNotExist
         end
       end
     end
