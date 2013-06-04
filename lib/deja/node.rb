@@ -36,10 +36,10 @@ module Deja
         end
       end
       unless @id
-        #create
+        # create
         @id = Deja::Node.create_node(node_attributes)
       else
-        #update
+        # update
         Deja::Node.update_node(@id, node_attributes)
       end
     end
