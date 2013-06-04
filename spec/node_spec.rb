@@ -51,6 +51,14 @@ describe Node do
         expect{Person.load(old_id)}.to raise_error(Deja::Error::NodeDoesNotExist)
       end
     end
+
+    context "with a node which doesn't already exist in the graph" do
+      it "should do nothing" do
+        old_id = @person.id
+        @person.delete
+        expect(@person.id).to eq(old_id)
+      end
+    end
   end
 
 end

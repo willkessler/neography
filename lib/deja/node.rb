@@ -45,8 +45,8 @@ module Deja
     end
 
     def delete
-      Deja::Node.delete_node(self.id)
-      self.id = nil
+      Deja::Node.delete_node(@id) if @id
+      @id = nil
     end
 
     def get_related_nodes
