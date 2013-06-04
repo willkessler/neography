@@ -12,8 +12,6 @@ class Person < Deja::Node
   relationship :Investments, :invested_in, 'Company'
 end
 
-
-
 describe Finders do
 
   describe ".load" do
@@ -29,8 +27,8 @@ describe Finders do
       it "should return a node object" do
         person_node = Person.load(@node['data'].first.first)
         person_node.id.should eq(@node['data'].first.first)
-        person_node.name.should eq('Jerry Wang')
-        person_node.permalink.should eq('jerry_wang')
+        expect person_node.name.to eq('Jerry Wang')
+        expect person_node.permalink.to eq('jerry_wang')
       end
     end
 

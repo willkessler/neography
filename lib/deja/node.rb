@@ -13,9 +13,8 @@ module Deja
 
     attr_accessor :id, :relationships
 
-    @relationships = {}
-
     def initialize(opts = {})
+      @id = nil
       @relationships = {}
       opts.each { |k,v| instance_variable_set("@#{k}", v) }
     end
@@ -29,22 +28,28 @@ module Deja
         end"
     end
 
-    def save()
+    def save
       node_attributes = {}
       instance_variables.each do |var|
-        unless var == 'id' && !@id
-          node_attributes[var.to_sym] = send(var.to_sym)
+        unless var == :@id || var == :@relationships
+          node_attributes[var.to_s[1..-1]] = eval(var.to_s)
         end
       end
       unless @id
         #create
-        Deja::Node.create_single_node(node_attributes)
+        @id = Deja::Node.create_node(node_attributes)
       else
         #update
+        Deja::Node.update_node(@id, node_attributes)
       end
     end
 
-    def get_related_nodes()
+    def delete
+      Deja::Node.delete_node(self.id)
+      self.id = nil
+    end
+
+    def get_related_nodes
       Deja::Node.get_related_nodes(@id)
     end
 
