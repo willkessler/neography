@@ -12,11 +12,14 @@ module Deja
       end
 
       def sane_hash(hash)
+        #puts hash
         clean_hash = []
         hash['data'].first.each do |record|
           attr_hash = {}
           attr_hash[:id] = record['self'].split('/').last.to_i
           attr_hash[:type] = record['type'] if record['type']
+          attr_hash[:start] = record['start'].split('/').last.to_i if record['start']
+          attr_hash[:end] = record['end'].split('/').last.to_i if record['end']
           record['data'].each do |key, value|
             attr_hash[key.to_sym] = value
           end
@@ -150,7 +153,7 @@ module Deja
           node(neo_id).ret.both(relation.ret).ret
         end
         begin
-          Deja.neo.execute_query(read_query)
+          Deja.neo.execute_query(read_query.to_s)
         rescue
           raise Deja::Error::NodeDoesNotExist
         end
