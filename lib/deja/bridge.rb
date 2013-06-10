@@ -31,11 +31,11 @@ module Deja
       def create_node(attributes = {})
         raise Deja::Error::InvalidParameter unless attributes
         raise Deja::Error::NoParameter if attributes.empty?
-        create_query = Neo4j::Cypher.query() do
+        query = Neo4j::Cypher.query() do
           node.new(attributes).neo_id
         end
         begin
-          Deja.neo.execute_query(create_query)['data'].first.first
+          Deja.execute_cypher(query)['data'].first.first
         rescue
           raise Deja::Error::CreationFailure
         end
@@ -54,7 +54,7 @@ module Deja
           end
         end
         begin
-          Deja.neo.execute_query(update_query)
+          Deja.execute_cypher(update_query)
         rescue
           raise Deja::Error::NodeDoesNotExist
         end
@@ -69,7 +69,7 @@ module Deja
           end
         end
         begin
-          Deja.neo.execute_query(update_query)
+          Deja.execute_cypher(update_query)
         rescue
           raise Deja::Error::NodeDoesNotExist
         end
@@ -80,7 +80,7 @@ module Deja
           node(node_id).del.both(rel().as(:r).del)
         end
         begin
-          Deja.neo.execute_query(delete_query)
+          Deja.execute_cypher(delete_query)
         rescue
           raise Deja::Error::NodeDoesNotExist
         end
@@ -93,7 +93,7 @@ module Deja
             node(start_node) > relation.as(:r).neo_id.ret > node(end_node)
           }
         end
-        Deja.neo.execute_query(create_query)['data'].first.first
+        Deja.execute_cypher(create_query)['data'].first.first
       end
 
       def update_relationship(rel_id, attributes)
@@ -105,7 +105,7 @@ module Deja
           rel(rel_id).del
         end
         begin
-          Deja.neo.execute_query(delete_query)
+          Deja.execute_cypher(delete_query)
         rescue
           raise Deja::Error::RelationshipDoesNotExist
         end
@@ -130,7 +130,7 @@ module Deja
           node(neo_id)
         end
         begin
-          Deja.neo.execute_query(read_query)
+          Deja.execute_cypher(read_query)
         rescue
           raise Deja::Error::NodeDoesNotExist
         end
@@ -141,7 +141,7 @@ module Deja
           rel(rel_id)
         end
         begin
-          Deja.neo.execute_query(read_query)
+          Deja.execute_cypher(read_query)
         rescue
           raise Deja::Error::RelationshipDoesNotExist
         end
@@ -153,7 +153,7 @@ module Deja
           node(neo_id).ret.both(relation.ret).ret
         end
         begin
-          Deja.neo.execute_query(read_query.to_s)
+          Deja.execute_cypher(read_query.to_s)
         rescue
           raise Deja::Error::NodeDoesNotExist
         end
@@ -164,7 +164,7 @@ module Deja
           node(neo_id).both(rel.ret).ret
         end
         begin
-          Deja.neo.execute_query(read_query)
+          Deja.execute_cypher(read_query)
         rescue
           raise Deja::Error::NodeDoesNotExist
         end
@@ -175,7 +175,7 @@ module Deja
           node(neo_id).ret >> node.ret
         end
         begin
-          Deja.neo.execute_query(read_query)
+          Deja.execute_cypher(read_query)
         rescue
           raise Deja::Error::NodeDoesNotExist
         end
@@ -186,7 +186,7 @@ module Deja
           node(neo_id) >> node.ret
         end
         begin
-          Deja.neo.execute_query(read_query)
+          Deja.execute_cypher(read_query)
         rescue
           raise Deja::Error::NodeDoesNotExist
         end
@@ -197,7 +197,7 @@ module Deja
           node(neo_id).ret << node.ret
         end
         begin
-          Deja.neo.execute_query(read_query)
+          Deja.execute_cypher(read_query)
         rescue
           raise Deja::Error::NodeDoesNotExist
         end
@@ -208,7 +208,7 @@ module Deja
           node(neo_id) << node.ret
         end
         begin
-          Deja.neo.execute_query(read_query)
+          Deja.execute_cypher(read_query)
         rescue
           raise Deja::Error::NodeDoesNotExist
         end
@@ -219,7 +219,7 @@ module Deja
           start_node(neo_id).ret - relationship.ret - node.ret
         end
         begin
-          Deja.neo.execute_query(read_query)
+          Deja.execute_cypher(read_query)
         rescue
           raise Deja::Error::NodeDoesNotExist
         end
@@ -230,7 +230,7 @@ module Deja
           start_node(neo_id).ret - relations.join('|').ret - node.ret
         end
         begin
-          Deja.neo.execute_query(read_query)
+          Deja.execute_cypher(read_query)
         rescue
           raise Deja::Error::NodeDoesNotExist
         end

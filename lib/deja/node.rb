@@ -1,5 +1,8 @@
 module Deja
+
   class Node
+    extend ActiveModel::Naming
+    extend ActiveModel::Callbacks
     extend ActiveModel::Translation
 
     include ActiveModel::Dirty
@@ -7,9 +10,10 @@ module Deja
     include ActiveModel::Validations
     include ActiveModel::MassAssignmentSecurity
 
-    include Deja::Bridge
-    include Deja::Finders
     include Deja::Error
+    include Deja::Bridge
+    include Deja::Metaid
+    include Deja::Finders
 
     attr_accessor :id
 
@@ -17,26 +21,28 @@ module Deja
       attr_accessor :relationships
     end
 
-    @@relationships = Hash.new
-
-
-
     def initialize(opts = {})
       @id = nil
       opts.each { |k,v| instance_variable_set("@#{k}", v) }
     end
 
     def self.relationship(name, label, end_node_type)
-      @@relationships[label] = Array.new
-      class_eval %Q"
-        def #{name}
-          @@relationships[:#{label}]
-        end
-        def set_#{label}(label, direction = :both, start_node, end_node)
-          #instance_variables
-          @@relationships[label] <<  Deja::Relationship.new(label, direction, start_node, end_node)
-        end
-        "
+      @relationships ||= {}
+
+      @relationships[label] = []
+
+      meta_def name do
+        @relationships[label]
+      end
+
+      meta_def "#{label}_class" do
+        end_node_type
+      end
+
+      meta_def "set_#{label}" do
+        @relationship[label] << Deja::Relationship.new(label, direction, start_node, end_node)
+      end
+
     end
 
     def save

@@ -9,6 +9,8 @@ end
 class Person < Deja::Node
   attr_accessor :name, :permalink
 
+  validates :name, :presence => true
+
   relationship :Investments, :invested_in, 'Company'
 end
 
@@ -25,6 +27,10 @@ describe Finders do
 
     context "given a single node id" do
       it "should return a node object" do
+        p = Person.new()
+        puts p.valid?
+        puts p.errors.inspect
+        puts Person.validators.inspect
         person_node = Person.load(@node)
         person_node.id.should eq(@node)
         expect(person_node.name).to eq('Jerry Wang')
@@ -35,7 +41,7 @@ describe Finders do
     context "given a node id with associated nodes" do
       it "should return node objects with relationships" do
         person_node = Person.load(@node)
-        puts person_node.relationships
+        #puts person_node.relationships
       end
     end
 
