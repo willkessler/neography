@@ -1,5 +1,7 @@
 module Deja
   class Relationship
+    extend ActiveModel::Naming
+    extend ActiveModel::Callbacks
     extend ActiveModel::Translation
 
     include ActiveModel::Dirty
@@ -7,9 +9,10 @@ module Deja
     include ActiveModel::Validations
     include ActiveModel::MassAssignmentSecurity
 
-    include Deja::Bridge
-    include Deja::Finders
     include Deja::Error
+    include Deja::Bridge
+    include Deja::Metaid
+    include Deja::Finders
 
     attr_accessor :label, :start_node, :end_node, :direction
 
