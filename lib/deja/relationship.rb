@@ -10,17 +10,14 @@ module Deja
     include ActiveModel::MassAssignmentSecurity
 
     include Deja::Error
+    include Deja::Index
     include Deja::Bridge
-    include Deja::Metaid
     include Deja::Finders
 
-    attr_accessor :label, :start_node, :end_node, :direction
+    attr_accessor :id, :label, :start_node, :end_node, :direction
 
-    def initialize(label, direction, start_node, end_node)
-        @label = label
-        @direction = direction
-        @start_node = start_node
-        @end_node = end_node
+    def initialize(id, label, start_node, end_node, direction = nil)
+        @id, @label, @start_node, @end_node, @direction = id, label, start_node, end_node, direction
     end
 
     def save()

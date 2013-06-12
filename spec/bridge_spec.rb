@@ -3,7 +3,8 @@ require 'spec_helper'
 require 'rake/testtask'
 
 describe Bridge do
-  before :each do
+  after :each do
+    Deja.neo.execute_script("g.clear()")
   end
 
   describe ".sane_hash" do
@@ -101,6 +102,7 @@ describe Bridge do
       it "should return multiple nodes" do
         response = Deja::Node.get_node_with_related_nodes(@first_node)
         response.should be_a(Hash)
+        puts Deja::Node.normalize(response)
       end
     end
   end
