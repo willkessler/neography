@@ -1,5 +1,4 @@
 module Deja
-
   class Node
     extend ActiveModel::Naming
     extend ActiveModel::Callbacks
@@ -11,8 +10,8 @@ module Deja
     include ActiveModel::MassAssignmentSecurity
 
     include Deja::Error
+    include Deja::Index
     include Deja::Bridge
-    include Deja::Metaid
     include Deja::Finders
 
     attr_accessor :id
@@ -23,26 +22,14 @@ module Deja
 
     def initialize(opts = {})
       @id = nil
-      opts.each { |k,v| instance_variable_set("@#{k}", v) }
+      opts.each { |k, v| send("#{k}=", v)}
     end
 
-    def self.relationship(name, label, end_node_type)
-      @relationships ||= {}
+    def self.relationship(name)
+      @relationships ||= []
+      @relationships.push(name.to_s)
 
-      @relationships[label] = []
-
-      meta_def name do
-        @relationships[label]
-      end
-
-      meta_def "#{label}_class" do
-        end_node_type
-      end
-
-      meta_def "set_#{label}" do
-        @relationship[label] << Deja::Relationship.new(label, direction, start_node, end_node)
-      end
-
+      send(:attr_accessor, name)
     end
 
     def save
