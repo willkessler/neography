@@ -13,6 +13,7 @@ module Deja
     include Deja::Index
     include Deja::Bridge
     include Deja::Finders
+    include Deja::SchemaGenerator
 
     attr_accessor :id
 
