@@ -11,6 +11,7 @@ module Deja
   extend ActiveSupport::Autoload
   autoload :Node
   autoload :Relationship
+  autoload :SchemaGenerator
   autoload :Finders
   autoload :Error
   autoload :Bridge
