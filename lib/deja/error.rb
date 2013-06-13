@@ -10,22 +10,10 @@ module Deja
       end
     end
 
-    class NodeDoesNotExist < StandardError
-      def initialize
-        super ('could not find a node that matches your query')
-      end
-    end
+    class NodeDoesNotExist < StandardError; end
 
-    class RelationshipDoesNotExist < StandardError
-      def initialize
-        super ('could not find a relationship that matches your query')
-      end
-    end
+    class RelationshipDoesNotExist < StandardError; end
 
-    class CreationFailure < StandardError
-      def initialize
-        super ('there was an issue with creating this graph entity')
-      end
-    end
+    class CreationFailure < StandardError; end
   end
 end

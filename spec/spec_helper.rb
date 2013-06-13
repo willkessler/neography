@@ -3,6 +3,7 @@ require 'rspec'
 # Load Deja lib
 CURRENT_DIR = File.dirname(__FILE__)
 $: << File.expand_path(CURRENT_DIR + '/../lib')
+#require File.dirname(__FILE__) + "/factories"
 require 'deja'
 include Deja
 

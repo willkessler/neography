@@ -16,6 +16,7 @@ module Deja
   autoload :Relationship
   autoload :SchemaGenerator
   autoload :RelNodeWrapper
+  autoload :NeoParse
   autoload :Finders
   autoload :Error
   autoload :Bridge
