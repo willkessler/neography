@@ -12,6 +12,14 @@ module Deja
         node_lookup.is_a?(Hash)
       end
 
+      def node_query(query)
+        begin
+          Deja.execute_cypher(query)
+        rescue Exception => e
+          raise Deja::Error::NodeDoesNotExist, "#{e.message}"
+        end
+      end
+
       def create_node(attributes = {})
         raise Deja::Error::InvalidParameter unless attributes
         raise Deja::Error::NoParameter if attributes.empty?
@@ -30,44 +38,32 @@ module Deja
       end
 
       def update_node_by_id(node_id, attributes)
-        update_query = Neo4j::Cypher.query do
+        query = Neo4j::Cypher.query do
           node(node_id).tap do |n|
             attributes.each_with_index do |(key, value), index|
               n[key] = value
             end
           end
         end
-        begin
-          Deja.execute_cypher(update_query)
-        rescue Exception => e
-          raise Deja::Error::NodeDoesNotExist, "#{e.message}"
-        end
+        node_query(query)
       end
 
       def update_node_by_index(index_hash, attributes)
-        update_query = Neo4j::Cypher.query do
+        query = Neo4j::Cypher.query do
           node(node_id).tap do |n|
             attributes.each_with_index do |(key, value), index|
               n[key] = value
             end
           end
         end
-        begin
-          Deja.execute_cypher(update_query)
-        rescue Exception => e
-          raise Deja::Error::NodeDoesNotExist, "#{e.message}"
-        end
+        node_query(query)
       end
 
       def delete_node(node_id)
-        delete_query = Neo4j::Cypher.query() do
+        query = Neo4j::Cypher.query() do
           node(node_id).del.both(rel().as(:r).del)
         end
-        begin
-          Deja.execute_cypher(delete_query)
-        rescue Exception => e
-          raise Deja::Error::NodeDoesNotExist, "#{e.message}"
-        end
+        node_query(query)
       end
 
       def create_relationship(start_node, end_node, name, attributes = {})
@@ -85,11 +81,11 @@ module Deja
       end
 
       def delete_relationship(rel_id)
-        delete_query = Neo4j::Cypher.query() do
+        query = Neo4j::Cypher.query() do
           rel(rel_id).del
         end
         begin
-          Deja.execute_cypher(delete_query)
+          Deja.execute_cypher(query)
         rescue Exception => e
           raise Deja::Error::RelationshipDoesNotExist, "#{e.message}"
         end
@@ -118,11 +114,7 @@ module Deja
         read_query = Neo4j::Cypher.query() do
           node(neo_id)
         end
-        begin
-          Deja.execute_cypher(read_query)
-        rescue Exception => e
-          raise Deja::Error::NodeDoesNotExist, "#{e.message}"
-        end
+        node_query(read_query)
       end
 
       def get_single_relationship(rel_id)
@@ -141,11 +133,7 @@ module Deja
           relation = rel()
           node(neo_id).ret.both(relation.ret).ret
         end
-        begin
-          Deja.execute_cypher(read_query.to_s)
-        rescue Exception => e
-          raise Deja::Error::NodeDoesNotExist, "#{e.message}"
-        end
+        node_query(read_query)
       end
 
       def get_related_nodes(neo_id, relationships = [])
@@ -156,78 +144,49 @@ module Deja
             node(neo_id) - relations.join('|').ret - node.ret
           end
         end
-        begin
-          Deja.execute_cypher(read_query)
-        rescue Exception => e
-          raise Deja::Error::NodeDoesNotExist, "#{e.message}"
-        end
+        node_query(read_query)
       end
 
       def get_node_with_outgoing_nodes(neo_id)
-        read query = Neo4j::Cypher.query() do
+        query = Neo4j::Cypher.query() do
           node(neo_id).ret >> node.ret
         end
-        begin
-          Deja.execute_cypher(read_query)
-        rescue Exception => e
-          raise Deja::Error::NodeDoesNotExist, "#{e.message}"
-        end
+        node_query(query)
       end
 
       def get_outgoing_nodes(neo_id)
-        read_query = Neo4j::Cypher.query() do
+        query = Neo4j::Cypher.query() do
           node(neo_id) >> node.ret
         end
-        begin
-          Deja.execute_cypher(read_query)
-        rescue Exception => e
-          raise Deja::Error::NodeDoesNotExist, "#{e.message}"
-        end
+        node_query(query)
       end
 
       def get_node_with_incoming_nodes(neo_id)
-        read query = Neo4j::Cypher.query() do
+        query = Neo4j::Cypher.query() do
           node(neo_id).ret << node.ret
         end
-        begin
-          Deja.execute_cypher(read_query)
-        rescue Exception => e
-          raise Deja::Error::NodeDoesNotExist, "#{e.message}"
-        end
+        node_query(query)
       end
 
       def get_incoming_nodes(neo_id)
-        read_query = Neo4j::Cypher.query() do
+        query = Neo4j::Cypher.query() do
           node(neo_id) << node.ret
         end
-        begin
-          Deja.execute_cypher(read_query)
-        rescue Exception => e
-          raise Deja::Error::NodeDoesNotExist, "#{e.message}"
-        end
+        node_query(query)
       end
 
       def get_node_with_relationship(neo_id, relationship)
-
-        read_query = Neo4j::Cypher.query() do
+        query = Neo4j::Cypher.query() do
           node(neo_id).ret - rel(relationship).ret - node.ret
         end
-        begin
-          Deja.execute_cypher(read_query)
-        rescue Exception => e
-          raise Deja::Error::NodeDoesNotExist, "#{e.message}"
-        end
+        node_query(query)
       end
 
       def get_node_with_relationships(neo_id, relations = [])
-        read_query = Neo4j::Cypher.query() do
+        query = Neo4j::Cypher.query() do
           node(neo_id).ret - rel(*relations).ret - node.ret
         end
-        begin
-          Deja.execute_cypher(read_query)
-        rescue Exception => e
-          raise Deja::Error::NodeDoesNotExist, "#{e.message}"
-        end
+        node_query(query)
       end
     end
   end
