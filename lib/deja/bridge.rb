@@ -20,6 +20,14 @@ module Deja
         end
       end
 
+      def rel_query(query)
+        begin
+          Deja.execute_cypher(query)
+        rescue Exception => e
+          raise Deja::Error::RelationshipDoesNotExist, "#{e.message}"
+        end
+      end
+
       def create_node(attributes = {})
         raise Deja::Error::InvalidParameter unless attributes
         raise Deja::Error::NoParameter if attributes.empty?
@@ -67,13 +75,13 @@ module Deja
       end
 
       def create_relationship(start_node, end_node, name, attributes = {})
-        create_query = Neo4j::Cypher.query() do
+        query = Neo4j::Cypher.query() do
           relation = rel(name)
           create_path{
             node(start_node) > relation.as(:r).neo_id.ret > node(end_node)
           }
         end
-        Deja.execute_cypher(create_query)['data'].first.first
+        node_query(query)['data'].first.first
       end
 
       def update_relationship(rel_id, attributes)
@@ -84,11 +92,7 @@ module Deja
         query = Neo4j::Cypher.query() do
           rel(rel_id).del
         end
-        begin
-          Deja.execute_cypher(query)
-        rescue Exception => e
-          raise Deja::Error::RelationshipDoesNotExist, "#{e.message}"
-        end
+        rel_query(query)
       end
 
       def create_node_with_relationship(relationship, attributes)
@@ -111,40 +115,36 @@ module Deja
       end
 
       def get_single_node(neo_id)
-        read_query = Neo4j::Cypher.query() do
+        query = Neo4j::Cypher.query() do
           node(neo_id)
         end
-        node_query(read_query)
+        node_query(query)
       end
 
       def get_single_relationship(rel_id)
-        read_query = Neo4j::Cypher.query() do
+        query = Neo4j::Cypher.query() do
           rel(rel_id)
         end
-        begin
-          Deja.execute_cypher(read_query)
-        rescue Exception => e
-          raise Deja::Error::RelationshipDoesNotExist, "#{e.message}"
-        end
+        rel_query(query)
       end
 
       def get_node_with_related_nodes(neo_id)
-        read_query = Neo4j::Cypher.query() do
+        query = Neo4j::Cypher.query() do
           relation = rel()
           node(neo_id).ret.both(relation.ret).ret
         end
-        node_query(read_query)
+        node_query(query)
       end
 
       def get_related_nodes(neo_id, relationships = [])
-        read_query = Neo4j::Cypher.query() do
+        query = Neo4j::Cypher.query() do
           if relationships.empty?
             node(neo_id).both(rel.ret).ret
           else
             node(neo_id) - relations.join('|').ret - node.ret
           end
         end
-        node_query(read_query)
+        node_query(query)
       end
 
       def get_node_with_outgoing_nodes(neo_id)
