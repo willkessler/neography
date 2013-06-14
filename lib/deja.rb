@@ -7,12 +7,11 @@ require 'active_support'
 
 require 'oj'
 
-#require 'lib/metaid'
-
 module Deja
   extend ActiveSupport::Autoload
   autoload :Index
   autoload :Node
+  autoload :Cast
   autoload :Relationship
   autoload :SchemaGenerator
   autoload :RelNodeWrapper

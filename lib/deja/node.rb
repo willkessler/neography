@@ -9,6 +9,7 @@ module Deja
     include ActiveModel::Validations
     include ActiveModel::MassAssignmentSecurity
 
+    include Deja::Cast
     include Deja::Error
     include Deja::Index
     include Deja::Bridge
@@ -47,6 +48,10 @@ module Deja
         # update
         Deja::Node.update_node(@id, node_attributes)
       end
+    end
+
+    def save!
+      save
     end
 
     def delete

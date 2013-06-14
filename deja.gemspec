@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_development_dependency "rspec", "~>2.13.0"
+  s.add_development_dependency "factory_girl"
   s.add_dependency "neography"
   s.add_dependency "neo4j-cypher"
   s.add_dependency "activemodel"

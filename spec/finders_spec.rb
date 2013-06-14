@@ -2,64 +2,112 @@ require 'deja'
 require 'spec_helper'
 require 'rake/testtask'
 
-class Company < Deja::Node
-  attr_accessor :name, :permalink, :type
+def full_node_type_test(node)
+  node.should be_a(Node)
+  node.class.relationships.each do |rel|
+    node.send(rel).should be_a(Array)
+    node.send(rel).each do |relnode|
+      relnode.should be_a(RelNodeWrapper)
+      relnode.node.should be_a(Node)
+      relnode.rel.should be_a(Relationship)
+    end
+  end
 end
 
-class Person < Deja::Node
-  attr_accessor :name, :permalink, :type
-
-  relationship :invested_in
+def node_type_test(node, rel)
+  node.should be_a(Node)
+  node.send(rel).should be_a(Array)
+  node.send(rel).each do |relnode|
+    relnode.should be_a(RelNodeWrapper)
+    relnode.node.should be_a(Node)
+    relnode.rel.should be_a(Relationship)
+  end
 end
+
 
 describe Finders do
-  describe ".load" do
-    before :each do
-      @node = Deja::Node.create_node(:name => 'Jerry Wang', :permalink => 'jerry_wang', :type => 'Person')
-      @second_node = Deja::Node.create_node(:name => 'Willy Wonka', :permalink => 'willy_wonka', :type => 'Person')
-      @third_node = Deja::Node.create_node(:name => 'Fuck tha police', :permalink => 'f_police', :type => 'Company')
-      @relationship = Deja::Relationship.create_relationship(@node, @second_node, :invested_in)
-      @other_relationship = Deja::Relationship.create_relationship(@node, @third_node, :friends)
-    end
-
-    context "given a single node id" do
-      it "should return a node object" do
-        person_node = Person.load(@node)
-        person_node.id.should eq(@node)
-        expect(person_node.name).to eq('Jerry Wang')
-        expect(person_node.permalink).to eq('jerry_wang')
+  before :each do
+    @first_node = FactoryGirl.create(:person);
+    @second_node = FactoryGirl.create(:person);
+    @third_node = FactoryGirl.create(:company);
+    @invested_in = Deja::Relationship.create_relationship(@first_node.id, @second_node.id, :invested_in)
+    @friends = Deja::Relationship.create_relationship(@first_node.id, @second_node.id, :friends)
+    @hates = Deja::Relationship.create_relationship(@first_node.id, @third_node.id, :hates)
+  end
+  describe ".load_single" do
+    context "given a node id and no filters" do
+      it "should return a single node" do
+        first_node = Person.load_single(@first_node.id)
+        first_node.name.should eq(@first_node.name)
+        first_node.permalink.should eq(@first_node.permalink)
+        first_node.invested_in.should be_nil
+        first_node.friends.should be_nil
+        first_node.hates.should be_nil
       end
     end
 
+    context "given a node id with an :invested_in argument" do
+      it "should return only the invested_in relationship" do
+        first_node = Person.load_single(@first_node.id, :invested_in)
+        first_node.name.should eq(@first_node.name)
+        first_node.permalink.should eq(@first_node.permalink)
+        first_node.invested_in.should_not be_nil
+        first_node.friends.should be_nil
+        first_node.hates.should be_nil
+        node_type_test(first_node, :invested_in)
+      end
+    end
+
+    context "given a node id with an :invested_in and :friends argument" do
+      it "should return both relationships" do
+        first_node = Person.load_single(@first_node.id, [:invested_in, :friends])
+        first_node.name.should eq(@first_node.name)
+        first_node.permalink.should eq(@first_node.permalink)
+        first_node.invested_in.should_not be_nil
+        first_node.friends.should_not be_nil
+        first_node.hates.should be_nil
+        node_type_test(first_node, :invested_in)
+        node_type_test(first_node, :friends)
+      end
+    end
+
+    context "given a node id with an :all filter" do
+      it "should return a node and all related nodes" do
+        first_node = Person.load_single(@first_node.id, :all)
+        first_node.invested_in.should_not be_nil
+        first_node.friends.should_not be_nil
+        first_node.hates.should_not be_nil
+        full_node_type_test(first_node)
+      end
+    end
+  end
+
+  describe ".load" do
     context "given a node id with associated nodes" do
       it "should return node objects with relationships" do
-        person_node = Person.load(@node)
-        person_node.invested_in.should be_a(Array)
-        person_node.invested_in.each do |investment|
-          investment.should be_a(RelNodeWrapper)
-          investment.node.should be_a(Node)
-          investment.rel.should be_a(Relationship)
-        end
+        first_node = Person.load(@first_node.id)
+        first_node.invested_in.should_not be_nil
+        first_node.friends.should_not be_nil
+        first_node.hates.should_not be_nil
+        full_node_type_test(first_node)
       end
     end
 
     context "given multiple node ids" do
       it "should return an array of node objects and their relationships" do
-        person_nodes = Person.load(@node, @second_node)
+        person_nodes = Person.load(@first_node.id, @second_node.id)
         person_nodes.should be_a(Array)
         person_nodes.each do |node|
-          node.should be_a(Node)
-          node.invested_in.should be_a(Array)
-          node.invested_in.each do |investment|
-            investment.should be_a(RelNodeWrapper)
-            investment.node.should be_a(Node)
-            investment.rel.should be_a(Relationship)
-          end
+          node.invested_in.should_not be_nil
+          node.friends.should_not be_nil
         end
-        person_nodes[0].id.should eq(@node)
-        person_nodes[0].name.should eq('Jerry Wang')
-        person_nodes[1].id.should eq(@second_node)
-        person_nodes[1].name.should eq('Willy Wonka')
+        person_nodes.first.hates.should_not be_nil
+        full_node_type_test(person_nodes.first)
+        person_nodes[1].hates.should be_nil
+        person_nodes[0].name.should eq(@first_node.name)
+        person_nodes[0].permalink.should eq(@first_node.permalink)
+        person_nodes[1].name.should eq(@second_node.name)
+        person_nodes[1].permalink.should eq(@second_node.permalink)
       end
     end
   end

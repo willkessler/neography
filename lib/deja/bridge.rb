@@ -8,7 +8,6 @@ module Deja
     include Deja::NeoParse
 
     module ClassMethods
-
       def is_index?(node_lookup)
         node_lookup.is_a?(Hash)
       end
@@ -149,9 +148,13 @@ module Deja
         end
       end
 
-      def get_related_nodes(neo_id)
+      def get_related_nodes(neo_id, relationships = [])
         read_query = Neo4j::Cypher.query() do
-          node(neo_id).both(rel.ret).ret
+          if relationships.empty?
+            node(neo_id).both(rel.ret).ret
+          else
+            node(neo_id) - relations.join('|').ret - node.ret
+          end
         end
         begin
           Deja.execute_cypher(read_query)
@@ -205,8 +208,9 @@ module Deja
       end
 
       def get_node_with_relationship(neo_id, relationship)
+
         read_query = Neo4j::Cypher.query() do
-          start_node(neo_id).ret - relationship.ret - node.ret
+          node(neo_id).ret - rel(relationship).ret - node.ret
         end
         begin
           Deja.execute_cypher(read_query)
@@ -215,9 +219,9 @@ module Deja
         end
       end
 
-      def get_node_with_relationships(neo_id, relations = {})
+      def get_node_with_relationships(neo_id, relations = [])
         read_query = Neo4j::Cypher.query() do
-          start_node(neo_id).ret - relations.join('|').ret - node.ret
+          node(neo_id).ret - rel(*relations).ret - node.ret
         end
         begin
           Deja.execute_cypher(read_query)

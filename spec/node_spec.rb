@@ -9,7 +9,7 @@ end
 class Person < Deja::Node
   attr_accessor :name, :permalink
 
-  relationship :Investments, :invested_in, 'Company'
+  relationship :invested_in
 end
 
 describe Node do

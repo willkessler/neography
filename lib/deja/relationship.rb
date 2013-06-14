@@ -22,7 +22,13 @@ module Deja
     end
 
     def save()
-
+      unless @id
+        # create
+        @id = Deja::Relationship.create_relationship(node_attributes)
+      else
+        # update
+        Deja::Node.update_node(@id, node_attributes)
+      end
     end
   end
 end
