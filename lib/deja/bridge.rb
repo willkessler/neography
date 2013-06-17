@@ -135,8 +135,8 @@ module Deja
       # does not include origin node
       def get_related_nodes(neo_id, rels)
         case rels
-        when Array then node_query cypher { node(neo_id) - rels.join('|').ret - node.ret }
-        when :all  then node_query cypher { node(neo_id).both(rel().ret).ret }
+        when Array     then node_query cypher { node(neo_id) - rels.join('|').ret - node.ret }
+        when :all      then node_query cypher { node(neo_id).both(rel().ret).ret }
         when :outgoing then node_query cypher { node(neo_id).outgoing(rel().ret).ret }
         when :incoming then node_query cypher { node(neo_id).incoming(rel().ret).ret }
         else node_query cypher { node(neo_id) - rel(rels.to_sym).ret - node.ret } end
