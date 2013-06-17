@@ -47,7 +47,7 @@ module Deja
       end
 
       def update_node_by_id(node_id, attributes)
-        query = Neo4j::Cypher.query do
+        query = cypher do
           node(node_id).tap do |n|
             attributes.each_with_index do |(key, value), index|
               n[key] = value
@@ -58,7 +58,7 @@ module Deja
       end
 
       def update_node_by_index(index_hash, attributes)
-        query = Neo4j::Cypher.query do
+        query = cypher do
           node(node_id).tap do |n|
             attributes.each_with_index do |(key, value), index|
               n[key] = value
