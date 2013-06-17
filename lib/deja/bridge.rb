@@ -9,6 +9,10 @@ module Deja
         node_lookup.is_a?(Hash)
       end
 
+      def cypher(&block)
+        Neo4j::Cypher.query(&block)
+      end
+
       def node_query(query)
         begin
           Deja.execute_cypher(query)
@@ -106,6 +110,18 @@ module Deja
         get_node_with_rels(neo_id, options[:include])
       end
 
+      def load_related_nodes(neo_id, options = {})
+        entity = load_related_nodes_with_args(neo_id, options)
+        # may need specialized normalize method to handle rels without start nodes
+        normalize(entity)
+      end
+
+      def load_related_nodes_with_args(neo_id, options)
+        options[:include] ||= :all
+        get_related_nodes(neo_id, options[:include])
+      end
+
+      # includes origin node
       def get_node_with_rels(neo_id, rels)
         case rels
         when Array     then node_query cypher { node(neo_id).ret - rel(*rels).ret - node.ret }
@@ -116,8 +132,14 @@ module Deja
         else node_query cypher { node(neo_id).ret - rel(rels.to_sym).ret - node.ret } end
       end
 
-      def cypher(&block)
-        Neo4j::Cypher.query(&block)
+      # does not include origin node
+      def get_related_nodes(neo_id, rels)
+        case rels
+        when Array then node_query cypher { node(neo_id) - rels.join('|').ret - node.ret }
+        when :all  then node_query cypher { node(neo_id).both(rel().ret).ret }
+        when :outgoing then node_query cypher { node(neo_id).outgoing(rel().ret).ret }
+        when :incoming then node_query cypher { node(neo_id).incoming(rel().ret).ret }
+        else node_query cypher { node(neo_id) - rel(rels.to_sym).ret - node.ret } end
       end
 
       def get_single_relationship(rel_id)
@@ -125,31 +147,6 @@ module Deja
           rel(rel_id)
         end
         rel_query(query)
-      end
-
-      def get_related_nodes(neo_id, relationships = [])
-        query = cypher do
-          if relationships.empty?
-            node(neo_id).both(rel.ret).ret
-          else
-            node(neo_id) - relations.join('|').ret - node.ret
-          end
-        end
-        node_query(query)
-      end
-
-      def get_outgoing_nodes(neo_id)
-        query = cypher do
-          node(neo_id) >> node.ret
-        end
-        node_query(query)
-      end
-
-      def get_incoming_nodes(neo_id)
-        query = cypher do
-          node(neo_id) << node.ret
-        end
-        node_query(query)
       end
     end
   end
