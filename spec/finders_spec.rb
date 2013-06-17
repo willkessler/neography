@@ -26,6 +26,10 @@ end
 
 
 describe Finders do
+  after :each do
+    Deja.neo.execute_script("g.clear()")
+  end
+
   before :each do
     @first_node = FactoryGirl.create(:person);
     @second_node = FactoryGirl.create(:person);
@@ -37,7 +41,7 @@ describe Finders do
   describe ".load_single" do
     context "given a node id and no filters" do
       it "should return a single node" do
-        first_node = Person.load_single(@first_node.id)
+        first_node = Person.load(@first_node.id)
         first_node.name.should eq(@first_node.name)
         first_node.permalink.should eq(@first_node.permalink)
         first_node.invested_in.should be_nil
@@ -48,7 +52,7 @@ describe Finders do
 
     context "given a node id with an :invested_in argument" do
       it "should return only the invested_in relationship" do
-        first_node = Person.load_single(@first_node.id, :invested_in)
+        first_node = Person.load(@first_node.id, :include => :invested_in)
         first_node.name.should eq(@first_node.name)
         first_node.permalink.should eq(@first_node.permalink)
         first_node.invested_in.should_not be_nil
@@ -60,7 +64,7 @@ describe Finders do
 
     context "given a node id with an :invested_in and :friends argument" do
       it "should return both relationships" do
-        first_node = Person.load_single(@first_node.id, [:invested_in, :friends])
+        first_node = Person.load(@first_node.id, :include => [:invested_in, :friends])
         first_node.name.should eq(@first_node.name)
         first_node.permalink.should eq(@first_node.permalink)
         first_node.invested_in.should_not be_nil
@@ -73,7 +77,7 @@ describe Finders do
 
     context "given a node id with an :all filter" do
       it "should return a node and all related nodes" do
-        first_node = Person.load_single(@first_node.id, :all)
+        first_node = Person.load(@first_node.id, :include => :all)
         first_node.invested_in.should_not be_nil
         first_node.friends.should_not be_nil
         first_node.hates.should_not be_nil
@@ -85,7 +89,7 @@ describe Finders do
   describe ".load" do
     context "given a node id with associated nodes" do
       it "should return node objects with relationships" do
-        first_node = Person.load(@first_node.id)
+        first_node = Person.load_many(@first_node.id)
         first_node.invested_in.should_not be_nil
         first_node.friends.should_not be_nil
         first_node.hates.should_not be_nil
@@ -95,7 +99,7 @@ describe Finders do
 
     context "given multiple node ids" do
       it "should return an array of node objects and their relationships" do
-        person_nodes = Person.load(@first_node.id, @second_node.id)
+        person_nodes = Person.load_many(@first_node.id, @second_node.id)
         person_nodes.should be_a(Array)
         person_nodes.each do |node|
           node.invested_in.should_not be_nil

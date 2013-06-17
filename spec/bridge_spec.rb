@@ -64,48 +64,32 @@ describe Bridge do
     end
   end
 
-  describe ".get_single_node" do
+  describe ".get_node_with_rels" do
     before :each do
-      @node = Deja::Node.create_node({:name => 'get_single'})
+      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
+      @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
+      @third_node = Deja::Node.create_node({:name => 'Mike Myers'})
+      @first_relationship = Deja::Relationship.create_relationship(@first_node, @second_node, :friends)
+      @second_relationship = Deja::Relationship.create_relationship(@first_node, @third_node, :enemies)
     end
 
-    context "given a node id" do
+    it "should throw an error if node id doesn't exist" do
+      expect{Deja::Node.get_node_with_rels(@first_node + 5, :none)}.to raise_error(Deja::Error::NodeDoesNotExist)
+    end
+
+    context "given a node id, and argument :none" do
       it "should return a single node" do
-        response = Deja::Node.get_single_node(@node)
+        response = Deja::Node.get_node_with_rels(@first_node, :none)
         response.should be_a(Hash)
-        response['data'].first.first['data']['name'].should eq('get_single')
-      end
-
-      it "should throw an error if node id doesn't exist" do
-        expect{Deja::Node.get_single_node(@node + 5)}.to raise_error(Deja::Error::NodeDoesNotExist)
+        response['data'].first.first['data']['name'].should eq('Jerry Wang')
       end
     end
-  end
 
-  describe ".get_node_with_related_nodes" do
-    before :each do
-      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
-      @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
-      @third_node = Deja::Node.create_node({:name => 'Mike Myers'})
-      @first_relationship = Deja::Relationship.create_relationship(@first_node, @second_node, :friends)
-      @second_relationship = Deja::Relationship.create_relationship(@first_node, @third_node, :enemies)
-    end
-
-    context "given a node id" do
+    context "given a node id, and argument :all" do
       it "should return multiple nodes" do
-        response = Deja::Node.get_node_with_related_nodes(@first_node)
+        response = Deja::Node.get_node_with_rels(@first_node, :all)
         response.should be_a(Hash)
       end
-    end
-  end
-
-  describe ".get_node_with_relationships" do
-    before :each do
-      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
-      @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
-      @third_node = Deja::Node.create_node({:name => 'Mike Myers'})
-      @first_relationship = Deja::Relationship.create_relationship(@first_node, @second_node, :friends)
-      @second_relationship = Deja::Relationship.create_relationship(@first_node, @third_node, :enemies)
     end
   end
 
@@ -137,12 +121,12 @@ describe Bridge do
 
     context "with relationships" do
       it "should delete the node and connecting relationships" do
-        read_node = Deja::Node.get_single_node(@first_node)
-        read_node.should be_a(Hash)
-        read_rel = Deja::Relationship.get_single_relationship(@relationship)
-        read_rel.should be_a(Hash)
+        first_node = Deja::Node.get_node_with_rels(@first_node, :none)
+        first_node.should be_a(Hash)
+        first_rel = Deja::Relationship.get_single_relationship(@relationship)
+        first_rel.should be_a(Hash)
         response = Deja::Node.delete_node(@first_node)
-        expect{Deja::Node.get_single_node(@first_node)}.to raise_error(Deja::Error::NodeDoesNotExist)
+        expect{Deja::Node.get_node_with_rels(@first_node, :none)}.to raise_error(Deja::Error::NodeDoesNotExist)
         expect{Deja::Node.get_single_relationship(@relationship)}.to raise_error(Deja::Error::RelationshipDoesNotExist)
       end
     end
@@ -157,8 +141,8 @@ describe Bridge do
 
     context "given a relationship id" do
       it "should delete a single relationship" do
-        read_rel = Deja::Relationship.get_single_relationship(@relationship)
-        read_rel.should be_a(Hash)
+        first_rel = Deja::Relationship.get_single_relationship(@relationship)
+        first_rel.should be_a(Hash)
         response = Deja::Node.delete_relationship(@relationship)
         expect{Deja::Node.get_single_relationship(@relationship)}.to raise_error(Deja::Error::RelationshipDoesNotExist)
       end

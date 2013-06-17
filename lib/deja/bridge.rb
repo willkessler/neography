@@ -8,6 +8,7 @@ module Deja
     include Deja::NeoParse
 
     module ClassMethods
+
       def is_index?(node_lookup)
         node_lookup.is_a?(Hash)
       end
@@ -31,7 +32,7 @@ module Deja
       def create_node(attributes = {})
         raise Deja::Error::InvalidParameter unless attributes
         raise Deja::Error::NoParameter if attributes.empty?
-        query = Neo4j::Cypher.query() do
+        query = neo_query do
           node.new(attributes).neo_id
         end
         begin
@@ -68,14 +69,14 @@ module Deja
       end
 
       def delete_node(node_id)
-        query = Neo4j::Cypher.query() do
+        query = neo_query do
           node(node_id).del.both(rel().as(:r).del)
         end
         node_query(query)
       end
 
       def create_relationship(start_node, end_node, name, attributes = {})
-        query = Neo4j::Cypher.query() do
+        query = neo_query do
           relation = rel(name)
           create_path{
             node(start_node) > relation.as(:r).neo_id.ret > node(end_node)
@@ -89,7 +90,7 @@ module Deja
       end
 
       def delete_relationship(rel_id)
-        query = Neo4j::Cypher.query() do
+        query = neo_query do
           rel(rel_id).del
         end
         rel_query(query)
@@ -99,45 +100,41 @@ module Deja
 
       end
 
-      def load_entity_with_args(neo_id, relations = :all)
-        return get_node_with_relationships(neo_id, relations) if relations.is_a? Array
-        raise Deja::Error::InvalidParameter unless relations.is_a? Symbol
-        return get_node_with_related_nodes(neo_id) if relations == :all
-        return get_all_outgoing_nodes(neo_id)      if relations == :outgoing
-        return get_all_incoming_nodes(neo_id)      if relations == :incoming
-        return get_single_node(neo_id)             if relations == :none
-        return get_node_with_relationship(neo_id, relations) if relations != :all
+      def load_entity_with_args(neo_id, options)
+        options[:include] ||= :all
+        get_node_with_rels(neo_id, options[:include])
       end
 
-      def load_entity(neo_id, relations = :all)
-        entity = load_entity_with_args(neo_id, relations)
+      def load_entity(neo_id, options={})
+        entity = load_entity_with_args(neo_id, options)
         normalize(entity)
       end
 
-      def get_single_node(neo_id)
-        query = Neo4j::Cypher.query() do
-          node(neo_id)
+      def neo_query(&block)
+        Neo4j::Cypher.query(&block)
+      end
+
+      def get_node_with_rels(neo_id, rels)
+        case rels
+        when Array     then query = neo_query { node(neo_id).ret - rel(*rels).ret - node.ret }
+        when :all      then query = neo_query { node(neo_id).ret.both(rel().ret).ret }
+        when :outgoing then query = neo_query { node(neo_id).ret.outgoing(rel().ret).ret }
+        when :incoming then query = neo_query { node(neo_id).ret.incoming(rel().ret).ret }
+        when :none     then query = neo_query { node(neo_id) }
+        else query = neo_query { node(neo_id).ret - rel(rels.to_sym).ret - node.ret }
         end
         node_query(query)
       end
 
       def get_single_relationship(rel_id)
-        query = Neo4j::Cypher.query() do
+        query = neo_query do
           rel(rel_id)
         end
         rel_query(query)
       end
 
-      def get_node_with_related_nodes(neo_id)
-        query = Neo4j::Cypher.query() do
-          relation = rel()
-          node(neo_id).ret.both(relation.ret).ret
-        end
-        node_query(query)
-      end
-
       def get_related_nodes(neo_id, relationships = [])
-        query = Neo4j::Cypher.query() do
+        query = neo_query do
           if relationships.empty?
             node(neo_id).both(rel.ret).ret
           else
@@ -147,44 +144,16 @@ module Deja
         node_query(query)
       end
 
-      def get_node_with_outgoing_nodes(neo_id)
-        query = Neo4j::Cypher.query() do
-          node(neo_id).ret >> node.ret
-        end
-        node_query(query)
-      end
-
       def get_outgoing_nodes(neo_id)
-        query = Neo4j::Cypher.query() do
+        query = neo_query do
           node(neo_id) >> node.ret
         end
         node_query(query)
       end
 
-      def get_node_with_incoming_nodes(neo_id)
-        query = Neo4j::Cypher.query() do
-          node(neo_id).ret << node.ret
-        end
-        node_query(query)
-      end
-
       def get_incoming_nodes(neo_id)
-        query = Neo4j::Cypher.query() do
+        query = neo_query do
           node(neo_id) << node.ret
-        end
-        node_query(query)
-      end
-
-      def get_node_with_relationship(neo_id, relationship)
-        query = Neo4j::Cypher.query() do
-          node(neo_id).ret - rel(relationship).ret - node.ret
-        end
-        node_query(query)
-      end
-
-      def get_node_with_relationships(neo_id, relations = [])
-        query = Neo4j::Cypher.query() do
-          node(neo_id).ret - rel(*relations).ret - node.ret
         end
         node_query(query)
       end

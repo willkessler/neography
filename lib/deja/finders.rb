@@ -7,21 +7,18 @@ module Deja
     end
 
     module ClassMethods
-      def load(*ids)
+      def load(id, options = {})
+        options[:include] ||= :none
+        entity_array = load_entity(id, options)
+        objectify(entity_array)
+      end
+
+      def load_many(*ids)
         nodes = ids.map do |id|
           entity_array = load_entity(id)
           objectify(entity_array)
         end
-        if ids.length == 1
-          nodes.first
-        else
-          nodes
-        end
-      end
-
-      def load_single(id, filter = :none)
-        entity_array = load_entity(id, filter)
-        objectify(entity_array)
+        ids.length == 1 ? nodes.first : nodes
       end
 
     end
