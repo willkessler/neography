@@ -75,13 +75,15 @@ module Deja
         node_query(query)
       end
 
-      def create_relationship(start_node, end_node, name, attributes = {})
-        query = cypher do
-          relation = rel(name)
-          create_path{
-            node(start_node) > relation.as(:r).neo_id.ret > node(end_node)
-          }
-        end
+      def create_relationship(start_node, end_node, name, direction = :none, attributes = {})
+        case direction
+        when :none then
+          query = cypher { create_path{ node(start_node) - rel(name).as(:r).neo_id.ret - node(end_node)} }
+        when :out  then
+          query = cypher { create_path{ node(start_node) > rel(name).as(:r).neo_id.ret > node(end_node)} }
+        when :in   then
+          query = cypher { create_path{ node(start_node) < rel(name).as(:r).neo_id.ret < node(end_node)} }
+        else return false end
         node_query(query)['data'].first.first
       end
 
