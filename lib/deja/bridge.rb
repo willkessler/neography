@@ -42,6 +42,10 @@ module Deja
         end
       end
 
+      def delete_node(node_id)
+        node_query cypher { node(node_id).del.both(rel().as(:r).del) }
+      end
+
       def update_node(node, attributes)
         is_index?(node) ? update_node_by_index(node, attributes) : update_node_by_id(node, attributes)
       end
@@ -68,13 +72,6 @@ module Deja
         node_query(query)
       end
 
-      def delete_node(node_id)
-        query = cypher do
-          node(node_id).del.both(rel().as(:r).del)
-        end
-        node_query(query)
-      end
-
       def create_relationship(start_node, end_node, name, direction = :none, attributes = {})
         case direction
         when :none then
@@ -87,19 +84,12 @@ module Deja
         node_query(query)['data'].first.first
       end
 
-      def update_relationship(rel_id, attributes)
-
-      end
-
       def delete_relationship(rel_id)
-        query = cypher do
-          rel(rel_id).del
-        end
-        rel_query(query)
+        rel_query cypher { rel(rel_id).del }
       end
 
-      def create_node_with_relationship(relationship, attributes)
-
+      def get_single_relationship(rel_id)
+        rel_query cypher { rel(rel_id) }
       end
 
       def load_entity(neo_id, options={})
@@ -142,13 +132,6 @@ module Deja
         when :outgoing then node_query cypher { node(neo_id).outgoing(rel().ret).ret }
         when :incoming then node_query cypher { node(neo_id).incoming(rel().ret).ret }
         else node_query cypher { node(neo_id) - rel(rels.to_sym).ret - node.ret } end
-      end
-
-      def get_single_relationship(rel_id)
-        query = cypher do
-          rel(rel_id)
-        end
-        rel_query(query)
       end
     end
   end
