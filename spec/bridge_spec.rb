@@ -200,4 +200,22 @@ describe Bridge do
     end
   end
 
+
+  describe ".get_related_nodes" do
+    before :each do
+      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
+      @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
+      @third_node = Deja::Node.create_node({:name => 'Mike Myers'})
+      @first_relationship = Deja::Relationship.create_relationship(@first_node, @second_node, :friends)
+      @second_relationship = Deja::Relationship.create_relationship(@first_node, @third_node, :enemies)
+    end
+
+    context "given a node id" do
+      it "should return a hash" do
+        response = Deja::Node.load_related_nodes(@first_node, :include => :all)
+        response.should be_a(Hash)
+      end
+    end
+  end
+
 end

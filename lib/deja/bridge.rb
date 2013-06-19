@@ -105,7 +105,7 @@ module Deja
       def load_related_nodes(neo_id, options = {})
         entity = load_related_nodes_with_args(neo_id, options)
         # may need specialized normalize method to handle rels without start nodes
-        normalize(entity)
+        normalize(entity, :lazy)
       end
 
       def load_related_nodes_with_args(neo_id, options)

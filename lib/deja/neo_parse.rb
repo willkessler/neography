@@ -3,8 +3,11 @@ module Deja
     extend ActiveSupport::Concern
 
     module ClassMethods
-      def normalize(hash)
-        tier_array(sane_hash(hash))
+      def normalize(hash, type = :eager)
+        case type
+        when :eager then tier_array(sane_hash(hash))
+        when :lazy  then tier_relations(sane_hash(hash))
+        else return false end
       end
 
       private
@@ -27,6 +30,29 @@ module Deja
         clean_array
       end
 
+      def tier_relations(array)
+        clean_hash = {}
+        current_rel = nil
+        current_type = nil
+
+        array.each_with_index do  |record, index|
+          unless record.has_key?(:start)
+            clean_hash[current_type].map! do |v|
+              v[:node] = record if v[:rel][:id] == current_rel
+            end
+          else
+            current_rel = record[:id]
+            current_type = record[:type]
+            clean_hash[record[:type]] ||= []
+            clean_hash[record[:type]] << {
+              :node => {},
+              :rel  => record
+            }
+          end
+        end
+        clean_hash
+      end
+
       def tier_array(array)
         clean_array = []
         current_rel = nil
@@ -39,9 +65,7 @@ module Deja
               # the last iteration created a relationship
               if clean_array.last && clean_array.last[:relationships].empty? == false
                 clean_array.last[:relationships][current_type].each do |relnode|
-                  if relnode[:rel][:id] == current_rel
-                    relnode[:node] = record
-                  end
+                  relnode[:node] = record if relnode[:rel][:id] == current_rel
                 end
               # the last iteration wasn't a relationship, must be a new node
               else
