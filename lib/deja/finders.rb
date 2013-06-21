@@ -3,7 +3,8 @@ module Deja
     extend ActiveSupport::Concern
 
     def load_related(*relationships)
-      get_related_nodes(self.id, relationships)
+      hashster = self.class.load_related_nodes(self.id, :include => relationships)
+      erectify(hashster)
     end
 
     module ClassMethods

@@ -115,4 +115,16 @@ describe Finders do
       end
     end
   end
+
+  describe ".load_related" do
+    context "on an instance of a single node" do
+      it "should load all related nodes" do
+        first_node = Person.load(@first_node.id)
+        first_node.invested_in.should be_nil
+        first_node.load_related
+        first_node.invested_in.should_not be_nil
+      end
+    end
+  end
+
 end

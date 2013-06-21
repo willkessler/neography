@@ -39,9 +39,10 @@ module Deja
           unless record.has_key?(:start)
             clean_hash[current_type].map! do |v|
               v[:node] = record if v[:rel][:id] == current_rel
+              v
             end
           else
-            current_rel = record[:id]
+            current_rel  = record[:id]
             current_type = record[:type]
             clean_hash[record[:type]] ||= []
             clean_hash[record[:type]] << {
@@ -50,6 +51,7 @@ module Deja
             }
           end
         end
+        #puts clean_hash
         clean_hash
       end
 
