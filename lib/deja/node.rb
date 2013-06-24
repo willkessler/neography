@@ -36,7 +36,6 @@ module Deja
                 send(:load_related, rel.to_sym)
                 eval("@#{rel}")
               end
-              #rel_instance ||= send(:load_related, rel.to_sym)
             end
           end
         end
