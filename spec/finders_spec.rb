@@ -38,38 +38,52 @@ describe Finders do
     @friends = Deja::Relationship.create_relationship(@first_node.id, @second_node.id, :friends)
     @hates = Deja::Relationship.create_relationship(@first_node.id, @third_node.id, :hates)
   end
+
   describe ".load_single" do
     context "given a node id and no filters" do
+      before :each do
+        @node = Person.load(@first_node.id)
+      end
+
       it "should return a single node" do
-        first_node = Person.load(@first_node.id)
-        first_node.name.should eq(@first_node.name)
-        first_node.permalink.should eq(@first_node.permalink)
-        first_node.invested_in.should be_nil
-        first_node.friends.should be_nil
-        first_node.hates.should be_nil
+        @node.name.should eq(@first_node.name)
+        @node.permalink.should eq(@first_node.permalink)
+        @node.should_not_receive(:load_related)
+      end
+
+      it "calling invested_in should call load_related" do
+        @node.should_receive(:load_related).with(:invested_in)
+        @node.invested_in
+      end
+
+      it "calling invested_in should return an array of relNodeWrappers" do
+        @node.invested_in.should be_a(Array)
+        @node.invested_in[0].should be_a(RelNodeWrapper)
       end
     end
 
     context "given a node id with an :invested_in argument" do
+      it "should not call load_related when eager loading" do
+        first_node = Person.load(@first_node.id, :include => :invested_in).should_not_receive(:load_related)
+      end
+
       it "should return only the invested_in relationship" do
         first_node = Person.load(@first_node.id, :include => :invested_in)
         first_node.name.should eq(@first_node.name)
         first_node.permalink.should eq(@first_node.permalink)
-        first_node.invested_in.should_not be_nil
-        first_node.friends.should be_nil
-        first_node.hates.should be_nil
         node_type_test(first_node, :invested_in)
       end
     end
 
     context "given a node id with an :invested_in and :friends argument" do
+      it "should not call load_related when eager loading multiple relations" do
+        first_node = Person.load(@first_node.id, :include => [:invested_in, :friends]).should_not_receive(:load_related)
+      end
+
       it "should return both relationships" do
         first_node = Person.load(@first_node.id, :include => [:invested_in, :friends])
         first_node.name.should eq(@first_node.name)
         first_node.permalink.should eq(@first_node.permalink)
-        first_node.invested_in.should_not be_nil
-        first_node.friends.should_not be_nil
-        first_node.hates.should be_nil
         node_type_test(first_node, :invested_in)
         node_type_test(first_node, :friends)
       end
@@ -118,11 +132,20 @@ describe Finders do
 
   describe ".load_related" do
     context "on an instance of a single node" do
+      before :each do
+        @node = Person.load(@first_node.id)
+      end
+
+      it "should not call load_related on already loaded relations" do
+        @node.invested_in
+        @node.invested_in.should_not_receive(:load_related)
+        @node.invested_in
+      end
+
       it "should load all related nodes" do
-        first_node = Person.load(@first_node.id)
-        first_node.invested_in.should be_nil
-        first_node.load_related
-        first_node.invested_in.should_not be_nil
+        @node.load_related
+        @node.invested_in.should be_a(Array)
+        full_node_type_test(@node)
       end
     end
   end

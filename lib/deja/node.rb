@@ -25,6 +25,22 @@ module Deja
     def initialize(opts = {})
       @id = nil
       opts.each { |k, v| send("#{k}=", v)}
+      if self.class.relationships
+        self.class.relationships.each do |rel|
+          rel_instance = eval("@#{rel}")
+          self.class.class_eval do
+            define_method rel do
+              if rel_instance
+                rel_instance
+              else
+                send(:load_related, rel.to_sym)
+                eval("@#{rel}")
+              end
+              #rel_instance ||= send(:load_related, rel.to_sym)
+            end
+          end
+        end
+      end
     end
 
     def self.relationship(name)
@@ -58,10 +74,6 @@ module Deja
       Deja::Node.delete_node(@id) if @id
       @id = nil
     end
-
-    # def get_related_nodes
-    #   Deja::Node.get_related_nodes(@id)
-    # end
 
   end
 end

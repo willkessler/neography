@@ -17,17 +17,17 @@ module Deja
 
     attr_accessor :id, :label, :start_node, :end_node, :direction
 
-    def initialize(id, label, start_node, end_node, direction = nil)
+    def initialize(id, label, start_node, end_node, direction = :both)
         @id, @label, @start_node, @end_node, @direction = id, label, start_node, end_node, direction
     end
 
     def save()
       unless @id
         # create
-        @id = Deja::Relationship.create_relationship(node_attributes)
+        @id = Deja::Relationship.create_relationship(@start_node, @end_node, @label, @direction)
       else
         # update
-        Deja::Node.update_node(@id, node_attributes)
+        # still to be implemented
       end
     end
   end
