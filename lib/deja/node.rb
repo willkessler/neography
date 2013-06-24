@@ -27,14 +27,14 @@ module Deja
       opts.each { |k, v| send("#{k}=", v)}
       if self.class.relationships
         self.class.relationships.each do |rel|
-          rel_instance = eval("@#{rel}")
+          rel_instance = self.instance_variable_get("@#{rel}")
           self.class.class_eval do
             define_method rel do
               if rel_instance
                 rel_instance
               else
                 send(:load_related, rel.to_sym)
-                eval("@#{rel}")
+                self.instance_variable_get("@#{rel}")
               end
             end
           end
