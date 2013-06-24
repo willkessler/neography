@@ -64,7 +64,7 @@ describe Finders do
 
     context "given a node id with an :invested_in argument" do
       it "should not call load_related when eager loading" do
-        first_node = Person.load(@first_node.id, :include => :invested_in).should_not_receive(:load_related)
+        Person.load(@first_node.id, :include => :invested_in).should_not_receive(:load_related)
       end
 
       it "should return only the invested_in relationship" do

@@ -30,5 +30,15 @@ module Deja
         # still to be implemented
       end
     end
+
+    def save!
+      save
+    end
+
+    def delete
+      Deja::Relationship.delete_relationship(@id) if @id
+      @id = nil
+    end
+
   end
 end
