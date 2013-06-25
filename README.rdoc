@@ -17,6 +17,7 @@ To setup a rest endpoint to issue queries against, bind the Neography Rest objec
 == Models:
 To implement a model using Deja, inherit from Deja::Node
 
+  ```ruby
   class Person < Deja::Node 
     attr_accessor :name, :permalink, :type
     
@@ -24,6 +25,7 @@ To implement a model using Deja, inherit from Deja::Node
     relationship :friends
     relationship :hates
   end
+  ```
   
 == Relationship Structure:
 Relationships are returned as instances of *RelNodeWrapper*. These are convenience objects that contain both the node and the relationship. Convenience methods for given relationships are created for each instance based on the naming defined in the class which inherits *Deja*::*Node*. These convenience methods return arrays of *RelNodeWrapper* objects, which can be interated over. 
