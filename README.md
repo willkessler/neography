@@ -1,6 +1,6 @@
 Welcome to Deja.rb
 ==================
-This is an ORM for Neo4j using Cypher over REST in place of JRuby and native Java. The goal of this project is to create a light ORM that implements basic CRUD operations for Neo4J using an ActiveRecord style interface.
+This is an ORM for Neo4j using Cypher over REST. The goal of this project is to create a light ORM that implements basic CRUD operations for Neo4J using an ActiveRecord style interface.
 
 
 Deja relies on the {Neography library}[https://github.com/maxdemarzi/neography] by {Max Demarzi}[http://maxdemarzi.com/] for communicating with Neo4j over its REST interface. We will use solely Cypher in this library, but inclusion of Neography affords us access to the full range of REST traversal methods. 
