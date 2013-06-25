@@ -9,6 +9,11 @@ Deja relies on the {Neography library}[https://github.com/maxdemarzi/neography] 
 It also makes use of the {Neo4j-Cypher gem}[https://github.com/andreasronge/neo4j-cypher] by Andreas Ronge as a simple DSL for the Cypher query language. 
 
 
+== Setup:
+To setup a rest endpoint to issue queries against, bind the Neography Rest object to Deja.neo.
+  
+  Deja.neo = Neography::Rest.new()
+
 == Models:
 To implement a model using Deja, inherit from Deja::Node
 
@@ -20,7 +25,7 @@ To implement a model using Deja, inherit from Deja::Node
     relationship :hates
   end
   
-== Relationship Structure
+== Relationship Structure:
 Relationships are returned as instances of *RelNodeWrapper*. These are convenience objects that contain both the node and the relationship. Convenience methods for given relationships are created for each instance based on the naming defined in the class which inherits *Deja*::*Node*. These convenience methods return arrays of *RelNodeWrapper* objects, which can be interated over. 
 
   Person.friends.each do |friend|
@@ -69,3 +74,4 @@ By default Deja supports lazy loading. To load a given relationship on the fly, 
     investment.node.class                 # returns the Node object at the end of the relationship
     investment.rel.class                  # returns the Relationship object in between the two nodes
   end
+  
