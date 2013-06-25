@@ -12,19 +12,22 @@ module Deja
     include Deja::Error
     include Deja::Index
     include Deja::Bridge
-    include Deja::Finders
     include Deja::SchemaGenerator
 
     attr_accessor :id, :label, :start_node, :end_node, :direction
 
-    def initialize(id, label, start_node, end_node, direction = :both)
-        @id, @label, @start_node, @end_node, @direction = id, label, start_node, end_node, direction
+    def initialize(id, label, start_node, end_node, direction = :none)
+      @id, @label, @start_node, @end_node, @direction = id, label, start_node, end_node, direction
+    end
+
+    def self.load()
+      # stub
     end
 
     def save()
       unless @id
         # create
-        @id = Deja::Relationship.create_relationship(@start_node, @end_node, @label, @direction)
+        @id = Deja::Relationship.create_relationship(@start_node.id, @end_node.id, @label, @direction)
       else
         # update
         # still to be implemented
