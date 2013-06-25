@@ -29,7 +29,7 @@ To implement a model using Deja, inherit from Deja::Node
   ```
 Relationship Structure:
 -----------------------
-Relationships are returned as instances of *RelNodeWrapper*. These are convenience objects that contain both the node and the relationship. Convenience methods for given relationships are created for each instance based on the naming defined in the class which inherits *Deja*::*Node*. These convenience methods return arrays of *RelNodeWrapper* objects, which can be interated over. 
+Relationships are returned as instances of **RelNodeWrapper**. These are convenience objects that contain both the node and the relationship. Convenience methods for given relationships are created for each instance based on the naming defined in the class which inherits **Deja::Node**. These convenience methods return arrays of **RelNodeWrapper** objects, which can be interated over. 
   ```ruby
   Person.friends.each do |friend|
     puts friend.node.name                 # returns the name of the related node, say "Fred"
@@ -39,21 +39,21 @@ Relationships are returned as instances of *RelNodeWrapper*. These are convenien
 Interface:
 ----------
 ### Loading Nodes:
-To load a node with a given id, use the *load* method:
+To load a node with a given id, use the **load** method:
   ```ruby
   Person.load(3)
   ```
-To load a person with a given id, and eager load a specific relationship, use the *:include* option:
+To load a person with a given id, and eager load a specific relationship, use the **:include** option:
   ```ruby
   Person.load(3, :include => :invested_in)  
   ```
-To load a node with a given id, and eager load all related nodes, use the *:all* argument:
+To load a node with a given id, and eager load all related nodes, use the **:all** argument:
   ```ruby
   Person.load(3, :include => :all)
   ```
 
 ### Saving Nodes:
-To save a node, simply call the *save* method on that node, if you are editing a node from the graph, it will update the graph, if the node has not yet been saved to the graph, the node will be created.
+To save a node, simply call the **save** method on that node, if you are editing a node from the graph, it will update the graph, if the node has not yet been saved to the graph, the node will be created.
   ```ruby
   node = Person.new()
   node.name      = "Mark Twain"
@@ -62,7 +62,7 @@ To save a node, simply call the *save* method on that node, if you are editing a
   node.save
   ```
 ### Deleting Nodes:
-To delete a node from the graph, call the *delete* method on the node. 
+To delete a node from the graph, call the **delete** method on the node. 
   ```ruby
   node = Person.load(3)
   node.delete
