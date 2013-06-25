@@ -21,7 +21,7 @@ To implement a model using Deja, inherit from Deja::Node
   end
   
 == Relationship Structure
-Relationships are returned as instances of *RelNodeWrapper*. These are convenience objects that contain both the node and the relationship. Convenience methods for given relationships are created for each instance based on the naming defined in the class which inherits *Deja::Node*. These convenience methods return arrays of *RelNodeWrapper* objects, which can be interated over. 
+Relationships are returned as instances of *RelNodeWrapper*. These are convenience objects that contain both the node and the relationship. Convenience methods for given relationships are created for each instance based on the naming defined in the class which inherits *Deja*::*Node*. These convenience methods return arrays of *RelNodeWrapper* objects, which can be interated over. 
 
   Person.friends.each do |friend|
     puts friend.node.name                 # returns the name of the related node, say "Fred"
@@ -61,7 +61,7 @@ To delete a node from the graph, call the *delete* method on the node.
   node.delete
   
 === Lazy Loading:
-By default Deja supports lazy loading. To load a given relationship on the fly, simply call the relationship method. If the relationship does not yet exist, it will be fetched from the graph. 
+By default Deja supports lazy loading. To load a given relationship on the fly, simply call method with the same name as the relationship. If the relationship does not yet exist, it will be fetched from the graph. 
 
   node = Person.load(3)
   node.invested_in.each do |investement|  # fetches the investments from the graph
