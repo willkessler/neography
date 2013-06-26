@@ -13,21 +13,20 @@ module Deja
       private
       # separate neo4j returned data into flat array of node/relationship data
       def sane_hash(hash)
-        clean_array = []
-        hash['data'].each do |slice|
-          slice.each do |record|
-            attr_hash = {}
-            attr_hash[:id] = record['self'].split('/').last.to_i
-            attr_hash[:type] = record['type'] if record['type']
+        hash['data'].map do |slice|
+          slice.map do |record|
+            attr_hash = {
+              :id => record['self'].split('/').last.to_i,
+              :type => record['type']
+            }
             attr_hash[:start] = record['start'].split('/').last.to_i if record['start']
             attr_hash[:end] = record['end'].split('/').last.to_i if record['end']
             record['data'].each do |key, value|
               attr_hash[key.to_sym] = value
             end
-            clean_array << attr_hash
+            attr_hashß
           end
-        end
-        clean_array
+        end.flatten
       end
 
       # tiers a data based on r-node structure
@@ -36,13 +35,8 @@ module Deja
         current_rel = nil
         current_type = nil
 
-        array.each_with_index do  |record, index|
-          unless record.has_key?(:start)
-            clean_hash[current_type].map! do |v|
-              v[:node] = record if v[:rel][:id] == current_rel
-              v
-            end
-          else
+        array.each do  |record|
+          if record.has_key?(:start)
             current_rel  = record[:id]
             current_type = record[:type]
             clean_hash[record[:type]] ||= []
@@ -50,9 +44,13 @@ module Deja
               :node => {},
               :rel  => record
             }
+          else
+            clean_hash[current_type].map! do |v|
+              v[:node] = record if v[:rel][:id] == current_rel
+              v
+            end
           end
         end
-        #puts clean_hash
         clean_hash
       end
 
@@ -61,24 +59,9 @@ module Deja
         clean_array = []
         current_rel = nil
         current_type = nil
-        array.each_with_index do |record, index|
+        array.each do |record|
           # we have a node
-          unless record.has_key?(:start)
-            # skip any repeated nodes
-            unless clean_array.any?{|h| h[:id] == record[:id]}
-              # the last iteration created a relationship
-              if clean_array.last && clean_array.last[:relationships].empty? == false
-                clean_array.last[:relationships][current_type].each do |relnode|
-                  relnode[:node] = record if relnode[:rel][:id] == current_rel
-                end
-              # the last iteration wasn't a relationship, must be a new node
-              else
-                record[:relationships] = {}
-                clean_array.push(record)
-              end
-            end
-          # we have a relationship
-          else
+          if record.has_key?(:start)
             current_rel = record[:id]
             current_type = record[:type]
             clean_array.last[:relationships][record[:type]] ||= []
@@ -86,10 +69,24 @@ module Deja
               :node => {},
               :rel  => record
             }
+          else
+            # skip any repeated nodes
+            next if clean_array.any? { |h| h[:id] == record[:id] }
+            # the last iteration created a relationship
+            if clean_array.last && !clean_array.last[:relationships].empty?
+              clean_array.last[:relationships][current_type].each do |relnode|
+                relnode[:node] = record if relnode[:rel][:id] == current_rel
+              end
+            # the last iteration wasn't a relationship, must be a new node
+            else
+              record[:relationships] = {}
+              clean_array.push(record)
+            end
           end
+        # we have a relationship
         end
-        clean_array
       end
+      clean_array
     end
   end
 end
