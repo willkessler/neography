@@ -34,6 +34,7 @@ module Deja
       end
     end
 
+    # convenience for factory_girl create()
     def save!
       save
     end

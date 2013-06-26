@@ -2,11 +2,13 @@ module Deja
   module Cast
     extend ActiveSupport::Concern
 
+    # creating relationships to be attached to already exisitng objects
     def erectify(hash)
       self.class.sans_initial_node(hash, self)
     end
 
     module ClassMethods
+      # creating objects and their relationships (if any)
       def objectify(array)
         with_initial_node(array)
       end

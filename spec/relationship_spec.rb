@@ -2,14 +2,12 @@ require 'deja'
 require 'spec_helper'
 require 'rake/testtask'
 
-
 describe Node do
   before :each do
     @first_node = FactoryGirl.create(:person);
     @second_node = FactoryGirl.create(:person);
     @relationship = Relationship.new(nil, :friends, @first_node, @second_node)
   end
-
 
   describe ".save" do
     context "with a relationship that has not yet been saved to the graph" do
@@ -22,7 +20,6 @@ describe Node do
     end
   end
 
-
   describe ".delete" do
     context "with a relationship that already exists in the graph" do
       it "should delete the relationship from the graph" do
@@ -32,7 +29,4 @@ describe Node do
       end
     end
   end
-
-
-
 end

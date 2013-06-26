@@ -11,7 +11,7 @@ module Deja
       end
 
       private
-
+      # separate neo4j returned data into flat array of node/relationship data
       def sane_hash(hash)
         clean_array = []
         hash['data'].each do |slice|
@@ -30,6 +30,7 @@ module Deja
         clean_array
       end
 
+      # tiers a data based on r-node structure
       def tier_relations(array)
         clean_hash = {}
         current_rel = nil
@@ -55,6 +56,7 @@ module Deja
         clean_hash
       end
 
+      # tiers data with node-r-node structure
       def tier_array(array)
         clean_array = []
         current_rel = nil

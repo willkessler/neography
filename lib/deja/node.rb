@@ -25,6 +25,7 @@ module Deja
     def initialize(opts = {})
       @id = nil
       opts.each { |k, v| send("#{k}=", v)}
+      # override all relationship read accessors
       if self.class.relationships
         self.class.relationships.each do |rel|
           rel_instance = instance_variable_get("@#{rel}")
@@ -33,6 +34,7 @@ module Deja
               if rel_instance
                 rel_instance
               else
+                # lazy load if nil
                 send(:load_related, rel.to_sym)
                 instance_variable_get("@#{rel}")
               end
@@ -65,6 +67,7 @@ module Deja
       end
     end
 
+    # convenience for factory_girl create()
     def save!
       save
     end
