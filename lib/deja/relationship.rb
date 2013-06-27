@@ -14,10 +14,14 @@ module Deja
     include Deja::Bridge
     include Deja::SchemaGenerator
 
-    attr_accessor :id, :label, :start_node, :end_node, :direction
+    attr_reader :id, :label, :start_node, :end_node, :direction
 
     def initialize(id, label, start_node, end_node, direction = :none)
-      @id, @label, @start_node, @end_node, @direction = id, label, start_node, end_node, direction
+      @id         = id
+      @label      = label
+      @start_node = start_node
+      @end_node   = end_node
+      @directionn = direction
     end
 
     def self.load()

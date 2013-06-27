@@ -6,7 +6,7 @@ module Deja
 
     class NoParameter < StandardError
       def initialize
-        super ('No parameters passed')
+        super('No parameters passed')
       end
     end
 

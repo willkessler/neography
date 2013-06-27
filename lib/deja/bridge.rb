@@ -53,7 +53,7 @@ module Deja
       def update_node_by_id(node_id, attributes)
         query = cypher do
           node(node_id).tap do |n|
-            attributes.each_with_index do |(key, value), index|
+            attributes.each do |key, value|
               n[key] = value
             end
           end
@@ -64,7 +64,7 @@ module Deja
       def update_node_by_index(index_hash, attributes)
         query = cypher do
           node(node_id).tap do |n|
-            attributes.each_with_index do |(key, value), index|
+            attributes.each do |key, value|
               n[key] = value
             end
           end
@@ -74,11 +74,11 @@ module Deja
 
       def create_relationship(start_node, end_node, name, direction = :none, attributes = {})
         case direction
-        when :none then
+        when :none
           query = cypher { create_path{ node(start_node) - rel(name).as(:r).neo_id.ret - node(end_node)} }
-        when :out  then
+        when :out
           query = cypher { create_path{ node(start_node) > rel(name).as(:r).neo_id.ret > node(end_node)} }
-        when :in   then
+        when :in
           query = cypher { create_path{ node(start_node) < rel(name).as(:r).neo_id.ret < node(end_node)} }
         else return false end
         node_query(query)['data'].first.first
@@ -121,7 +121,8 @@ module Deja
         when :outgoing then node_query cypher { node(neo_id).ret.outgoing(rel().ret).ret }
         when :incoming then node_query cypher { node(neo_id).ret.incoming(rel().ret).ret }
         when :none     then node_query cypher { node(neo_id) }
-        else node_query cypher { node(neo_id).ret - rel(rels.to_sym).ret - node.ret } end
+        else node_query cypher { node(neo_id).ret - rel(rels.to_sym).ret - node.ret }
+        end
       end
 
       # does not include origin node
@@ -131,7 +132,8 @@ module Deja
         when :all      then node_query cypher { node(neo_id).both(rel().ret).ret }
         when :outgoing then node_query cypher { node(neo_id).outgoing(rel().ret).ret }
         when :incoming then node_query cypher { node(neo_id).incoming(rel().ret).ret }
-        else node_query cypher { node(neo_id) - rel(rels.to_sym).ret - node.ret } end
+        else node_query cypher { node(neo_id) - rel(rels.to_sym).ret - node.ret }
+        end
       end
     end
   end

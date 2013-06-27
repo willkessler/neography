@@ -4,10 +4,8 @@ module Deja
 
     module ClassMethods
       def normalize(hash, type = :eager)
-        case type
-        when :eager then tier_array(sane_hash(hash))
-        when :lazy  then tier_relations(sane_hash(hash))
-        else return false end
+        return structure_node_and_relationships(sane_hash(hash)) if type == :eager
+        return structure_relationships(sane_hash(hash)) if type == :lazy
       end
 
       private
@@ -24,69 +22,69 @@ module Deja
             record['data'].each do |key, value|
               attr_hash[key.to_sym] = value
             end
-            attr_hashß
+            attr_hash
           end
         end.flatten
       end
 
-      # tiers a data based on r-node structure
-      def tier_relations(array)
-        clean_hash = {}
+      # tiers data based on r-node structure
+      def structure_relationships(flat_hash)
+        tiered_hash = {}
         current_rel = nil
         current_type = nil
 
-        array.each do  |record|
+        flat_hash.each do  |record|
           if record.has_key?(:start)
             current_rel  = record[:id]
             current_type = record[:type]
-            clean_hash[record[:type]] ||= []
-            clean_hash[record[:type]] << {
+            tiered_hash[record[:type]] ||= []
+            tiered_hash[record[:type]] << {
               :node => {},
               :rel  => record
             }
           else
-            clean_hash[current_type].map! do |v|
+            tiered_hash[current_type].map! do |v|
               v[:node] = record if v[:rel][:id] == current_rel
               v
             end
           end
         end
-        clean_hash
+        tiered_hash
       end
 
       # tiers data with node-r-node structure
-      def tier_array(array)
-        clean_array = []
+      def structure_node_and_relationships(flat_array)
+        tiered_array = []
         current_rel = nil
         current_type = nil
-        array.each do |record|
+        flat_array.each do |record|
           # we have a node
           if record.has_key?(:start)
             current_rel = record[:id]
             current_type = record[:type]
-            clean_array.last[:relationships][record[:type]] ||= []
-            clean_array.last[:relationships][record[:type]] << {
+            tiered_array.last[:relationships][record[:type]] ||= []
+            tiered_array.last[:relationships][record[:type]] << {
               :node => {},
               :rel  => record
             }
           else
             # skip any repeated nodes
-            next if clean_array.any? { |h| h[:id] == record[:id] }
+            next if tiered_array.any? { |h| h[:id] == record[:id] }
             # the last iteration created a relationship
-            if clean_array.last && !clean_array.last[:relationships].empty?
-              clean_array.last[:relationships][current_type].each do |relnode|
+            if tiered_array.last && !tiered_array.last[:relationships].empty?
+              tiered_array.last[:relationships][current_type].each do |relnode|
                 relnode[:node] = record if relnode[:rel][:id] == current_rel
               end
             # the last iteration wasn't a relationship, must be a new node
             else
               record[:relationships] = {}
-              clean_array.push(record)
+              tiered_array.push(record)
             end
           end
         # we have a relationship
         end
+        tiered_array
       end
-      clean_array
     end
   end
 end

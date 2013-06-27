@@ -2,7 +2,7 @@ module Deja
   module Finders
     extend ActiveSupport::Concern
 
-    def load_related(*relationships)
+    def related_nodes(*relationships)
       hashster = self.class.load_related_nodes(self.id, :include => relationships)
       erectify(hashster)
     end
@@ -21,7 +21,6 @@ module Deja
         end
         ids.length == 1 ? nodes.first : nodes
       end
-
     end
   end
 end
