@@ -16,7 +16,7 @@ module Deja
     include Deja::Finders
     include Deja::SchemaGenerator
 
-    attr_accessor :id
+    attributes :id => :String
 
     class << self
       attr_accessor :relationships
