@@ -30,6 +30,10 @@ module Deja
         end
       end
 
+      def inspect
+        @@all_attributes
+      end
+
       private
 
       def inspect_attributes
