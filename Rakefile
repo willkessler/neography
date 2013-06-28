@@ -16,5 +16,3 @@ end
 
 desc "Run Tests"
 task :default => :spec
-
-
