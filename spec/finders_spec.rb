@@ -48,11 +48,11 @@ describe Finders do
       it "should return a single node" do
         @node.name.should eq(@first_node.name)
         @node.permalink.should eq(@first_node.permalink)
-        @node.should_not_receive(:load_related)
+        @node.should_not_receive(:related_nodes)
       end
 
-      it "calling invested_in should call load_related" do
-        @node.should_receive(:load_related).with(:invested_in)
+      it "calling invested_in should call related_nodes" do
+        @node.should_receive(:related_nodes).with(:invested_in)
         @node.invested_in
       end
 
@@ -63,8 +63,8 @@ describe Finders do
     end
 
     context "given a node id with an :invested_in argument" do
-      it "should not call load_related when eager loading" do
-        Person.load(@first_node.id, :include => :invested_in).should_not_receive(:load_related)
+      it "should not call related_nodes when eager loading" do
+        Person.load(@first_node.id, :include => :invested_in).should_not_receive(:related_nodes)
       end
 
       it "should return only the invested_in relationship" do
@@ -76,8 +76,8 @@ describe Finders do
     end
 
     context "given a node id with an :invested_in and :friends argument" do
-      it "should not call load_related when eager loading multiple relations" do
-        first_node = Person.load(@first_node.id, :include => [:invested_in, :friends]).should_not_receive(:load_related)
+      it "should not call related_nodes when eager loading multiple relations" do
+        first_node = Person.load(@first_node.id, :include => [:invested_in, :friends]).should_not_receive(:related_nodes)
       end
 
       it "should return both relationships" do
@@ -130,20 +130,20 @@ describe Finders do
     end
   end
 
-  describe ".load_related" do
+  describe ".related_nodes" do
     context "on an instance of a single node" do
       before :each do
         @node = Person.load(@first_node.id)
       end
 
-      it "should not call load_related on already loaded relations" do
+      it "should not call related_nodes on already loaded relations" do
         @node.invested_in
-        @node.invested_in.should_not_receive(:load_related)
+        @node.invested_in.should_not_receive(:related_nodes)
         @node.invested_in
       end
 
       it "should load all related nodes" do
-        @node.load_related
+        @node.related_nodes
         @node.invested_in.should be_a(Array)
         full_node_type_test(@node)
       end

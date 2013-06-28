@@ -23,7 +23,6 @@ module Deja
     end
 
     def initialize(opts = {})
-      @id = nil
       opts.each { |k, v| send("#{k}=", v)}
       # override all relationship read accessors
       if self.class.relationships
@@ -35,7 +34,7 @@ module Deja
                 rel_instance
               else
                 # lazy load if nil
-                send(:load_related, rel.to_sym)
+                send(:related_nodes, rel.to_sym)
                 instance_variable_get("@#{rel}")
               end
             end
@@ -55,7 +54,8 @@ module Deja
       node_attributes = {}
       instance_variables.each do |var|
         unless var == :@id || var == :@relationships
-          node_attributes[var.to_s[1..-1]] = eval(var.to_s)
+          attribute_name =  var.to_s[1..-1]
+          node_attributes[attribute_name] = send(attribute_name)
         end
       end
       unless @id
