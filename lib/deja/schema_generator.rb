@@ -14,20 +14,41 @@ module Deja
     end
 
     module ClassMethods
+      @@all_attributes = {}
+
       def schema
-        { :attributes => @attributes, :validations => validations }
+        {
+          :attributes => inspect_attributes,
+          :validations => inspect_validations
+        }
       end
 
-      def attributes(map)
-        @attributes = map
-        map.each do |attr, type|
+      def attributes(attrs)
+        @@all_attributes[self.name] = attrs
+        attrs.each do |attr, type|
           send(:attr_accessor, attr)
         end
       end
 
+      def inspect
+        @@all_attributes
+      end
+
       private
 
-      def validations
+      def inspect_attributes
+        klass = self
+        attrs = {}
+
+        while @@all_attributes.has_key?(klass.name)
+          attrs.merge!(@@all_attributes[klass.name])
+          klass = klass.superclass
+        end
+
+        attrs
+      end
+
+      def inspect_validations
         validators.inject({}) do |memo, validator|
           validator.attributes.each do |attr|
             memo[attr] ||= {}
