@@ -3,7 +3,6 @@ module Deja
     extend ActiveSupport::Concern
 
     def self.included(base)
-      base.extend ClassMethods
       base.class_eval do
         extend ActiveModel::Translation
         include ActiveModel::Dirty

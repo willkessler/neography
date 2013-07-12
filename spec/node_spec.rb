@@ -36,7 +36,7 @@ describe Node do
         id = @first_node.id
         @first_node.delete
         expect(@first_node.id).to be_nil
-        expect{Person.load(id)}.to raise_error(Deja::Error::NodeDoesNotExist)
+        expect{Person.load(id)}.to raise_error()
       end
     end
 

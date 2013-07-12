@@ -11,17 +11,15 @@ module Deja
 
     include Deja::Error
     include Deja::Index
-    include Deja::Bridge
     include Deja::SchemaGenerator
 
-    attr_reader :id, :label, :start_node, :end_node, :direction
-
-    def initialize(id, label, start_node, end_node, direction = :none)
+    def initialize(id, label, start_node, end_node, direction = :none, attributes = nil)
       @id         = id
       @label      = label
       @start_node = start_node
       @end_node   = end_node
-      @directionn = direction
+      @direction  = direction
+      @attributes = attributes
     end
 
     def self.load()
@@ -29,9 +27,14 @@ module Deja
     end
 
     def save()
+      rel_attributes = {}
+      instance_variables.each do |var|
+        attribute_name =  var.to_s[1..-1]
+        rel_attributes[attribute_name] = send(attribute_name)
+      end
       unless @id
         # create
-        @id = Deja::Relationship.create_relationship(@start_node.id, @end_node.id, @label, @direction)
+        @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, @direction)
       else
         # update
         # still to be implemented
@@ -44,7 +47,7 @@ module Deja
     end
 
     def delete
-      Deja::Relationship.delete_relationship(@id) if @id
+      Deja::Query.delete_relationship(@id) if @id
       @id = nil
     end
 

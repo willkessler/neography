@@ -12,7 +12,6 @@ module Deja
     include Deja::Cast
     include Deja::Error
     include Deja::Index
-    include Deja::Bridge
     include Deja::Finders
     include Deja::SchemaGenerator
 
@@ -58,10 +57,10 @@ module Deja
       end
       unless @id
         # create
-        @id = Deja::Node.create_node(node_attributes)
+        @id = Deja::Query.create_node(node_attributes)
       else
         # update
-        Deja::Node.update_node(@id, node_attributes)
+        Deja::Query.update_node(@id, node_attributes)
       end
     end
 
@@ -71,7 +70,7 @@ module Deja
     end
 
     def delete
-      Deja::Node.delete_node(@id) if @id
+      Deja::Query.delete_node(@id) if @id
       @id = nil
     end
 

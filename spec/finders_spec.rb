@@ -27,16 +27,16 @@ end
 
 describe Finders do
   after :each do
-    Deja.neo.execute_script("g.clear()")
+    Deja.neo.execute_query("START n=node(*) MATCH n-[r?]->() WHERE ID(n) <> 0 DELETE r DELETE n")
   end
 
   before :each do
     @first_node = FactoryGirl.create(:person);
     @second_node = FactoryGirl.create(:person);
     @third_node = FactoryGirl.create(:company);
-    @invested_in = Deja::Relationship.create_relationship(@first_node.id, @second_node.id, :invested_in)
-    @friends = Deja::Relationship.create_relationship(@first_node.id, @second_node.id, :friends)
-    @hates = Deja::Relationship.create_relationship(@first_node.id, @third_node.id, :hates)
+    @invested_in = Deja::Query.create_relationship(@first_node.id, @second_node.id, :invested_in)
+    @friends = Deja::Query.create_relationship(@first_node.id, @second_node.id, :friends)
+    @hates = Deja::Query.create_relationship(@first_node.id, @third_node.id, :hates)
   end
 
   describe ".load_single" do
@@ -147,6 +147,32 @@ describe Finders do
         @node.invested_in.should be_a(Array)
         full_node_type_test(@node)
       end
+    end
+  end
+
+  describe "in transactions" do
+    context "updating multiple nodes" do
+      before :each do
+        @u_node1 = Person.load(@first_node.id)
+        @u_node2 = Person.load(@second_node.id)
+      end
+
+      it "should do some shit" do
+        @u_node1.name = "shark"
+        @u_node2.name = "speak"
+
+        Deja::Transaction.commit do
+          @u_node1.save()
+          @u_node2.save()
+        end
+
+        @u_node1_new = Person.load(@first_node.id)
+        @u_node2_new = Person.load(@second_node.id)
+
+        expect(@u_node1_new.name).to eq("shark")
+        expect(@u_node2_new.name).to eq("speak")
+      end
+
     end
   end
 

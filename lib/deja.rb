@@ -12,6 +12,8 @@ module Deja
   autoload :Index
   autoload :Node
   autoload :Cast
+  autoload :Query
+  autoload :Transaction
   autoload :Relationship
   autoload :SchemaGenerator
   autoload :RelNodeWrapper
@@ -20,10 +22,13 @@ module Deja
   autoload :Error
   autoload :Bridge
 
-  class << self; attr_accessor :neo; end
+  class << self; attr_accessor :neo, :tx ; end
 
   def self.execute_cypher(query)
-    self.neo.execute_query(query.to_s)
+    if (Deja.tx)
+      Deja.neo.in_transaction(Deja.tx, query.to_s)
+    else
+      self.neo.execute_query(query.to_s)
+    end
   end
-
 end

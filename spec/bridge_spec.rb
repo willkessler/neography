@@ -4,7 +4,7 @@ require 'rake/testtask'
 
 describe Bridge do
   after :each do
-    Deja.neo.execute_script("g.clear()")
+    Deja.neo.execute_query("START n=node(*) MATCH n-[r?]->() WHERE ID(n) <> 0 DELETE r DELETE n")
   end
 
   describe ".is_index" do
@@ -217,5 +217,6 @@ describe Bridge do
       end
     end
   end
-
 end
+
+

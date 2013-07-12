@@ -1,10 +1,6 @@
 module Deja
-  module Bridge
-    extend ActiveSupport::Concern
-
-    include Deja::NeoParse
-
-    module ClassMethods
+  class Bridge
+    class << self
       def is_index?(node_lookup)
         node_lookup.is_a?(Hash)
       end
@@ -13,37 +9,14 @@ module Deja
         Neo4j::Cypher.query(&block)
       end
 
-      def node_query(query)
-        begin
-          Deja.execute_cypher(query)
-        rescue Exception => e
-          raise Deja::Error::NodeDoesNotExist, "#{e.message}"
-        end
-      end
-
-      def rel_query(query)
-        begin
-          Deja.execute_cypher(query)
-        rescue Exception => e
-          raise Deja::Error::RelationshipDoesNotExist, "#{e.message}"
-        end
-      end
-
       def create_node(attributes = {})
         raise Deja::Error::InvalidParameter unless attributes
         raise Deja::Error::NoParameter if attributes.empty?
-        query = cypher do
-          node.new(attributes).neo_id
-        end
-        begin
-          Deja.execute_cypher(query)['data'].first.first
-        rescue Exception => e
-          raise Deja::Error::CreationFailure, "#{e.message}"
-        end
+        cypher { node.new(attributes).neo_id }
       end
 
       def delete_node(node_id)
-        node_query cypher { node(node_id).del.both(rel().as(:r).del) }
+        cypher { node(node_id).del.both(rel().as(:r).del) }
       end
 
       def update_node(node, attributes)
@@ -51,88 +24,66 @@ module Deja
       end
 
       def update_node_by_id(node_id, attributes)
-        query = cypher do
+        cypher do
           node(node_id).tap do |n|
             attributes.each do |key, value|
               n[key] = value
             end
           end
         end
-        node_query(query)
       end
 
       def update_node_by_index(index_hash, attributes)
-        query = cypher do
+        cypher do
           node(node_id).tap do |n|
             attributes.each do |key, value|
               n[key] = value
             end
           end
         end
-        node_query(query)
       end
 
       def create_relationship(start_node, end_node, name, direction = :none, attributes = {})
         case direction
         when :none
-          query = cypher { create_path{ node(start_node) - rel(name).as(:r).neo_id.ret - node(end_node)} }
+          cypher { create_path{ node(start_node) - rel(name).as(:r).neo_id.ret - node(end_node)} }
         when :out
-          query = cypher { create_path{ node(start_node) > rel(name).as(:r).neo_id.ret > node(end_node)} }
+          cypher { create_path{ node(start_node) > rel(name).as(:r).neo_id.ret > node(end_node)} }
         when :in
-          query = cypher { create_path{ node(start_node) < rel(name).as(:r).neo_id.ret < node(end_node)} }
-        else return false end
-        node_query(query)['data'].first.first
+          cypher { create_path{ node(start_node) < rel(name).as(:r).neo_id.ret < node(end_node)} }
+        else
+          return false
+        end
       end
 
       def delete_relationship(rel_id)
-        rel_query cypher { rel(rel_id).del }
+        cypher { rel(rel_id).del }
       end
 
       def get_single_relationship(rel_id)
-        rel_query cypher { rel(rel_id) }
-      end
-
-      def load_entity(neo_id, options={})
-        entity = load_entity_with_args(neo_id, options)
-        normalize(entity)
-      end
-
-      def load_entity_with_args(neo_id, options)
-        options[:include] ||= :all
-        get_node_with_rels(neo_id, options[:include])
-      end
-
-      def load_related_nodes(neo_id, options = {})
-        entity = load_related_nodes_with_args(neo_id, options)
-        # may need specialized normalize method to handle rels without start nodes
-        normalize(entity, :lazy)
-      end
-
-      def load_related_nodes_with_args(neo_id, options)
-        options[:include] ||= :all
-        get_related_nodes(neo_id, options[:include])
+        cypher { rel(rel_id) }
       end
 
       # includes origin node
       def get_node_with_rels(neo_id, rels)
         case rels
-        when Array     then node_query cypher { node(neo_id).ret - rel(*rels).ret - node.ret }
-        when :all      then node_query cypher { node(neo_id).ret.both(rel().ret).ret }
-        when :outgoing then node_query cypher { node(neo_id).ret.outgoing(rel().ret).ret }
-        when :incoming then node_query cypher { node(neo_id).ret.incoming(rel().ret).ret }
-        when :none     then node_query cypher { node(neo_id) }
-        else node_query cypher { node(neo_id).ret - rel(rels.to_sym).ret - node.ret }
+        when Array     then cypher { node(neo_id).ret - rel(*rels).ret - node.ret }
+        when :all      then cypher { node(neo_id).ret.both(rel().ret).ret }
+        when :outgoing then cypher { node(neo_id).ret.outgoing(rel().ret).ret }
+        when :incoming then cypher { node(neo_id).ret.incoming(rel().ret).ret }
+        when :none     then cypher { node(neo_id) }
+        else cypher { node(neo_id).ret - rel(rels.to_sym).ret - node.ret }
         end
       end
 
       # does not include origin node
       def get_related_nodes(neo_id, rels)
         case rels
-        when Array     then node_query cypher { node(neo_id) - rel(*rels).ret - node.ret }
-        when :all      then node_query cypher { node(neo_id).both(rel().ret).ret }
-        when :outgoing then node_query cypher { node(neo_id).outgoing(rel().ret).ret }
-        when :incoming then node_query cypher { node(neo_id).incoming(rel().ret).ret }
-        else node_query cypher { node(neo_id) - rel(rels.to_sym).ret - node.ret }
+        when Array     then cypher { node(neo_id) - rel(*rels).ret - node.ret }
+        when :all      then cypher { node(neo_id).both(rel().ret).ret }
+        when :outgoing then cypher { node(neo_id).outgoing(rel().ret).ret }
+        when :incoming then cypher { node(neo_id).incoming(rel().ret).ret }
+        else cypher { node(neo_id) - rel(rels.to_sym).ret - node.ret }
         end
       end
     end

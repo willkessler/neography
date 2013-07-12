@@ -1,9 +1,23 @@
+
+
 class Company < Deja::Node
-  attr_accessor :name, :permalink, :type
+  attr_accessor :id, :name, :permalink, :type
+  # attributes({
+  #   :id => :Integer,
+  #   :name => :String,
+  #   :permalink => :String,
+  #   :type => :String
+  # })
 end
 
 class Person < Deja::Node
-  attr_accessor :name, :permalink, :type
+  attr_accessor :id, :name, :permalink, :type
+  # attributes({
+  #   :id => :Integer,
+  #   :name => :String,
+  #   :permalink => :String,
+  #   :type => :String
+  # })
 
   relationship :invested_in
   relationship :friends
