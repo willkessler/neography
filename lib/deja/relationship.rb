@@ -13,13 +13,14 @@ module Deja
     include Deja::Index
     include Deja::SchemaGenerator
 
-    def initialize(id, label, start_node, end_node, direction = :none, attributes = nil)
-      @id         = id
-      @label      = label
+    attr_accessor :label, :start_node, :end_node, :direction
+
+    def initialize(label, start_node, end_node, direction, attrs = {})
+      @label = label
       @start_node = start_node
-      @end_node   = end_node
-      @direction  = direction
-      @attributes = attributes
+      @end_node = end_node
+      @direction = direction
+      attrs.each { |k, v| send("#{k}=", v) }
     end
 
     def self.load()
@@ -28,13 +29,12 @@ module Deja
 
     def save()
       rel_attributes = {}
-      instance_variables.each do |var|
-        attribute_name =  var.to_s[1..-1]
-        rel_attributes[attribute_name] = send(attribute_name)
+      self.class.list_attributes[self.class.name].each do |k, v|
+        rel_attributes[k] = send(k)
       end
       unless @id
         # create
-        @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, @direction)
+        @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, @direction, rel_attributes)
       else
         # update
         # still to be implemented

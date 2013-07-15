@@ -22,6 +22,14 @@ module Deja
   autoload :Error
   autoload :Bridge
 
+  ID            = 'id'
+  REL           = 'rel'
+  NODE          = 'node'
+  TYPE          = 'type'
+  START_NODE    = 'start_node'
+  END_NODE      = 'end_node'
+  RELATIONSHIPS = 'relationships'
+
   class << self; attr_accessor :neo, :tx ; end
 
   def self.execute_cypher(query)

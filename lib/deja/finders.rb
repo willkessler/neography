@@ -10,13 +10,13 @@ module Deja
     module ClassMethods
       def load(id, index = false, options = {})
         options[:include] ||= :none
-        entity_array = Deja::Query.load_entity(id, options)
+        entity_array = Deja::Query.load_node(id, options)
         objectify(entity_array)
       end
 
       def load_many(*ids)
         nodes = ids.map do |id|
-          entity_array = Deja::Query.load_entity(id)
+          entity_array = Deja::Query.load_node(id)
           objectify(entity_array)
         end
         ids.length == 1 ? nodes.first : nodes

@@ -30,7 +30,7 @@ module Deja
         end
       end
 
-      def inspect
+      def list_attributes
         @@all_attributes
       end
 
