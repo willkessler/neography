@@ -37,7 +37,7 @@ module Deja
         @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, @direction, rel_attributes)
       else
         # update
-        # still to be implemented
+        Deja::Query.update_relationship(@id, rel_attributes)
       end
     end
 

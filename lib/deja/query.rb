@@ -45,7 +45,7 @@ module Deja
       end
 
       def update_relationship(rel_id, attributes = {})
-        cypher_query = Deja::Bridge.update_relationship(rel_id)
+        cypher_query = Deja::Bridge.update_relationship(rel_id, attributes)
         result_hash  = Deja.execute_cypher(cypher_query)
       end
 
