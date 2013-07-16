@@ -17,11 +17,13 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_development_dependency "rspec", "~>2.13.0"
   s.add_development_dependency "factory_girl"
+  s.add_development_dependency "pry"
+  s.add_development_dependency "rspec", "~>2.13.0"
+
+  s.add_dependency "activemodel", ">= 4.0.0"
+  s.add_dependency "activesupport", ">= 4.0.0"
   s.add_dependency "neography"
   s.add_dependency "neo4j-cypher"
-  s.add_dependency "activemodel"
-  s.add_dependency "activesupport"
   s.add_dependency "oj"
 end

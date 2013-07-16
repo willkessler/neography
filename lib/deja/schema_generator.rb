@@ -2,16 +2,6 @@ module Deja
   module SchemaGenerator
     extend ActiveSupport::Concern
 
-    def self.included(base)
-      base.class_eval do
-        extend ActiveModel::Translation
-        include ActiveModel::Dirty
-        include ActiveModel::Observing
-        include ActiveModel::Validations
-        include ActiveModel::MassAssignmentSecurity
-      end
-    end
-
     module ClassMethods
       @@all_attributes = {}
 
@@ -26,7 +16,12 @@ module Deja
         @@all_attributes[self.name] ||= {}
         @@all_attributes[self.name].merge!(attrs)
         attrs.each do |attr, type|
-          send(:attr_accessor, attr)
+          define_attribute_methods attr
+          send(:attr_reader, attr)
+          define_method("#{attr}=") do |new_value|
+            send("#{attr}_will_change!") unless new_value == send("#{attr}")
+            instance_variable_set("@#{attr}", new_value)
+          end
         end
       end
 
