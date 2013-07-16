@@ -21,6 +21,7 @@ module Deja
   autoload :Finders
   autoload :Error
   autoload :Bridge
+  autoload :Model
 
   ID            = 'id'
   REL           = 'rel'
@@ -33,10 +34,12 @@ module Deja
   class << self; attr_accessor :neo, :tx ; end
 
   def self.execute_cypher(query)
-    if (Deja.tx)
-      Deja.neo.in_transaction(Deja.tx, query.to_s)
+    cypher_query = query.to_s
+    puts "Executing cypher: #{cypher_query}"
+    if Deja.tx
+      Deja.neo.in_transaction(Deja.tx, cypher_query)
     else
-      self.neo.execute_query(query.to_s)
+      self.neo.execute_query(cypher_query)
     end
   end
 end
