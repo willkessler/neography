@@ -23,7 +23,8 @@ module Deja
       end
 
       def attributes(attrs)
-        @@all_attributes[self.name] = attrs
+        @@all_attributes[self.name] ||= {}
+        @@all_attributes[self.name].merge!(attrs)
         attrs.each do |attr, type|
           send(:attr_accessor, attr)
         end
