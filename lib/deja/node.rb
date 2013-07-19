@@ -16,7 +16,6 @@ module Deja
           @relationship_names << arg
           attr_writer arg
         end
-        #puts @relationship_names.length
       end
     end
 
