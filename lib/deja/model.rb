@@ -3,7 +3,6 @@ module Deja
     extend ActiveModel::Callbacks
 
     include ActiveModel::Model
-    include ActiveModel::Dirty
     include ActiveSupport::Concern
 
     define_model_callbacks :initialize, :create, :update, :delete, :save
@@ -39,8 +38,9 @@ module Deja
       begin
         update!(opts)
         self
-      rescue StandardError => e
-        raise e if e.is_a? BadImplementationError
+      rescue BadImplementationError => e
+        raise e
+      rescue StandardError
         false
       end
     end
@@ -58,8 +58,9 @@ module Deja
       begin
         save!
         self
-      rescue StandardError => e
-        raise e if e.is_a? BadImplementationError
+      rescue BadImplementationError => e
+        raise e
+      rescue StandardError
         false
       end
     end

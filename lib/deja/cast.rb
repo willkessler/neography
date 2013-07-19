@@ -38,6 +38,7 @@ module Deja
           initial_node.send("#{name}=", relationship_array.compact) if self.relationships.include?(name)
         end
       end
+
     end
   end
 end

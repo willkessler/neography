@@ -2,11 +2,6 @@ module Deja
   module Finders
     extend ActiveSupport::Concern
 
-    def related_nodes(*relationships)
-      related_nodes = Deja::Query.load_related_nodes(self.id, :include => relationships)
-      erectify(related_nodes)
-    end
-
     module ClassMethods
       def load(id, index = false, options = {})
         options[:include] ||= :none
