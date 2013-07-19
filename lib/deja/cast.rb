@@ -23,7 +23,7 @@ module Deja
       def sans_initial_node(relation_hash, initial_node)
         relation_hash.each do |name, relationship|
           relationship_array = relationship.map do |rel|
-            if self.relationships.include?(rel[REL][TYPE])
+            if self.relationship_names.include?(rel[REL][TYPE].to_sym)
               node_class     = rel[NODE][TYPE].constantize
               related_node   = node_class.new(rel[NODE])
               rel_class      = rel[REL][TYPE].camelize.constantize
@@ -35,7 +35,7 @@ module Deja
               relation_bundle = Deja::RelNodeWrapper.new(related_node, relationship)
             end
           end
-          initial_node.send("#{name}=", relationship_array.compact) if self.relationships.include?(name)
+          initial_node.send("#{name}=", relationship_array.compact) if self.relationship_names.include?(name.to_sym)
         end
       end
 

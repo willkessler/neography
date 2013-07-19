@@ -34,12 +34,10 @@ module Deja
   class << self; attr_accessor :neo, :tx ; end
 
   def self.execute_cypher(query)
-    cypher_query = query.to_s
-    puts "Executing cypher: #{cypher_query}"
     if Deja.tx
-      Deja.neo.in_transaction(Deja.tx, cypher_query)
+      Deja.neo.in_transaction(Deja.tx, query)
     else
-      self.neo.execute_query(cypher_query)
+      self.neo.execute_query(query)
     end
   end
 end

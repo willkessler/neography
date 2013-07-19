@@ -8,15 +8,15 @@ module Deja
     include Deja::SchemaGenerator
 
     class << self
-      attr_reader :relationships
+      attr_reader :relationship_names
 
       def relationships(*args)
-        @relationships ||= Set.new
+        @relationship_names ||= Set.new
         args.each do |arg|
-          name = arg.to_s
-          @relationships << name
-          attr_writer name
+          @relationship_names << arg
+          attr_writer arg
         end
+        #puts @relationship_names.length
       end
     end
 
@@ -26,19 +26,26 @@ module Deja
     end
 
     def relationships
-      self.class.relationships.inject({}) do |memo, rel_name|
+      self.class.relationship_names.inject({}) do |memo, rel_name|
         memo[rel_name] = send("@#{rel_name}")
         memo
       end
     end
 
-    def initialize
+    def initialize(*args)
       super do
-        self.class.relationships.each do |rel|
-          class_eval do
-            define_method rel do
-              send(:related_nodes, rel.to_sym) unless send("@#{rel}")
-              send("@#{rel}")
+        if self.class.relationship_names
+          self.class.relationship_names.each do |rel|
+            rel_instance = instance_variable_get("@#{rel}")
+            self.class.class_eval do
+              define_method rel do
+                if rel_instance
+                  rel_instance
+                else
+                  send(:related_nodes, rel)
+                  instance_variable_get("@#{rel}")
+                end
+              end
             end
           end
         end
@@ -63,7 +70,7 @@ module Deja
     def persisted_attributes
       run_callbacks :save do
         instance_variables.inject({}) do |memo, ivar|
-          unless ivar && ivar != :@id && ivar != :@relationships
+          unless ivar && (ivar === :@id || ivar == :@relationships)
             attribute_name =  ivar.to_s[1..-1]
             memo[attribute_name] = send(attribute_name)
             puts "Added {'#{attribute_name}' => '#{send(attribute_name)}'} to persisted node attributes"
