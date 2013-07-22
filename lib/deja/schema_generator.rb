@@ -19,7 +19,7 @@ module Deja
           #define_attribute_methods attr
           send(:attr_reader, attr)
           define_method("#{attr}=") do |new_value|
-            send("#{attr}_will_change!") unless new_value == send("#{attr}")
+            # send("#{attr}_will_change!") unless new_value == send("#{attr}")
             instance_variable_set("@#{attr}", new_value)
           end
         end
