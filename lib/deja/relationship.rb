@@ -9,8 +9,8 @@ module Deja
 
     # initialize(label, start_node, end_node, direction, options = {})
     # the method below ensures that the relationship configuration is done between before_initialize and after_initialize
-    def initialize(args*)
-      super(args) do |config|
+    def initialize(*args)
+      super(*args) do |config|
         puts "Configuring relationship..."
         @label      = config[0]
         @start_node = config[1]
