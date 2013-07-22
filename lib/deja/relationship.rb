@@ -6,6 +6,30 @@ module Deja
     include Deja::SchemaGenerator
 
     attr_accessor :label, :start_node, :end_node, :direction
+    @connected_node_types = {}
+
+    class << self
+      def establish_connected_node_type(*nodes, key)
+        @connected_node_types ||= {}
+        nodes.each do |node|
+          name = node.to_s.classify
+          @connected_node_types[key] ||= Set.new
+          @connected_node_types[key] << name
+        end
+      end
+
+      def from(*nodes)
+        establish_connected_node_type(*nodes, :from)
+      end
+
+      def to(*nodes)
+        establish_connected_node_type(*nodes, :to)
+      end
+
+      def node_types
+        @connected_node_types
+      end
+    end
 
     # initialize(label, start_node, end_node, direction, options = {})
     # the method below ensures that the relationship configuration is done between before_initialize and after_initialize
