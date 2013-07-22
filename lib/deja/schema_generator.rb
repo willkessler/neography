@@ -16,7 +16,7 @@ module Deja
         @@all_attributes[self.name] ||= {}
         @@all_attributes[self.name].merge!(attrs)
         attrs.each do |attr, type|
-          define_attribute_methods attr
+          #define_attribute_methods attr
           send(:attr_reader, attr)
           define_method("#{attr}=") do |new_value|
             send("#{attr}_will_change!") unless new_value == send("#{attr}")
