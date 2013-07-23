@@ -4,6 +4,7 @@ module Deja
 
     module ClassMethods
       @@all_attributes = {}
+      @@indexed_attributes = []
 
       def schema
         {
@@ -19,6 +20,35 @@ module Deja
         define_method("#{name}=") do |new_value|
           instance_variable_set("@#{name}", new_value)
         end
+        if opts[:index]
+          @@indexed_attributes << name
+          unique = opts[:unique] ? opts[:unique] : nil
+          define_method("add_to_#{name}_index") do
+            self.add_to_index("idx_#{self.name}_#{name}", self.send(name), self.id, unique)
+          end
+          define_method("remove_from_#{name}_index") do
+            self.remove_from_index("idx_#{self.name}_#{name}", self.id)
+          end
+          private("add_to_#{name}_index")
+          private("remove_from_#{name}_index")
+        end
+      end
+
+      def index(name, attrs, opts = {})
+        @@indexed_attributes << name
+        unique = opts[:unique] ? opts[:unique] : nil
+        define_method("add_to_#{name}_index") do
+          keys = []
+          attrs.each do |attr|
+            keys << send(attr)
+          end
+          key = keys.join("^^^")
+          self.add_to_index("idx_#{self.name}_#{name}", key, self.id, unique)
+        end
+      end
+
+      def indexed_attributes
+        @@indexed_attributes
       end
 
       def list_attributes
