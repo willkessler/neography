@@ -12,14 +12,12 @@ module Deja
         }
       end
 
-      def attributes(attrs)
+      def attribute(name, opts = {})
         @@all_attributes[self.name] ||= {}
-        @@all_attributes[self.name].merge!(attrs)
-        attrs.each do |attr, type|
-          send(:attr_reader, attr)
-          define_method("#{attr}=") do |new_value|
-            instance_variable_set("@#{attr}", new_value)
-          end
+        @@all_attributes[self.name][name] = opts
+        send(:attr_reader, name)
+        define_method("#{name}=") do |new_value|
+          instance_variable_set("@#{name}", new_value)
         end
       end
 

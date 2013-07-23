@@ -4,7 +4,6 @@ module Deja
     include Deja::Cast
     include Deja::Error
     include Deja::Finders
-    include Deja::SchemaGenerator
 
     class << self
       attr_reader :relationship_names

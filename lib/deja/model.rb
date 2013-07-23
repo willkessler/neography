@@ -5,6 +5,8 @@ module Deja
     include ActiveModel::Model
     include ActiveSupport::Concern
 
+    include Deja::SchemaGenerator
+
     define_model_callbacks :initialize, :create, :update, :delete, :save
 
     def initialize(*args)

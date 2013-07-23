@@ -2,7 +2,6 @@ module Deja
   class Relationship < Model
 
     include Deja::Error
-    include Deja::SchemaGenerator
 
     attr_accessor :label, :start_node, :end_node, :direction
     @connected_node_types = {}
