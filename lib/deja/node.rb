@@ -59,16 +59,12 @@ module Deja
 
     def save!
       if persisted?
-        Deja::Query.update_node(@id, persisted_attributes)
-        self.class.indexed_attributes.each do |name|
-          #if
+        run_callbacks :update do
+          Deja::Query.update_node(@id, persisted_attributes)
         end
       else
         run_callbacks :create do
           @id = Deja::Query.create_node(persisted_attributes)
-        end
-        self.class.indexed_attributes.each do |name|
-          send("add_to_#{name}_index")
         end
       end
     end
@@ -90,7 +86,6 @@ module Deja
         end
       end
     end
-
   end
 end
 

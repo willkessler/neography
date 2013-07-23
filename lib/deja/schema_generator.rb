@@ -18,6 +18,7 @@ module Deja
         @@all_attributes[self.name][name] = opts
         send(:attr_reader, name)
         define_method("#{name}=") do |new_value|
+          send("#{name}_will_change!") if (new_value != instance_variable_get("@#{name}") && opts[:index])
           instance_variable_set("@#{name}", new_value)
         end
         if opts[:index]
@@ -36,6 +37,7 @@ module Deja
 
       def index(name, attrs, opts = {})
         @@indexed_attributes << name
+        define_attribute_method(name)
         unique = opts[:unique] ? opts[:unique] : nil
         define_method("add_to_#{name}_index") do
           keys = []
@@ -45,6 +47,11 @@ module Deja
           key = keys.join("^^^")
           self.add_to_index("idx_#{self.name}_#{name}", key, self.id, unique)
         end
+        define_method("remove_from_#{name}_index") do
+          self.remove_from_index("idx_#{self.name}_#{name}", self.id)
+        end
+        private("add_to_#{name}_index")
+        private("remove_from_#{name}_index")
       end
 
       def indexed_attributes

@@ -3,6 +3,7 @@ module Deja
     extend ActiveModel::Callbacks
 
     include ActiveModel::Model
+    include ActiveModel::Dirty
     include ActiveSupport::Concern
 
     include Deja::SchemaGenerator
@@ -64,6 +65,21 @@ module Deja
         raise e
       rescue StandardError
         false
+      end
+    end
+
+    def after_save
+      @@indexed_attributes.each do |name|
+        send("add_to_#{name}_index")
+      end
+    end
+
+    def after_update
+      @@indexed_attributes.each do |name|
+        if(send("#{name}_changed?") == true)
+          send("remove_from_#{name}_index")
+          send("add_to_#{name}_index")
+        end
       end
     end
 

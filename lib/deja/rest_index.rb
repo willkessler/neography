@@ -69,7 +69,6 @@ module Deja
       Deja.neo.remove_node_auto_index_property(property)
     end
 
-
     # relationship indexes
     def create_relationship_index(name, type = "exact", provider = "lucene")
       Deja.neo.create_relationship_index(name, type, provider)

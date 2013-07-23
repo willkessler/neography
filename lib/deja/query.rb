@@ -34,7 +34,6 @@ module Deja
           cypher_query = Deja::Bridge.count_relationships(id)
         end
         result_hash = Deja.execute_cypher(cypher_query)
-
       end
 
       def load_relationship(rel_id)
