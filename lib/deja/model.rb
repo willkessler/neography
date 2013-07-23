@@ -12,7 +12,6 @@ module Deja
 
     def initialize(*args)
       run_callbacks :initialize do
-        puts "Initializing model..."
         @id = nil
         options = args.extract_options!
         super(options)

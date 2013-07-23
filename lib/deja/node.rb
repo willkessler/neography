@@ -80,7 +80,6 @@ module Deja
           unless ivar && (ivar === :@id || ivar == :@relationships)
             attribute_name =  ivar.to_s[1..-1]
             memo[attribute_name] = send(attribute_name)
-            puts "Added {'#{attribute_name}' => '#{send(attribute_name)}'} to persisted node attributes"
           end
           memo
         end
