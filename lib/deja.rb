@@ -9,7 +9,8 @@ require 'oj'
 
 module Deja
   extend ActiveSupport::Autoload
-  autoload :Index
+
+  autoload :RestIndex
   autoload :Node
   autoload :Cast
   autoload :Query
@@ -22,6 +23,8 @@ module Deja
   autoload :Error
   autoload :Bridge
   autoload :Model
+
+  include Deja::RestIndex
 
   ID            = 'id'
   REL           = 'rel'

@@ -9,7 +9,6 @@ class Friends < Relationship
   })
 end
 
-
 describe Node do
   before :each do
     @first_node = FactoryGirl.create(:person);
@@ -24,7 +23,6 @@ describe Node do
         @relationship.save
         @relationship.id.should be_a(Fixnum)
       end
-
     end
   end
 

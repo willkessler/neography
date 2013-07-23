@@ -3,7 +3,6 @@ module Deja
 
     include Deja::Cast
     include Deja::Error
-    include Deja::Index
     include Deja::Finders
     include Deja::SchemaGenerator
 
@@ -28,6 +27,14 @@ module Deja
       self.class.relationship_names.inject({}) do |memo, rel_name|
         memo[rel_name] = send("@#{rel_name}")
         memo
+      end
+    end
+
+    def count_relationships(type = :all)
+      if type == :all
+        Deja::Query.count_relationships(@id)
+      else
+        Deja::Query.count_relationships(@id, type)
       end
     end
 
