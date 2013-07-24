@@ -3,6 +3,14 @@ module Deja
     include Deja::NeoParse
 
     class << self
+      def load_node(neo_id, options = {})
+        load_node_with_args(neo_id, options)
+      end
+
+      def load_related_nodes(neo_id, options = {})
+        load_related_nodes_with_args(neo_id, options)
+      end
+
       def create_node(attributes = {})
         cypher_query = Deja::Bridge.create_node(attributes)
         result_hash  = Deja.execute_cypher(cypher_query)
@@ -19,8 +27,23 @@ module Deja
         result_hash  = Deja.execute_cypher(cypher_query)
       end
 
-      def create_relationship(start_node, end_node, name, direction = :none, attributes = {})
-        cypher_query = Deja::Bridge.create_relationship(start_node, end_node, name, direction, attributes)
+      def count_relationships(id, type = :all)
+        if type
+          cypher_query = Deja::Bridge.count_relationships(id, type)
+        else
+          cypher_query = Deja::Bridge.count_relationships(id)
+        end
+        result_hash = Deja.execute_cypher(cypher_query)
+      end
+
+      def load_relationship(rel_id)
+        cypher_query = Deja::Bridge.get_single_relationship(rel_id)
+        result_hash  = Deja.execute_cypher(cypher_query)
+        normalize(result_hash, :lazy)
+      end
+
+      def create_relationship(start_node, end_node, label, direction = :none, attributes = {})
+        cypher_query = Deja::Bridge.create_relationship(start_node, end_node, label, direction, attributes)
         result_hash  = Deja.execute_cypher(cypher_query)
         rel_id       = result_hash['data'].first.first
       end
@@ -30,19 +53,16 @@ module Deja
         result_hash  = Deja.execute_cypher(cypher_query)
       end
 
-      def load_entity(neo_id, options = {})
-        load_entity_with_args(neo_id, options)
+      def update_relationship(rel_id, attributes = {})
+        cypher_query = Deja::Bridge.update_relationship(rel_id, attributes)
+        result_hash  = Deja.execute_cypher(cypher_query)
       end
 
-      def load_entity_with_args(neo_id, options)
+      def load_node_with_args(neo_id, options)
         options[:include] ||= :all
         cypher_query = Deja::Bridge.get_node_with_rels(neo_id, options[:include])
         result_hash  = Deja.execute_cypher(cypher_query)
         normalize(result_hash)
-      end
-
-      def load_related_nodes(neo_id, options = {})
-        load_related_nodes_with_args(neo_id, options)
       end
 
       def load_related_nodes_with_args(neo_id, options)

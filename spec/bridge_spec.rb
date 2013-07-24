@@ -10,7 +10,7 @@ describe Bridge do
   describe ".is_index" do
     context "given a hash" do
       it "should return true" do
-        Deja::Node.is_index?({}).should be_true
+        Deja::Bridge.is_index?({}).should be_true
       end
     end
   end
@@ -18,39 +18,9 @@ describe Bridge do
   describe ".cypher" do
     context "given a block of neo4j-cypher dsl" do
       it "should return a cypher result" do
-        query = Deja::Node.cypher { node(1)}
+        query = Deja::Bridge.cypher {node(1)}
         query.should be_a(Neo4j::Cypher::Result)
         query.to_s.should eq('START v1=node(1) RETURN v1')
-      end
-    end
-  end
-
-  describe ".node_query" do
-    context "given a node id" do
-      it "should throw an error if it doesn't exist" do
-        query = Deja::Node.cypher{node(1)}
-        expect{Deja::Node.node_query query}.to raise_error(Deja::Error::NodeDoesNotExist)
-      end
-      it "should return a result if it does exist" do
-        first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
-        query = Deja::Node.cypher{node(first_node)}
-        Deja::Node.node_query(query).should be_a(Hash)
-      end
-    end
-  end
-
-  describe ".rel_query" do
-    context "given a relationship id" do
-      it "should throw an error if it doesn't exist" do
-        query = Deja::Node.cypher{rel(1)}
-        expect{Deja::Node.rel_query query}.to raise_error(Deja::Error::RelationshipDoesNotExist)
-      end
-      it "should return a result if it does exist" do
-        first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
-        second_node = Deja::Node.create_node({:name => 'Jerry Wang'})
-        relationship = Deja::Relationship.create_relationship(first_node, second_node, :friends)
-        query = Deja::Relationship.cypher{rel(relationship)}
-        Deja::Relationship.rel_query(query).should be_a(Hash)
       end
     end
   end
@@ -58,162 +28,91 @@ describe Bridge do
   describe ".create_node" do
     context "with no attributes" do
       it "should raise an exception" do
-        expect{Deja::Node.create_node()}.to raise_error(Deja::Error::NoParameter)
+        expect{Deja::Bridge.create_node()}.to raise_error(Deja::Error::NoParameter)
       end
     end
 
     context "with nil attribute" do
       it "should raise an exception" do
-        expect{Deja::Node.create_node(nil)}.to raise_error(Deja::Error::InvalidParameter)
+        expect{Deja::Bridge.create_node(nil)}.to raise_error(Deja::Error::InvalidParameter)
       end
     end
 
     context "with one attribute" do
-      it "returns a node id" do
-        response = Deja::Node.create_node(:name => 'Jerry Wang')
-        response.should be_a_kind_of(Fixnum)
+      it "returns a cypher result" do
+        query = Deja::Bridge.create_node(:name => 'Jerry Wang')
+        query.should be_a_kind_of(Neo4j::Cypher::Result)
       end
     end
 
     context "with multiple attributes" do
-      it "returns a node id" do
-        response = Deja::Node.create_node(:name => 'Jerry Wang', :type => 'Person', :permalink => 'jerry_wang')
-        response.should be_a_kind_of(Fixnum)
+      it "returns a cypher result" do
+        query = Deja::Bridge.create_node(:name => 'Jerry Wang', :type => 'Person', :permalink => 'jerry_wang')
+        query.should be_a_kind_of(Neo4j::Cypher::Result)
       end
     end
   end
 
   describe ".delete_node" do
-    before :each do
-      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
-      @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
-      @relationship = Deja::Relationship.create_relationship(@first_node, @second_node, :friends)
-    end
-
-    context "with relationships" do
-      it "should delete the node and connecting relationships" do
-        first_node = Deja::Node.get_node_with_rels(@first_node, :none)
-        first_node.should be_a(Hash)
-        first_rel = Deja::Relationship.get_single_relationship(@relationship)
-        first_rel.should be_a(Hash)
-        response = Deja::Node.delete_node(@first_node)
-        expect{Deja::Node.get_node_with_rels(@first_node, :none)}.to raise_error(Deja::Error::NodeDoesNotExist)
-        expect{Deja::Node.get_single_relationship(@relationship)}.to raise_error(Deja::Error::RelationshipDoesNotExist)
+    context "given a node id" do
+      it "should return cypher for deleting a node" do
+        query = Deja::Bridge.delete_node(1)
+        query.should be_a(Neo4j::Cypher::Result)
       end
     end
   end
 
   describe ".update_node_by_id" do
-    before :each do
-      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
-    end
-
-    context "given an existing node id" do
-      it "should return a response hash with updated value" do
-        response = Deja::Node.update_node_by_id(@first_node, {:name => 'Manly Man'})
-        response.should be_a(Hash)
-        response['data'].first.first['data']['name'].should eq('Manly Man')
+    context "given a node id" do
+      it "should return a cypher result" do
+        query = Deja::Bridge.update_node(1, {:some => :attr})
+        query.should be_a(Neo4j::Cypher::Result)
       end
     end
   end
 
   describe ".create_relationship" do
-    before :each do
-      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
-      @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
-    end
-
     context "with no attributes" do
-      it "returns a relationship id" do
-        response = Deja::Node.create_relationship(@first_node, @second_node, :friends)
-        response.should be_a_kind_of(Fixnum)
+      it "returns a cypher result" do
+        query = Deja::Bridge.create_relationship(1, 2, :friends, :none, {:some => :attr})
+        query.should be_a(Neo4j::Cypher::Result)
       end
     end
   end
 
   describe ".delete_relationship" do
-    before :each do
-      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
-      @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
-      @relationship = Deja::Relationship.create_relationship(@first_node, @second_node, :friends)
-    end
-
     context "given a relationship id" do
-      it "should delete a single relationship" do
-        first_rel = Deja::Relationship.get_single_relationship(@relationship)
-        first_rel.should be_a(Hash)
-        response = Deja::Node.delete_relationship(@relationship)
-        expect{Deja::Node.get_single_relationship(@relationship)}.to raise_error(Deja::Error::RelationshipDoesNotExist)
-      end
-
-      it "should throw an error if relationship id doesn't exist" do
-        expect{Deja::Relationship.get_single_relationship(@relationship + 5)}.to raise_error(Deja::Error::RelationshipDoesNotExist)
+      it "should return a cyphe result" do
+        query = Deja::Bridge.delete_relationship(1)
+        query.should be_a(Neo4j::Cypher::Result)
       end
     end
   end
 
   describe ".get_single_relationship" do
-    before :each do
-      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
-      @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
-      @relationship = Deja::Relationship.create_relationship(@first_node, @second_node, :friends)
-    end
-
     context "given a relationship id" do
-      it "should return a single relationship" do
-        response = Deja::Relationship.get_single_relationship(@relationship)
-        response.should be_a(Hash)
-      end
-
-      it "should throw an error if relationship id doesn't exist" do
-        expect{Deja::Relationship.get_single_relationship(@relationship + 5)}.to raise_error(Deja::Error::RelationshipDoesNotExist)
+      it "should return a cypher result" do
+        query = Deja::Bridge.get_single_relationship(1)
+        query.should be_a(Neo4j::Cypher::Result)
       end
     end
   end
 
   describe ".get_node_with_rels" do
-    before :each do
-      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
-      @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
-      @third_node = Deja::Node.create_node({:name => 'Mike Myers'})
-      @first_relationship = Deja::Relationship.create_relationship(@first_node, @second_node, :friends)
-      @second_relationship = Deja::Relationship.create_relationship(@first_node, @third_node, :enemies)
-    end
-
-    it "should throw an error if node id doesn't exist" do
-      expect{Deja::Node.get_node_with_rels(@first_node + 5, :none)}.to raise_error(Deja::Error::NodeDoesNotExist)
-    end
-
-    context "given a node id, and argument :none" do
-      it "should return a single node" do
-        response = Deja::Node.get_node_with_rels(@first_node, :none)
-        response.should be_a(Hash)
-        response['data'].first.first['data']['name'].should eq('Jerry Wang')
-      end
-    end
-
-    context "given a node id, and argument :all" do
-      it "should return multiple nodes" do
-        response = Deja::Node.get_node_with_rels(@first_node, :all)
-        response.should be_a(Hash)
+    context "given a node id, and argument" do
+      it "should return a cypher result" do
+        query = Deja::Bridge.get_node_with_rels(1, :friends)
+        query.should be_a(Neo4j::Cypher::Result)
       end
     end
   end
 
 
   describe ".get_related_nodes" do
-    before :each do
-      @first_node = Deja::Node.create_node({:name => 'Jerry Wang'})
-      @second_node = Deja::Node.create_node({:name => 'Harrison Ford'})
-      @third_node = Deja::Node.create_node({:name => 'Mike Myers'})
-      @first_relationship = Deja::Relationship.create_relationship(@first_node, @second_node, :friends)
-      @second_relationship = Deja::Relationship.create_relationship(@first_node, @third_node, :enemies)
-    end
-
     context "given a node id" do
-      it "should return a hash" do
-        response = Deja::Node.load_related_nodes(@first_node, :include => :all)
-        response.should be_a(Hash)
+      it "should return a cypher result" do
+        query = Deja::Bridge.get_related_nodes(1, :all)
+        query.should be_a(Neo4j::Cypher::Result)
       end
     end
   end

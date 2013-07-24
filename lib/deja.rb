@@ -9,7 +9,8 @@ require 'oj'
 
 module Deja
   extend ActiveSupport::Autoload
-  autoload :Index
+
+  autoload :RestIndex
   autoload :Node
   autoload :Cast
   autoload :Query
@@ -21,14 +22,25 @@ module Deja
   autoload :Finders
   autoload :Error
   autoload :Bridge
+  autoload :Model
+
+  include Deja::RestIndex
+
+  ID            = 'id'
+  REL           = 'rel'
+  NODE          = 'node'
+  TYPE          = 'type'
+  START_NODE    = 'start_node'
+  END_NODE      = 'end_node'
+  RELATIONSHIPS = 'relationships'
 
   class << self; attr_accessor :neo, :tx ; end
 
   def self.execute_cypher(query)
-    if (Deja.tx)
-      Deja.neo.in_transaction(Deja.tx, query.to_s)
+    if Deja.tx
+      Deja.neo.in_transaction(Deja.tx, query)
     else
-      self.neo.execute_query(query.to_s)
+      self.neo.execute_query(query)
     end
   end
 end

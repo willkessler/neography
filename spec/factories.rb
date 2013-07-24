@@ -19,9 +19,7 @@ class Person < Deja::Node
   #   :type => :String
   # })
 
-  relationship :invested_in
-  relationship :friends
-  relationship :hates
+  relationships(:invested_in, :friends, :hates)
 end
 
 FactoryGirl.define do

@@ -24,6 +24,9 @@ def node_type_test(node, rel)
   end
 end
 
+class InvestedIn < Relationship; end
+class Friends < Relationship; end
+class Hates < Relationship; end
 
 describe Finders do
   after :each do

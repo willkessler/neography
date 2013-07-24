@@ -2,11 +2,16 @@ require 'deja'
 require 'spec_helper'
 require 'rake/testtask'
 
+class Friends < Relationship
+  attribute :id, Integer
+  attribute :name, String
+end
+
 describe Node do
   before :each do
     @first_node = FactoryGirl.create(:person);
     @second_node = FactoryGirl.create(:person);
-    @relationship = Relationship.new(nil, :friends, @first_node, @second_node)
+    @relationship = Friends.new(:friends, @first_node, @second_node, :none)
   end
 
   describe ".save" do
@@ -16,7 +21,6 @@ describe Node do
         @relationship.save
         @relationship.id.should be_a(Fixnum)
       end
-
     end
   end
 

@@ -1,38 +1,54 @@
 module Deja
-  class Node
-    extend ActiveModel::Naming
-    extend ActiveModel::Callbacks
-    extend ActiveModel::Translation
-
-    include ActiveModel::Dirty
-    include ActiveModel::Observing
-    include ActiveModel::Validations
-    include ActiveModel::MassAssignmentSecurity
+  class Node < Model
 
     include Deja::Cast
-    include Deja::Error
-    include Deja::Index
     include Deja::Finders
-    include Deja::SchemaGenerator
 
     class << self
-      attr_accessor :relationships
+      attr_reader :relationship_names
+
+      def relationships(*args)
+        @relationship_names ||= Set.new
+        args.each do |arg|
+          @relationship_names << arg
+          attr_writer arg
+        end
+      end
     end
 
-    def initialize(opts = {})
-      opts.each { |k, v| send("#{k}=", v)}
-      # override all relationship read accessors
-      if self.class.relationships
-        self.class.relationships.each do |rel|
-          rel_instance = instance_variable_get("@#{rel}")
-          self.class.class_eval do
-            define_method rel do
-              if rel_instance
-                rel_instance
-              else
-                # lazy load if nil
-                send(:related_nodes, rel.to_sym)
-                instance_variable_get("@#{rel}")
+    def related_nodes(*relationships)
+      related_nodes = Deja::Query.load_related_nodes(self.id, :include => relationships)
+      erectify(related_nodes)
+    end
+
+    def relationships
+      self.class.relationship_names.inject({}) do |memo, rel_name|
+        memo[rel_name] = send("@#{rel_name}")
+        memo
+      end
+    end
+
+    def count_relationships(type = :all)
+      if type == :all
+        Deja::Query.count_relationships(@id)
+      else
+        Deja::Query.count_relationships(@id, type)
+      end
+    end
+
+    def initialize(*args)
+      super do
+        if self.class.relationship_names
+          self.class.relationship_names.each do |rel|
+            rel_instance = instance_variable_get("@#{rel}")
+            self.class.class_eval do
+              define_method rel do
+                if rel_instance
+                  rel_instance
+                else
+                  send(:related_nodes, rel)
+                  instance_variable_get("@#{rel}")
+                end
               end
             end
           end
@@ -40,40 +56,37 @@ module Deja
       end
     end
 
-    def self.relationship(name)
-      @relationships ||= []
-      @relationships.push(name.to_s)
-
-      send(:attr_accessor, name)
-    end
-
-    def save
-      node_attributes = {}
-      instance_variables.each do |var|
-        unless var == :@id || var == :@relationships
-          attribute_name =  var.to_s[1..-1]
-          node_attributes[attribute_name] = send(attribute_name)
+    def save!
+      if persisted?
+        run_callbacks :update do
+          Deja::Query.update_node(@id, persisted_attributes)
+        end
+      else
+        run_callbacks :create do
+          @id = Deja::Query.create_node(persisted_attributes)
         end
       end
-      unless @id
-        # create
-        @id = Deja::Query.create_node(node_attributes)
-      else
-        # update
-        Deja::Query.update_node(@id, node_attributes)
-      end
     end
 
-    # convenience for factory_girl create()
-    def save!
-      save
-    end
-
-    def delete
+    def destroy
       Deja::Query.delete_node(@id) if @id
+      (self.class.indexed_attributes[self.class.name] || []).each do |name|
+        self.remove_from_index("idx_#{self.name}_#{name}", @id)
+      end
       @id = nil
     end
 
+    def persisted_attributes
+      run_callbacks :save do
+        instance_variables.inject({}) do |memo, ivar|
+          unless ivar && (ivar === :@id || ivar == :@relationships)
+            attribute_name =  ivar.to_s[1..-1]
+            memo[attribute_name] = send(attribute_name)
+          end
+          memo
+        end
+      end
+    end
   end
 end
 
