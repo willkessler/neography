@@ -25,7 +25,7 @@ module Deja
           @@indexed_attributes[self.name] << name
           unique = opts[:unique] ? opts[:unique] : nil
           define_method("add_to_#{name}_index") do
-            self.add_to_index("idx_#{self.name}_#{name}", self.send(name), self.id, unique)
+            self.add_to_index("idx_#{self.name}_#{name}", name, self.send(name), unique)
           end
           define_method("remove_from_#{name}_index") do
             self.remove_from_index("idx_#{self.name}_#{name}", self.id)
@@ -40,12 +40,12 @@ module Deja
         define_attribute_method(name)
         unique = opts[:unique] ? opts[:unique] : nil
         define_method("add_to_#{name}_index") do
-          keys = []
+          values = []
           attrs.each do |attr|
-            keys << send(attr)
+            values << send(attr)
           end
-          key = keys.join("^^^")
-          self.add_to_index("idx_#{self.name}_#{name}", key, self.id, unique)
+          value = values.join("^^^")
+          self.add_to_index("idx_#{self.name}_#{name}", name, value, unique)
         end
         define_method("remove_from_#{name}_index") do
           self.remove_from_index("idx_#{self.name}_#{name}", self.id)
