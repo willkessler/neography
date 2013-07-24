@@ -15,6 +15,15 @@ def generate_text(length=8)
   length.times { |i| key << chars[rand(chars.length)] }
   key
 end
+RSpec.configure do |config|
+  # Before all specs, for each spec file
+  config.before(:all) { SpecHelper.truncate }
+end
 
+class SpecHelper
+  def self.truncate
+    Deja.neo.execute_query("START n=node(*) MATCH n-[r?]->() WHERE ID(n) <> 0 DELETE r DELETE n")
+  end
+end
 # Start Neo4j server
 Deja.neo = Neography::Rest.new()

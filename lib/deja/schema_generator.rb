@@ -4,7 +4,7 @@ module Deja
 
     module ClassMethods
       @@all_attributes = {}
-      @@indexed_attributes = []
+      @@indexed_attributes = {}
 
       def schema
         {
@@ -36,7 +36,7 @@ module Deja
       end
 
       def index(name, attrs, opts = {})
-        @@indexed_attributes << name
+        @@indexed_attributes[self.name] << name
         define_attribute_method(name)
         unique = opts[:unique] ? opts[:unique] : nil
         define_method("add_to_#{name}_index") do

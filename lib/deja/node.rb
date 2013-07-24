@@ -70,7 +70,7 @@ module Deja
 
     def destroy
       Deja::Query.delete_node(@id) if @id
-      self.class.indexed_attributes.each do |name|
+      (self.class.indexed_attributes[self.class.name] || []).each do |name|
         self.remove_from_index("idx_#{self.name}_#{name}", @id)
       end
       @id = nil

@@ -6,8 +6,8 @@ describe Deja::SchemaGenerator do
   end
 
   it 'includes attributes types' do
-    Example.schema[:attributes][:name].should == :String
-    Example.schema[:attributes][:code].should == :Integer
+    Example.schema[:attributes][:name].should be_a(Hash)
+    Example.schema[:attributes][:code].should be_a(Hash)
   end
 
   it 'includes validations' do
@@ -32,13 +32,9 @@ describe Deja::SchemaGenerator do
   end
 end
 
-class Example
-  include Deja::SchemaGenerator
-
-  attributes({
-    :name => :String,
-    :code => :Integer
-  })
+class Example < Deja::Node
+  attribute :name, String
+  attribute :code, String
 
   validates :name, :presence => true
   validates :code, :presence => true
