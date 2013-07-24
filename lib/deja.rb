@@ -33,14 +33,15 @@ module Deja
   START_NODE    = 'start_node'
   END_NODE      = 'end_node'
   RELATIONSHIPS = 'relationships'
+  INDEX_DELIM   = '^^^'
 
   class << self; attr_accessor :neo, :tx ; end
 
   def self.execute_cypher(query)
     if Deja.tx
-      Deja.neo.in_transaction(Deja.tx, query)
+      Deja.neo.in_transaction(Deja.tx, query.to_s)
     else
-      self.neo.execute_query(query)
+      self.neo.execute_query(query.to_s)
     end
   end
 end

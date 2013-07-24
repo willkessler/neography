@@ -9,6 +9,8 @@ module Deja
     include Deja::Error
     include Deja::SchemaGenerator
 
+    attr_reader :id
+
     define_model_callbacks :initialize, :create, :update, :delete, :save
 
     after_save   :create_indices
