@@ -1,8 +1,6 @@
 module Deja
   class Relationship < Model
 
-    include Deja::Error
-
     attr_accessor :label, :start_node, :end_node, :direction
     @connected_node_types = {}
 
@@ -46,7 +44,9 @@ module Deja
 
     def save!
       if persisted?
-        Deja::Query.update_relationship(@id, persisted_attributes)
+        run_callbacks :update do
+          Deja::Query.update_relationship(@id, persisted_attributes)
+        end
       else
         run_callbacks :create do
           @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, @direction, persisted_attributes)
@@ -56,6 +56,9 @@ module Deja
 
     def destroy
       Deja::Query.delete_relationship(@id) if persisted?
+      self.class.indexed_attributes.each do |name|
+        self.remove_from_index("idx_#{self.name}_#{name}", @id)
+      end
       @id = nil
     end
 

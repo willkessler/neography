@@ -3,8 +3,8 @@ require 'spec_helper'
 require 'rake/testtask'
 
 class Friends < Relationship
-  attribute :id, :type => Integer
-  attribute :name, :type => String
+  attribute :id, Integer
+  attribute :name, String
 end
 
 describe Node do

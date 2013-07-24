@@ -6,6 +6,7 @@ module Deja
     include ActiveModel::Dirty
     include ActiveSupport::Concern
 
+    include Deja::Error
     include Deja::SchemaGenerator
 
     define_model_callbacks :initialize, :create, :update, :delete, :save
@@ -68,13 +69,13 @@ module Deja
     end
 
     def after_save
-      @@indexed_attributes.each do |name|
+      @@indexed_attributes[self.class.name].each do |name|
         send("add_to_#{name}_index")
       end
     end
 
     def after_update
-      @@indexed_attributes.each do |name|
+      @@indexed_attributes[self.class.name].each do |name|
         if(send("#{name}_changed?") == true)
           send("remove_from_#{name}_index")
           send("add_to_#{name}_index")
