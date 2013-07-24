@@ -11,6 +11,9 @@ module Deja
 
     define_model_callbacks :initialize, :create, :update, :delete, :save
 
+    after_save   :create_indices
+    after_update :update_indices
+
     def initialize(*args)
       run_callbacks :initialize do
         @id = nil
@@ -68,21 +71,6 @@ module Deja
       end
     end
 
-    def after_save
-      @@indexed_attributes[self.class.name].each do |name|
-        send("add_to_#{name}_index")
-      end
-    end
-
-    def after_update
-      @@indexed_attributes[self.class.name].each do |name|
-        if(send("#{name}_changed?") == true)
-          send("remove_from_#{name}_index")
-          send("add_to_#{name}_index")
-        end
-      end
-    end
-
     def delete
       run_callbacks :delete do
         destroy
@@ -106,6 +94,23 @@ module Deja
     end
 
     class BadImplementationError < StandardError; end
+
+    private
+
+    def create_indices
+      (self.class.indexed_attributes[self.class.name]||{}).each do |name|
+        send("add_to_#{name}_index")
+      end
+    end
+
+    def update_indices
+      (self.class.indexed_attributes[self.class.name]||{}).each do |name|
+        if(send("#{name}_changed?") == true)
+          send("remove_from_#{name}_index")
+          send("add_to_#{name}_index")
+        end
+      end
+    end
 
     def add_to_index(index, key, value, unique = false)
       if self.is_a? Deja::Node

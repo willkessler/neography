@@ -38,14 +38,9 @@ module Deja
       def index(name, attrs, opts = {})
         @@indexed_attributes[self.name] << name
         define_attribute_method(name)
-        unique = opts[:unique] ? opts[:unique] : nil
         define_method("add_to_#{name}_index") do
-          values = []
-          attrs.each do |attr|
-            values << send(attr)
-          end
-          value = values.join("^^^")
-          self.add_to_index("idx_#{self.name}_#{name}", name, value, unique)
+          values = attrs.map{|attr| send(attr)}.join("^^^")
+          self.add_to_index("idx_#{self.name}_#{name}", name, value, opts[:unique])
         end
         define_method("remove_from_#{name}_index") do
           self.remove_from_index("idx_#{self.name}_#{name}", self.id)

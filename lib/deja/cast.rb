@@ -27,12 +27,12 @@ module Deja
               node_class     = rel[NODE][TYPE].constantize
               related_node   = node_class.new(rel[NODE])
               rel_class      = rel[REL][TYPE].camelize.constantize
-              rel_attributes = {}
-              rel_class.list_attributes.each do |attr|
-                rel_attributes[attr] = rel[REL][attr]
+              rel_attributes = rel_class.list_attributes.inject({}) do |memo, attr|
+                memo[attr]   = rel[REL][attr]
+                memo
               end
-              relationship = rel_class.new(rel[REL][ID], rel[REL][TYPE], initial_node, related_node, rel_attributes)
-              relation_bundle = Deja::RelNodeWrapper.new(related_node, relationship)
+              relationship   = rel_class.new(rel[REL][ID], rel[REL][TYPE], initial_node, related_node, rel_attributes)
+              Deja::RelNodeWrapper.new(related_node, relationship)
             end
           end
           initial_node.send("#{name}=", relationship_array.compact) if self.relationship_names.include?(name.to_sym)
