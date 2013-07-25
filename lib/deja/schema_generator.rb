@@ -15,7 +15,7 @@ module Deja
 
       def attribute(name, type, opts = {})
         @@all_attributes[self.name] ||= {}
-        @@all_attributes[self.name][name.to_s] = opts.merge({:type => type})
+        @@all_attributes[self.name][name] = opts.merge({:type => type})
         send(:attr_reader, name)
         define_method("#{name}=") do |new_value|
           send("#{name}_will_change!") if (new_value != instance_variable_get("@#{name}") && opts[:index])

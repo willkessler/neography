@@ -15,7 +15,7 @@ module Deja
       end
 
       def with_initial_node(entity_array)
-        initial_node = self.new(entity_array.first.except(RELATIONSHIPS))
+        initial_node = self.new(entity_array.first.except(ID).except(RELATIONSHIPS))
         sans_initial_node(entity_array.first[RELATIONSHIPS], initial_node)
         initial_node
       end
