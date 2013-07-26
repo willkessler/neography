@@ -21,6 +21,8 @@ module Deja
       end
 
       def sans_initial_node(relation_hash, initial_node)
+        return if relation_hash.nil? or relation_hash.empty?
+
         relation_hash.each do |name, relationship|
           relationship_array = relationship.map do |rel|
             if self.relationship_names.include?(rel[REL][TYPE].to_sym)
