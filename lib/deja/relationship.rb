@@ -55,19 +55,26 @@ module Deja
     end
 
     def destroy
-      Deja::Query.delete_relationship(@id) if persisted?
-      (self.class.indexed_attributes[self.class.name] || {}).each do |name|
-        self.remove_from_index("idx_#{self.name}_#{name}", @id)
+      if @id
+        self.class.indexes.each do |name|
+          self.remove_from_index("idx_#{self.class.name}", name, self.send(name), @id)
+        end
+        begin
+          Deja::Query.delete_relationship(@id)
+        rescue
+          self.class.indexes.each do |name|
+            self.add_to_index("idx_#{self.class.name}", name, self.send(name), @id)
+          end
+        end
       end
       @id = nil
     end
 
     def persisted_attributes
-      run_callbacks :save do
-        my_attributes = self.class.list_attributes[self.class.name]
-        my_attributes.keys.inject({}) { |memo, k| memo[k] = send(k); memo }
+      self.class.attributes.inject({}) do |memo, (k, v)|
+        memo[k] = send(k)
+        memo
       end
     end
-
   end
 end

@@ -13,6 +13,7 @@ module Deja
       def sane_hash(hash)
         hash['data'].map do |slice|
           slice.map do |record|
+            next unless record
             attr_hash = {
               ID   => record['self'].split('/').last.to_i,
               TYPE => record[TYPE]
@@ -58,6 +59,7 @@ module Deja
         current_rel = nil
         current_type = nil
         flat_array.each do |record|
+          next unless record
           # we have a node
           if record.has_key?(START_NODE)
             current_rel = record[ID]

@@ -23,7 +23,7 @@ describe Node do
         id = @first_node.id
         @first_node.name = 'M'
         @first_node.save
-        graph_node = Person.load(id)
+        graph_node = Person.find_by_neo_id(id)
         expect(graph_node.name).to eq('M')
       end
     end
@@ -36,7 +36,7 @@ describe Node do
         id = @first_node.id
         @first_node.delete
         expect(@first_node.id).to be_nil
-        expect{Person.load(id)}.to raise_error()
+        expect{Person.find_by_neo_id(id)}.to raise_error()
       end
     end
 

@@ -1,26 +1,19 @@
 
 
 class Company < Deja::Node
-  attr_accessor :id, :name, :permalink, :type
-  # attributes({
-  #   :id => :Integer,
-  #   :name => :String,
-  #   :permalink => :String,
-  #   :type => :String
-  # })
+  attribute :name, String
+  attribute :permalink, String, :index => true
+  attribute :type, String
 end
 
 class Person < Deja::Node
-  attr_accessor :id, :name, :permalink, :type
-  # attributes({
-  #   :id => :Integer,
-  #   :name => :String,
-  #   :permalink => :String,
-  #   :type => :String
-  # })
+  attribute :name, String
+  attribute :permalink, String, :index => true
+  attribute :type, String
 
   relationships(:invested_in, :friends, :hates)
 end
+
 
 FactoryGirl.define do
 
