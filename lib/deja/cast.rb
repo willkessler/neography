@@ -15,9 +15,9 @@ module Deja
       end
 
       def with_initial_node(entity_array)
-        initial_node = self.new(entity_array.first.except(ID).except(RELATIONSHIPS))
-        initial_node.instance_variable_set("@#{ID}", entity_array.first[ID])
-        sans_initial_node(entity_array.first[RELATIONSHIPS], initial_node)
+        initial_node = self.new(entity_array.first.except(:id).except(:relationships))
+        initial_node.instance_variable_set('@id', entity_array.first[:id])
+        sans_initial_node(entity_array.first[:relationships], initial_node)
         initial_node
       end
 
@@ -25,17 +25,17 @@ module Deja
         return if relation_hash.nil? or relation_hash.empty?
         relation_hash.each do |name, relationship|
           relationship_array = relationship.map do |rel|
-            if self.relationship_names.include?(rel[REL][TYPE].to_sym)
-              node_class     = rel[NODE][TYPE].constantize
-              related_node   = node_class.new(rel[NODE].except(ID))
-              related_node.instance_variable_set("@#{ID}", rel[NODE][ID])
-              rel_class      = rel[REL][TYPE].camelize.constantize
+            if self.relationship_names.include?(rel[:rel][:type].to_sym)
+              node_class     = rel[:node][:type].constantize
+              related_node   = node_class.new(rel[:node].except(:id))
+              related_node.instance_variable_set('@id', rel[:node][:id])
+              rel_class      = rel[:rel][:type].camelize.constantize
               rel_attributes = rel_class.attributes.inject({}) do |memo, (k, v)|
-                memo[k]   = rel[REL][k]
+                memo[k]   = rel[:rel][k]
                 memo
               end
-              relationship   = rel_class.new(rel[REL][TYPE], initial_node, related_node, 'both', rel_attributes)
-              relationship.instance_variable_set("@#{ID}", rel[REL][ID])
+              relationship   = rel_class.new(rel[:rel][:type], initial_node, related_node, 'both', rel_attributes)
+              relationship.instance_variable_set('@id', rel[:rel][:id])
               Deja::RelNodeWrapper.new(related_node, relationship)
             end
           end

@@ -15,13 +15,13 @@ module Deja
           slice.map do |record|
             next unless record
             attr_hash = {
-              ID   => record['self'].split('/').last.to_i,
-              TYPE => record[TYPE]
+              :id   => record['self'].split('/').last.to_i,
+              :type => record['type']
             }
-            attr_hash[START_NODE] = record['start'].split('/').last.to_i if record['start']
-            attr_hash[END_NODE]   = record['end'].split('/').last.to_i if record['end']
+            attr_hash[:start_node] = record['start'].split('/').last.to_i if record['start']
+            attr_hash[:end_node]   = record['end'].split('/').last.to_i if record['end']
             record['data'].each do |key, value|
-              attr_hash[key] = value
+              attr_hash[key.to_sym] = value
             end
             attr_hash
           end
@@ -35,17 +35,17 @@ module Deja
         current_type = nil
 
         flat_hash.each do  |record|
-          if record.has_key?(START_NODE)
-            current_rel  = record[ID]
-            current_type = record[TYPE]
-            tiered_hash[record[TYPE]] ||= []
-            tiered_hash[record[TYPE]] << {
-              NODE => {},
-              REL  => record
+          if record.has_key?(:start_node)
+            current_rel  = record[:id]
+            current_type = record[:type]
+            tiered_hash[record[:type]] ||= []
+            tiered_hash[record[:type]] << {
+              :node => {},
+              :rel  => record
             }
           else
             tiered_hash[current_type].map! do |v|
-              v[NODE] = record if v[REL][ID] == current_rel
+              v[:node] = record if v[:rel][:id] == current_rel
               v
             end
           end
@@ -61,25 +61,25 @@ module Deja
         flat_array.each do |record|
           next unless record
           # we have a node
-          if record.has_key?(START_NODE)
-            current_rel = record[ID]
-            current_type = record[TYPE]
-            tiered_array.last[RELATIONSHIPS][record[TYPE]] ||= []
-            tiered_array.last[RELATIONSHIPS][record[TYPE]] << {
-              NODE => {},
-              REL  => record
+          if record.has_key?(:start_node)
+            current_rel = record[:id]
+            current_type = record[:type]
+            tiered_array.last[:relationships][record[:type]] ||= []
+            tiered_array.last[:relationships][record[:type]] << {
+              :node => {},
+              :rel  => record
             }
           else
             # skip any repeated nodes
-            next if tiered_array.any? { |h| h[ID] == record[ID] }
+            next if tiered_array.any? { |h| h[:id] == record[:id] }
             # the last iteration created a relationship
-            if tiered_array.last && !tiered_array.last[RELATIONSHIPS].empty?
-              tiered_array.last[RELATIONSHIPS][current_type].each do |relnode|
-                relnode[NODE] = record if relnode[REL][ID] == current_rel
+            if tiered_array.last && !tiered_array.last[:relationships].empty?
+              tiered_array.last[:relationships][current_type].each do |relnode|
+                relnode[:node] = record if relnode[:rel][:id] == current_rel
               end
             # the last iteration wasn't a relationship, must be a new node
             else
-              record[RELATIONSHIPS] = {}
+              record[:relationships] = {}
               tiered_array.push(record)
             end
           end
