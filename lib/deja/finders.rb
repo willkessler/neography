@@ -1,11 +1,10 @@
 module Deja
   module Finders
     extend ActiveSupport::Concern
-
     module ClassMethods
-      def find(uuid, options = {})
+      def find_by_index(index, key, value, options = {})
         options[:include] ||= :all
-        entity_array = Deja::Query.load_node({:index => "idx_node_uuid", :key =>"uuid", :value => uuid}, options)
+        entity_array = Deja::Query.load_node({:index => index, :key => key, :value => value}, options)
         objectify(entity_array)
       end
 
