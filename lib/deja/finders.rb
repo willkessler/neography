@@ -16,8 +16,7 @@ module Deja
 
       def where(key, value, options = {})
         options[:include] ||= :all
-        entity_array = Deja::Query.load_node({:index => "idx_#{self.name}", :key => key, :value => value}, options)
-        objectify(entity_array)
+        find_by_index("idx_#{self.name}", key, value, options)
       end
     end
   end
