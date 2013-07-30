@@ -58,13 +58,9 @@ module Deja
 
     def save!
       if persisted?
-        run_callbacks :update do
-          Deja::Query.update_node(@id, persisted_attributes)
-        end
+        update
       else
-        run_callbacks :create do
-          @id = Deja::Query.create_node(persisted_attributes)
-        end
+        create
       end
     end
 
@@ -85,7 +81,11 @@ module Deja
     end
 
     def persisted_attributes
-      self.class.attributes.inject({}) do |memo, (k, v)|
+      inst_vars = self.instance_variables.map do |i|
+        i.to_s[1..-1].to_sym
+      end
+      attrs = self.class.attributes.keys & inst_vars
+      attrs.inject({}) do |memo, (k, v)|
         memo[k] = send(k)
         memo
       end

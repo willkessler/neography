@@ -16,7 +16,7 @@ module Deja
 
     define_model_callbacks :initialize, :create, :update, :delete, :save
 
-    after_create   :create_indices
+    after_create :create_indices
     after_update :update_indices
 
     def initialize(*args)
@@ -44,11 +44,23 @@ module Deja
       obj.save!
     end
 
-    def update!(opts = {})
-      run_callbacks :update do
-        opts.each { |attribute, value| send("#{attribute}=", value) }
-        save!
+    def create()
+      if is_node?
+        @id = Deja::Query.create_node(persisted_attributes)
+      else
+        @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, @direction, persisted_attributes)
       end
+      run_callbacks :create
+    end
+
+    def update!(opts = {})
+      opts.each { |attribute, value| send("#{attribute}=", value) }
+      if is_node?
+        Deja::Query.update_node(@id, persisted_attributes)
+      else
+        Deja::Query.update_relationship(@id, persisted_attributes)
+      end
+      run_callbacks :update
     end
 
     def update(opts = {})
@@ -122,8 +134,12 @@ module Deja
       end
     end
 
+    def is_node?
+      self.is_a? Deja::Node
+    end
+
     def add_to_index(index, key, value, unique = false)
-      if self.is_a? Deja::Node
+      if is_node?
         Deja.add_node_to_index(index, key, value, @id, unique)
       else
         Deja.add_relationship_to_index(index, key, value)
@@ -131,7 +147,7 @@ module Deja
     end
 
     def remove_from_index(*args)
-      if self.is_a? Deja::Node
+      if is_node?
         Deja.remove_node_from_index(*args)
       else
         Deja.remove_relationship_from_index(*args)
