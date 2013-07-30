@@ -44,20 +44,20 @@ describe Finders do
     @hates = Deja::Query.create_relationship(@first_node.id, @third_node.id, :hates)
   end
 
-  describe ".load_single" do
+  describe ".find_by_neo_id" do
     context "given a node id and no filters" do
       before :each do
         @node = Person.find_by_neo_id(@first_node.id)
       end
 
-      it "should return a single node" do
+      it "should return a node and all related nodes by default" do
+        @node.should_not_receive(:related_nodes)
         @node.name.should eq(@first_node.name)
         @node.permalink.should eq(@first_node.permalink)
-        @node.should_not_receive(:related_nodes)
       end
 
-      it "calling invested_in should call related_nodes" do
-        @node.should_receive(:related_nodes).with(:invested_in)
+      it "calling invested_in should not call related_nodes" do
+        @node.should_not_receive(:related_nodes).with(:invested_in)
         @node.invested_in
       end
 
@@ -94,19 +94,18 @@ describe Finders do
       end
     end
 
-    context "given a node id with an :all filter" do
-      it "should return a node and all related nodes" do
-        first_node = Person.find_by_neo_id(@first_node.id, :include => :all)
-        first_node.invested_in.should_not be_nil
-        first_node.friends.should_not be_nil
-        first_node.hates.should_not be_nil
+    context "given a node id with a :none filter" do
+      it "should return a node and no related nodes" do
+        first_node = Person.find_by_neo_id(@first_node.id, :include => :none)
+        first_node.should_receive(:related_nodes)
+        first_node.invested_in
         full_node_type_test(first_node)
       end
     end
   end
 
-  describe ".load" do
-    context "given a node id with associated nodes" do
+  describe ".find" do
+    context "given an index with associated nodes" do
       it "should return node objects with relationships" do
         first_node = Person.find_by_neo_id(@first_node.id)
         first_node.invested_in.should_not be_nil
@@ -124,8 +123,7 @@ describe Finders do
       end
 
       it "should not call related_nodes on already loaded relations" do
-        @node.invested_in
-        @node.invested_in.should_not_receive(:related_nodes)
+        @node.should_not_receive(:related_nodes)
         @node.invested_in
       end
 

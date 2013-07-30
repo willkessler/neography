@@ -12,9 +12,9 @@ module Deja
       super do
         if self.class.relationship_names
           self.class.relationship_names.each do |rel|
-            rel_instance = instance_variable_get("@#{rel}")
             self.class.class_eval do
               define_method rel do
+                rel_instance = instance_variable_get("@#{rel}")
                 if rel_instance
                   rel_instance
                 else
@@ -81,9 +81,7 @@ module Deja
     end
 
     def persisted_attributes
-      inst_vars = instance_variables.map do |i|
-        i.to_s[1..-1].to_sym
-      end
+      inst_vars = instance_variables.map { |i| i.to_s[1..-1].to_sym }
       attrs = self.class.attributes & inst_vars
       attrs.inject({}) do |memo, (k, v)|
         memo[k] = send(k)
