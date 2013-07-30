@@ -16,13 +16,16 @@ module Deja
       def attribute(name, type, opts = {})
         @@all_attributes[self.name] ||= {}
         @@all_attributes[self.name][name] = opts.merge(:type => type)
+        attr_accessorize(name, opts)
+        create_index_methods(name, nil, opts[:unique]) if opts[:index]
+      end
+
+      def attr_accessorize(name, opts)
         send(:attr_reader, name)
         define_method("#{name}=") do |new_value|
           send("#{name}_will_change!") if (new_value != instance_variable_get("@#{name}") && opts[:index])
           instance_variable_set("@#{name}", new_value)
         end
-
-        create_index_methods(name, nil, opts[:unique]) if opts[:index]
       end
 
       def create_index_methods(key, values = nil, unique = nil)
