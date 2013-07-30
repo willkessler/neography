@@ -53,7 +53,7 @@ module Deja
       end
 
       def attributes
-        @@all_attributes[self.name] || {}
+        inspect_attributes.keys || []
       end
 
       def indexes

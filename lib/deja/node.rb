@@ -81,10 +81,10 @@ module Deja
     end
 
     def persisted_attributes
-      inst_vars = self.instance_variables.map do |i|
+      inst_vars = instance_variables.map do |i|
         i.to_s[1..-1].to_sym
       end
-      attrs = self.class.attributes.keys & inst_vars
+      attrs = self.class.attributes & inst_vars
       attrs.inject({}) do |memo, (k, v)|
         memo[k] = send(k)
         memo
