@@ -5,6 +5,7 @@ module Deja
     module ClassMethods
       @@all_attributes ||= {}
       @@indexed_attributes ||= {}
+      @@composed_attributes ||= []
 
       def schema
         {
@@ -61,6 +62,10 @@ module Deja
 
       def indexes
         @@indexed_attributes[self.name] || []
+      end
+
+      def composed_attributes(attrs = nil)
+        attrs ? @@composed_attributes = attrs : @@composed_attributes
       end
 
       private
