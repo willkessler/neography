@@ -64,20 +64,30 @@ module Deja
       end
     end
 
-    def destroy
-      if @id
-        self.class.indexes.each do |name|
-          self.remove_from_index("idx_#{self.class.name}", name, self.send(name), @id)
-        end
-        begin
-          Deja::Query.delete_node(@id)
-        rescue
-          self.class.indexes.each do |name|
-            self.add_to_index("idx_#{self.class.name}", name, self.send(name), @id)
-          end
-        end
+    def create
+      run_callbacks :create do
+        @id = Deja::Query.create_node(persisted_attributes)
       end
+    end
+
+    def update!(opts = {})
+      opts.each { |attribute, value| send("#{attribute}=", value) }
+      run_callbacks :update do
+        Deja::Query.update_node(@id, persisted_attributes)
+      end
+    end
+
+    def destroy
+      Deja::Query.delete_node(@id) if @id
       @id = nil
+    end
+
+    def add_to_index(index, key, value, unique = false)
+      Deja.add_node_to_index(index, key, value, @id, unique)
+    end
+
+    def remove_from_index(*args)
+      Deja.remove_node_from_index(*args)
     end
 
     def persisted_attributes

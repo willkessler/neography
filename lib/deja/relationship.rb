@@ -54,20 +54,29 @@ module Deja
       end
     end
 
-    def destroy
-      if @id
-        self.class.indexes.each do |name|
-          self.remove_from_index("idx_#{self.class.name}", name, self.send(name), @id)
-        end
-        begin
-          Deja::Query.delete_relationship(@id)
-        rescue
-          self.class.indexes.each do |name|
-            self.add_to_index("idx_#{self.class.name}", name, self.send(name), @id)
-          end
-        end
+    def create
+      @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, @direction, persisted_attributes)
+      super
+    end
+
+    def update!(opts = {})
+      opts.each { |attribute, value| send("#{attribute}=", value) }
+      run_callbacks :update do
+        Deja::Query.update_relationship(@id, persisted_attributes)
       end
+    end
+
+    def destroy
+      Deja::Query.delete_relationship(@id) if @id
       @id = nil
+    end
+
+    def add_to_index(index, key, value, unique = false)
+      Deja.add_relationship_to_index(index, key, value)
+    end
+
+    def remove_from_index(*args)
+      Deja.remove_relationship_from_index(*args)
     end
 
     def persisted_attributes
