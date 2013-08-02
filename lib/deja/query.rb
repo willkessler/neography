@@ -25,7 +25,7 @@ module Deja
       def update_node(node_id, attributes = {})
         cypher_query = Deja::Bridge.update_node(node_id, attributes)
         result_hash  = Deja.execute_cypher(cypher_query)
-        result_hash.empty? ? false : true
+        result_hash["data"].empty? ? false : true
       end
 
       def count_relationships(id, type = :all)
@@ -57,7 +57,7 @@ module Deja
       def update_relationship(rel_id, attributes = {})
         cypher_query = Deja::Bridge.update_relationship(rel_id, attributes)
         result_hash  = Deja.execute_cypher(cypher_query)
-        result_hash.empty? ? false : true
+        result_hash["data"].empty? ? false : true
       end
 
       def load_node_with_args(neo_id, options)

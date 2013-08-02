@@ -61,10 +61,15 @@ describe Query do
     end
 
     context "given an existing node id" do
-      it "should return a response hash with updated value" do
+      it "should return true" do
         response = Deja::Query.update_node(@first_node, {:name => 'Manly Man'})
-        response.should be_a(Hash)
-        response['data'].first.first['data']['name'].should eq('Manly Man')
+        response.should be_true
+      end
+    end
+
+    context "given a non-existant node id" do
+      it "should throw neography error" do
+        expect{Deja::Query.update_node(-1, {:name => 'Manly Man'})}.to raise_error(Neography::NotFoundException)
       end
     end
   end
