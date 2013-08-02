@@ -11,6 +11,7 @@ module Deja
     module ClassMethods
       # creating objects and their relationships (if any)
       def objectify(array)
+        return nil if array.empty?
         with_initial_node(array)
       end
 

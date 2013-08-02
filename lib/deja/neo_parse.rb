@@ -29,64 +29,63 @@ module Deja
       end
 
       # tiers data based on r-node structure
-      def structure_relationships(flat_hash)
-        tiered_hash = {}
-        current_rel = nil
-        current_type = nil
-
-        flat_hash.each do  |record|
-          if record.has_key?(:start_node)
-            current_rel  = record[:id]
-            current_type = record[:type]
-            tiered_hash[record[:type]] ||= []
-            tiered_hash[record[:type]] << {
-              :node => {},
-              :rel  => record
-            }
-          else
-            tiered_hash[current_type].map! do |v|
-              v[:node] = record if v[:rel][:id] == current_rel
-              v
-            end
+      def structure_relationships(flat_array)
+        build_tier(flat_array, :return => Hash) do |tier, rel, type, record|
+          tier[type].map! do |v|
+            v[:node] = record if v[:rel][:id] == rel
+            v
           end
         end
-        tiered_hash
       end
 
       # tiers data with node-r-node structure
       def structure_node_and_relationships(flat_array)
-        tiered_array = []
-        current_rel = nil
-        current_type = nil
-        flat_array.each do |record|
+        build_tier(flat_array, :return => Array) do |tier, rel, type, record|
+          # skip any repeated nodes based on id
+          next if tier.any? { |h| h[:id] == record[:id] }
+          # the last iteration created a relationship
+          if tier.last && tier.last[:relationships].present?
+            tier.last[:relationships][type].each do |relnode|
+              relnode[:node] = record if relnode[:rel][:id] == rel
+            end
+          # the last iteration wasn't a relationship, must be a new node
+          else
+            record[:relationships] = {}
+            tier.push(record)
+          end
+        end
+      end
+
+      private
+
+      def build_tier(array, opts = {})
+        opts[:return] ||= Array
+        tiered_struct = opts[:return].new
+        current_rel   = nil
+        current_type  = nil
+
+        array.each do |record|
           next unless record
-          # we have a node
+          # we have a relationship
           if record.has_key?(:start_node)
             current_rel = record[:id]
             current_type = record[:type]
-            tiered_array.last[:relationships][record[:type]] ||= []
-            tiered_array.last[:relationships][record[:type]] << {
-              :node => {},
-              :rel  => record
-            }
-          else
-            # skip any repeated nodes
-            next if tiered_array.any? { |h| h[:id] == record[:id] }
-            # the last iteration created a relationship
-            if tiered_array.last && !tiered_array.last[:relationships].empty?
-              tiered_array.last[:relationships][current_type].each do |relnode|
-                relnode[:node] = record if relnode[:rel][:id] == current_rel
-              end
-            # the last iteration wasn't a relationship, must be a new node
+            rel_node = { :node => {}, :rel => record }
+            if opts[:return] == Array
+              tiered_struct.last[:relationships][record[:type]] ||= []
+              tiered_struct.last[:relationships][record[:type]] << rel_node
             else
-              record[:relationships] = {}
-              tiered_array.push(record)
+              tiered_struct[record[:type]] ||= []
+              tiered_struct[record[:type]] << rel_node
             end
+          # we have a node, let the block handle node assignment
+          else
+            yield(tiered_struct, current_rel, current_type, record) if block_given?
           end
-        # we have a relationship
         end
-        tiered_array
+        tiered_struct
       end
     end
   end
 end
+

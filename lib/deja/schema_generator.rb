@@ -65,7 +65,12 @@ module Deja
       end
 
       def composed_attributes(attrs = nil)
-        attrs ? @@composed_attributes = attrs : @@composed_attributes
+        if attrs
+          @@composed_attributes += attrs
+          @@composed_attributes.uniq!
+        else
+          @@composed_attributes
+        end
       end
 
       private
