@@ -1,4 +1,4 @@
-module Deja
+ module Deja
   class Bridge
     class << self
       def is_index?(node_lookup)
@@ -15,17 +15,25 @@ module Deja
         cypher { node.new(attributes).neo_id }
       end
 
-      def delete_node(node_id)
-        cypher { node(node_id).del.both(rel().as(:r).del) }
+      def delete_node(id)
+        is_index?(id) ? delete_node_by_index(id) : delete_node_by_id(id)
       end
 
-      def update_node(node, attributes)
-        is_index?(node) ? update_node_by_index(node, attributes) : update_node_by_id(node, attributes)
+      def delete_node_by_index(id)
+        cypher { lookup(id[:index], id[:key], id[:value]).del.both(rel().as(:r).del) }
       end
 
-      def update_node_by_id(node_id, attributes)
+      def delete_node_by_id(neo_id)
+        cypher { node(neo_id).del.both(rel().as(:r).del) }
+      end
+
+      def update_node(id, attributes)
+        is_index?(id) ? update_node_by_index(id, attributes) : update_node_by_id(id, attributes)
+      end
+
+      def update_node_by_id(neo_id, attributes)
         cypher do
-          node(node_id).tap do |n|
+          node(neo_id).tap do |n|
             attributes.each do |key, value|
               n[key] = value
             end
@@ -33,9 +41,9 @@ module Deja
         end
       end
 
-      def update_node_by_index(index_hash, attributes)
+      def update_node_by_index(id, attributes)
         cypher do
-          node(node_id).tap do |n|
+          lookup(id[:index], id[:key], id[:value]).tap do |n|
             attributes.each do |key, value|
               n[key] = value
             end
@@ -56,8 +64,16 @@ module Deja
         end
       end
 
-      def delete_relationship(rel_id)
-        cypher { rel(rel_id).del }
+      def delete_relationship(id)
+        is_index?(id) ? delete_relationship_by_index(id) : delete_relationship_by_id(id)
+      end
+
+      def delete_relationship_by_index(id)
+        cypher { lookup_rel(id[:index], id[:key], id[:value]).del }
+      end
+
+      def delete_relationship_by_id(neo_id)
+        cypher { rel(neo_id).del }
       end
 
       def get_single_relationship(rel_id)
@@ -65,7 +81,40 @@ module Deja
       end
 
       # includes origin node
-      def get_node_with_rels(neo_id, rels)
+      def get_node_with_rels(id, rels)
+        is_index?(id) ? nodes_from_index(id, rels) : nodes_from_id(id, rels)
+      end
+
+      def nodes_from_index(id, rels)
+        case rels
+        when Array
+          cypher {
+            lookup(id[:index], id[:key], id[:value]).ret - rel(*rels).ret - node.ret
+          }
+        when :all
+          cypher {
+            lookup(id[:index], id[:key], id[:value]).ret.both(rel().ret).ret
+          }
+        when :outgoing
+          cypher {
+            lookup(id[:index], id[:key], id[:value]).ret.outgoing(rel().ret).ret
+          }
+        when :incoming
+          cypher {
+            lookup(id[:index], id[:key], id[:value]).ret.incoming(rel().ret).ret
+          }
+        when :none
+          cypher {
+            lookup(id[:index], id[:key], id[:value])
+          }
+        else
+          cypher {
+            lookup(id[:index], id[:key], id[:value]).ret - rel(rels.to_sym).ret - node.ret
+          }
+        end
+      end
+
+      def nodes_from_id(neo_id, rels)
         case rels
         when Array     then cypher { node(neo_id).ret - rel(*rels).ret - node.ret }
         when :all      then cypher { node(neo_id).ret.both(rel().ret).ret }
@@ -77,7 +126,36 @@ module Deja
       end
 
       # does not include origin node
-      def get_related_nodes(neo_id, rels)
+      def get_related_nodes(id, rels)
+        is_index?(id) ? rels_from_index(id, rels) : rels_from_id(id, rels)
+      end
+
+      def rels_from_index(id, rels)
+        case rels
+        when Array
+          cypher {
+            lookup(id[:index], id[:key], id[:value]) - rel(*rels).ret - node.ret
+          }
+        when :all
+          cypher {
+            lookup(id[:index], id[:key], id[:value]).both(rel().ret).ret
+          }
+        when :outgoing
+          cypher {
+            lookup(id[:index], id[:key], id[:value]).outgoing(rel().ret).ret
+          }
+        when :incoming
+          cypher {
+            lookup(id[:index], id[:key], id[:value]).incoming(rel().ret).ret
+          }
+        else
+          cypher {
+            lookup(id[:index], id[:key], id[:value]) - rel(rels.to_sym).ret - node.ret
+          }
+        end
+      end
+
+      def rels_from_id(neo_id, rels)
         case rels
         when Array     then cypher { node(neo_id) - rel(*rels).ret - node.ret }
         when :all      then cypher { node(neo_id).both(rel().ret).ret }

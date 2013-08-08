@@ -3,8 +3,9 @@ module Deja
     extend ActiveSupport::Concern
 
     module ClassMethods
-      @@all_attributes = {}
-      @@indexed_attributes = {}
+      @@all_attributes ||= {}
+      @@indexed_attributes ||= {}
+      @@composed_attributes ||= []
 
       def schema
         {
@@ -15,46 +16,61 @@ module Deja
 
       def attribute(name, type, opts = {})
         @@all_attributes[self.name] ||= {}
-        @@all_attributes[self.name][name.to_s] = opts.merge({:type => type})
+        @@all_attributes[self.name][name] = opts.merge(:type => type)
+        attr_accessorize(name, opts)
+        create_index_methods(name, nil, opts[:unique]) if opts[:index]
+      end
+
+      def attr_accessorize(name, opts)
         send(:attr_reader, name)
         define_method("#{name}=") do |new_value|
           send("#{name}_will_change!") if (new_value != instance_variable_get("@#{name}") && opts[:index])
           instance_variable_set("@#{name}", new_value)
         end
-        if opts[:index]
-          @@indexed_attributes[self.name] << name
-          unique = opts[:unique] ? opts[:unique] : nil
-          define_method("add_to_#{name}_index") do
-            self.add_to_index("idx_#{self.name}_#{name}", name, self.send(name), unique)
-          end
-          define_method("remove_from_#{name}_index") do
-            self.remove_from_index("idx_#{self.name}_#{name}", self.id)
-          end
-          private("add_to_#{name}_index")
-          private("remove_from_#{name}_index")
+      end
+
+      def create_index_methods(key, values = nil, unique = nil)
+        define_attribute_method(key)
+        @@indexed_attributes[self.name] ||= []
+        @@indexed_attributes[self.name] << key
+        define_method("add_#{key}_to_index") do
+          value = values ? values.map{|attr| send(attr)}.join(INDEX_DELIM) : send(key)
+          self.add_to_index("idx_#{self.class.name}", key, value, unique)
         end
+        define_method("remove_#{key}_from_index") do
+          self.remove_from_index("idx_#{self.class.name}", self.id)
+        end
+        private("add_#{key}_to_index")
+        private("remove_#{key}_from_index")
       end
 
       def index(name, attrs, opts = {})
-        @@indexed_attributes[self.name] << name
-        define_attribute_method(name)
-        define_method("add_to_#{name}_index") do
-          values = attrs.map{|attr| send(attr)}.join(INDEX_DELIM)
-          self.add_to_index("idx_#{self.name}_#{name}", name, value, opts[:unique])
-        end
-        define_method("remove_from_#{name}_index") do
-          self.remove_from_index("idx_#{self.name}_#{name}", self.id)
-        end
-        private("add_to_#{name}_index")
-        private("remove_from_#{name}_index")
+        create_index_methods(name, attrs, opts[:unique])
       end
 
       def indexed_attributes
         @@indexed_attributes
       end
 
-      def list_attributes
+      def all_attributes
         @@all_attributes
+      end
+
+      def attributes
+        inspect_attributes.keys || []
+      end
+
+      def indexes
+        @@indexed_attributes[self.name] || []
+      end
+
+      def composed_attributes(attrs = nil)
+        if attrs
+          @@composed_attributes += attrs
+          @@composed_attributes.uniq!
+        else
+          @@composed_attributes
+        end
       end
 
       private

@@ -54,20 +54,38 @@ module Deja
       end
     end
 
-    def destroy
-      Deja::Query.delete_relationship(@id) if persisted?
-      (self.class.indexed_attributes[self.class.name] || {}).each do |name|
-        self.remove_from_index("idx_#{self.name}_#{name}", @id)
+    def create
+      @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, @direction, persisted_attributes)
+      super
+    end
+
+    def update!(opts = {})
+      opts.each { |attribute, value| send("#{attribute}=", value) }
+      run_callbacks :update do
+        Deja::Query.update_relationship(@id, persisted_attributes)
       end
+    end
+
+    def destroy
+      Deja::Query.delete_relationship(@id) if @id
       @id = nil
     end
 
-    def persisted_attributes
-      run_callbacks :save do
-        my_attributes = self.class.list_attributes[self.class.name]
-        my_attributes.keys.inject({}) { |memo, k| memo[k] = send(k); memo }
-      end
+    def add_to_index(index, key, value, unique = false)
+      Deja.add_relationship_to_index(index, key, value)
     end
 
+    def remove_from_index(*args)
+      Deja.remove_relationship_from_index(*args)
+    end
+
+    def persisted_attributes
+      inst_vars = instance_variables.map { |i| i.to_s[1..-1].to_sym }
+      attrs = (self.class.attributes + self.class.composed_attributes) & inst_vars
+      attrs.inject({}) do |memo, (k, v)|
+        memo[k] = send(k)
+        memo
+      end
+    end
   end
 end

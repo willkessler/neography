@@ -26,13 +26,6 @@ module Deja
 
   include Deja::RestIndex
 
-  ID            = 'id'
-  REL           = 'rel'
-  NODE          = 'node'
-  TYPE          = 'type'
-  START_NODE    = 'start_node'
-  END_NODE      = 'end_node'
-  RELATIONSHIPS = 'relationships'
   INDEX_DELIM   = '^^^'
 
   class << self; attr_accessor :neo, :tx ; end

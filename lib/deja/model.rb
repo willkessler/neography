@@ -9,14 +9,23 @@ module Deja
     include Deja::Error
     include Deja::SchemaGenerator
 
+    @@all_attributes = {}
+    @@indexed_attributes = {}
+
     attr_reader :id
 
     define_model_callbacks :initialize, :create, :update, :delete, :save
 
-    after_save   :create_indices
+    after_create :create_indices
     after_update :update_indices
 
     def initialize(*args)
+      attrs = self.class.class_variable_get(:@@all_attributes)
+      indexes = self.class.class_variable_get(:@@indexed_attributes)
+      attrs[self.class.name] ||= {}
+      indexes[self.class.name] ||= {}
+      self.class.class_variable_set(:@@all_attributes, attrs)
+      self.class.class_variable_set(:@@indexed_attributes, indexes)
       run_callbacks :initialize do
         @id = nil
         options = args.extract_options!
@@ -33,13 +42,6 @@ module Deja
     def self.create!(opts = {})
       obj = new(opts)
       obj.save!
-    end
-
-    def update!(opts = {})
-      run_callbacks :update do
-        opts.each { |attribute, value| send("#{attribute}=", value) }
-        save!
-      end
     end
 
     def update(opts = {})
@@ -97,38 +99,20 @@ module Deja
 
     class BadImplementationError < StandardError; end
 
-    private
 
     def create_indices
-      (self.class.indexed_attributes[self.class.name]||{}).each do |name|
-        send("add_to_#{name}_index")
+      (self.class.indexes || {}).each do |name|
+        send("add_#{name}_to_index")
       end
     end
 
     def update_indices
-      (self.class.indexed_attributes[self.class.name]||{}).each do |name|
+      (self.class.indexes || {}).each do |name|
         if(send("#{name}_changed?") == true)
-          send("remove_from_#{name}_index")
-          send("add_to_#{name}_index")
+          send("remove_#{name}_from_index")
+          send("add_#{name}_to_index")
         end
       end
     end
-
-    def add_to_index(index, key, value, unique = false)
-      if self.is_a? Deja::Node
-        Deja.add_node_to_index(index, key, value, self.neo_id, unique)
-      else
-        Deja.add_relationship_to_index(index, key, value)
-      end
-    end
-
-    def remove_from_index(*args)
-      if self.is_a? Deja::Node
-        Deja.remove_node_from_index(*args)
-      else
-        Deja.remove_relationship_from_index(*args)
-      end
-    end
-
   end
 end
