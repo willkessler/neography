@@ -6,6 +6,14 @@ module Deja
 
     class << self
       attr_reader :relationship_names
+
+      def relationships(*args)
+        @relationship_names ||= Set.new
+        args.each do |arg|
+          @relationship_names << arg
+          attr_writer arg
+        end
+      end
     end
 
     def initialize(*args)
@@ -37,14 +45,6 @@ module Deja
       self.class.relationship_names.inject({}) do |memo, rel_name|
         memo[rel_name] = send("@#{rel_name}")
         memo
-      end
-    end
-
-    def self.relationships(*args)
-      @relationship_names ||= Set.new
-      args.each do |arg|
-        @relationship_names << arg
-        attr_writer arg
       end
     end
 
