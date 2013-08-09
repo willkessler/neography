@@ -24,7 +24,7 @@ module Deja
   autoload :Bridge
   autoload :Model
 
-  include Deja::RestIndex
+  extend Deja::RestIndex
 
   INDEX_DELIM   = '^^^'
 
