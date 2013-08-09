@@ -2,28 +2,28 @@ module Deja
   class Relationship < Model
 
     attr_accessor :label, :start_node, :end_node, :direction
-    @connected_node_types = {}
 
     class << self
-      def establish_connected_node_type(*nodes, key)
-        @connected_node_types ||= {}
-        nodes.each do |node|
-          name = node.to_s.classify
-          @connected_node_types[key] ||= Set.new
-          @connected_node_types[key] << name
-        end
+      @directionality = {}
+
+      def has_direction(from_type=nil, to_type=nil)
+        return StandardError, "'from' and 'to' must be specified" unless from_type and to_type
+
+        from_type = from_type.to_s.classify
+        to_type = to_type.to_s.classify
+
+        @directionality ||= {}
+        @directionality[from_type] ||= []
+        @directionality[from_type] << to_type
       end
 
-      def from(*nodes)
-        establish_connected_node_type(*nodes, :from)
-      end
+      def valid_direction?(from_type=nil, to_type=nil)
+        raise StandardError, "cannot check direction if 'from' and 'to' are not specified" unless from_type and to_type
 
-      def to(*nodes)
-        establish_connected_node_type(*nodes, :to)
-      end
+        from_type = from_type.to_s.classify
+        to_type = to_type.to_s.classify
 
-      def node_types
-        @connected_node_types
+        @directionality.key?(from_type) and @directionality[from_type].include?(to_type)
       end
     end
 
