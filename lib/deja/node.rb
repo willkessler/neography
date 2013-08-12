@@ -58,16 +58,35 @@ module Deja
 
     def save!
       if persisted?
-        update
+        update!
       else
-        create
+        create!
       end
       self
     end
 
     def create
+      begin
+        create!
+        true
+      rescue
+        false
+      end
+    end
+
+    def create!
       run_callbacks :create do
         @id = Deja::Query.create_node(persisted_attributes)
+      end
+      self
+    end
+
+    def update
+      begin
+        update!
+        true
+      rescue
+        false
       end
     end
 
@@ -82,6 +101,7 @@ module Deja
     def destroy
       Deja::Query.delete_node(@id) if @id
       @id = nil
+      true
     end
 
     def add_to_index(index, key, value, unique = false)

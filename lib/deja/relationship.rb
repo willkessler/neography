@@ -46,16 +46,26 @@ module Deja
 
     def save!
       if persisted?
-        update
+        update!
       else
-        create
+        create!
+      end
+      self
+    end
+
+    def create!
+      run_callbacks :create do
+        @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, @direction, persisted_attributes)
       end
       self
     end
 
     def create
-      run_callbacks :create do
-        @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, @direction, persisted_attributes)
+      begin
+        create!
+        true
+      rescue
+        false
       end
     end
 
@@ -70,6 +80,7 @@ module Deja
     def destroy
       Deja::Query.delete_relationship(@id) if @id
       @id = nil
+      true
     end
 
     def add_to_index(index, key, value, unique = false)

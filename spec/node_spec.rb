@@ -8,8 +8,11 @@ describe Node do
   end
 
   describe ".save!" do
-
-
+    context "with a node objec that ain't in the graph yet" do
+      it "should return self" do
+        @first_node.save!.should be_a(Person)
+      end
+    end
   end
 
   describe ".save" do
@@ -30,6 +33,15 @@ describe Node do
         @first_node.save.should be_a(TrueClass)
         graph_node = Person.find_by_neo_id(id)
         expect(graph_node.name).to eq('M')
+      end
+    end
+  end
+
+  describe ".destroy" do
+    context "with a node which already exists in the graph" do
+      it "should return a boolean" do
+        @first_node.save
+        @first_node.destroy.should be_a(TrueClass)
       end
     end
   end
