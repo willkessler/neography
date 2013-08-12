@@ -6,8 +6,10 @@ module Deja
     class << self
       @directionality = {}
 
-      def has_direction(from_type=nil, to_type=nil)
-        return StandardError, "'from' and 'to' must be specified" unless from_type and to_type
+      def from(from_type=nil, opts={})
+        return StandardError, "'from' and 'to' must be specified" unless from_type and opts.is_a? Hash and opts[:to]
+
+        to_type = opts[:to]
 
         from_type = from_type.to_s.classify
         to_type = to_type.to_s.classify
