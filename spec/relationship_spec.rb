@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'rake/testtask'
 
 class Friends < Relationship
-  attribute :id, Integer
+  attribute :uuid, Integer
   attribute :name, String
 end
 
