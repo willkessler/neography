@@ -43,7 +43,7 @@ module Deja
 
     def relationships
       self.class.relationship_names.inject({}) do |memo, rel_name|
-        memo[rel_name] = send("@#{rel_name}")
+        memo[rel_name] = instance_variable_get("@#{rel_name}")
         memo
       end
     end
@@ -62,6 +62,7 @@ module Deja
       else
         create
       end
+      self
     end
 
     def create
@@ -75,6 +76,7 @@ module Deja
       run_callbacks :update do
         Deja::Query.update_node(@id, persisted_attributes)
       end
+      self
     end
 
     def destroy

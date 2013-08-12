@@ -47,7 +47,7 @@ module Deja
     def update(opts = {})
       begin
         update!(opts)
-        self
+        true
       rescue BadImplementationError => e
         raise e
       rescue StandardError
@@ -67,7 +67,7 @@ module Deja
     def save
       begin
         save!
-        self
+        true
       rescue BadImplementationError => e
         raise e
       rescue StandardError
