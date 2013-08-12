@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'rake/testtask'
 
 class Friends < Relationship
-  attribute :id, Integer
+  attribute :uuid, Integer
   attribute :name, String
 end
 
@@ -11,7 +11,9 @@ describe Node do
   before :each do
     @first_node = FactoryGirl.create(:person);
     @second_node = FactoryGirl.create(:person);
-    @relationship = Friends.new(:friends, @first_node, @second_node, :none)
+
+    @relationship_properties = {:uuid => rand(100), :name => "FooBar"}
+    @relationship = Friends.new(:friends, @first_node, @second_node, :none, @relationship_properties)
   end
 
   describe ".save" do
@@ -19,7 +21,16 @@ describe Node do
       it "should create a new relationship in the graph" do
         @relationship.id.should be_nil
         @relationship.save
+
         @relationship.id.should be_a(Fixnum)
+      end
+
+      it "should set properties on relationship in the graph" do
+        @relationship.save
+
+        @relationship_properties.each do |key, value|
+          @relationship.send(key).should == value
+        end
       end
     end
   end
