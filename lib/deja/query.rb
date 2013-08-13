@@ -49,6 +49,12 @@ module Deja
         rel_id       = result_hash['data'].first.first
       end
 
+      def create_relationship_from_index(start_node, end_node, label, direction = :none, attributes = {})
+        cypher_query = Deja::Bridge.create_relationship_from_index(start_node, end_node, label, direction, attributes)
+        result_hash  = Deja.execute_cypher(cypher_query)
+        rel_id       = result_hash['data'].first.first
+      end
+
       def delete_relationship(rel_id)
         cypher_query = Deja::Bridge.delete_relationship(rel_id)
         result_hash  = Deja.execute_cypher(cypher_query)

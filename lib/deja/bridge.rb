@@ -64,6 +64,19 @@
         end
       end
 
+      def create_relationship_from_index(start_node, end_node, name, direction = :none, attributes = {})
+        case direction
+        when :none
+          cypher { create_path{ lookup(star_node[:index], start_node[:key], start_node[:value]) - rel(name, attributes).as(:r).neo_id.ret - lookup(end_node[:index], end_node[:key], end_node[:value])} }
+        when :out
+          cypher { create_path{ lookup(star_node[:index], start_node[:key], start_node[:value]) > rel(name, attributes).as(:r).neo_id.ret > lookup(end_node[:index], end_node[:key], end_node[:value])} }
+        when :in
+          cypher { create_path{ lookup(star_node[:index], start_node[:key], start_node[:value]) < rel(name, attributes).as(:r).neo_id.ret < lookup(end_node[:index], end_node[:key], end_node[:value])} }
+        else
+          return false
+        end
+      end
+
       def delete_relationship(id)
         is_index?(id) ? delete_relationship_by_index(id) : delete_relationship_by_id(id)
       end
