@@ -44,29 +44,11 @@ module Deja
       # stub
     end
 
-    def save!
-      if persisted?
-        update!
-      else
-        create!
-      end
-      self
-    end
-
     def create!
       run_callbacks :create do
         @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, @direction, persisted_attributes)
       end
       self
-    end
-
-    def create
-      begin
-        create!
-        true
-      rescue
-        false
-      end
     end
 
     def update!(opts = {})

@@ -56,38 +56,11 @@ module Deja
       end
     end
 
-    def save!
-      if persisted?
-        update!
-      else
-        create!
-      end
-      self
-    end
-
-    def create
-      begin
-        create!
-        true
-      rescue
-        false
-      end
-    end
-
     def create!
       run_callbacks :create do
         @id = Deja::Query.create_node(persisted_attributes)
       end
       self
-    end
-
-    def update
-      begin
-        update!
-        true
-      rescue
-        false
-      end
     end
 
     def update!(opts = {})
