@@ -14,8 +14,12 @@ module Deja
         }
       end
 
-      def attribute(name, type, opts = {})
+      def define_class_key
         @@all_attributes[self.name] ||= {}
+      end
+
+      def attribute(name, type, opts = {})
+        self.define_class_key
         @@all_attributes[self.name][name] = opts.merge(:type => type)
         attr_accessorize(name, opts)
         create_index_methods(name, nil, opts[:unique]) if opts[:index]
