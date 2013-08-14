@@ -107,6 +107,7 @@ module Deja
 
     def update!
       raise BadImplementationError.new "You must implement the #update! method in each class that includes Deja::Model"
+    end
 
     def destroy
       raise BadImplementationError.new "You must implement the #destroy method in each class that includes Deja::Model"
