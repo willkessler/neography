@@ -44,21 +44,11 @@ module Deja
       # stub
     end
 
-    def save!
-      if persisted?
-        run_callbacks :update do
-          Deja::Query.update_relationship(@id, persisted_attributes)
-        end
-      else
-        run_callbacks :create do
-          @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, @direction, persisted_attributes)
-        end
+    def create!
+      run_callbacks :create do
+        @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, @direction, persisted_attributes)
       end
-    end
-
-    def create
-      @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, @direction, persisted_attributes)
-      super
+      self
     end
 
     def update!(opts = {})
@@ -66,11 +56,13 @@ module Deja
       run_callbacks :update do
         Deja::Query.update_relationship(@id, persisted_attributes)
       end
+      self
     end
 
     def destroy
       Deja::Query.delete_relationship(@id) if @id
       @id = nil
+      true
     end
 
     def add_to_index(index, key, value, unique = false)

@@ -43,7 +43,7 @@ module Deja
 
     def relationships
       self.class.relationship_names.inject({}) do |memo, rel_name|
-        memo[rel_name] = send("@#{rel_name}")
+        memo[rel_name] = instance_variable_get("@#{rel_name}")
         memo
       end
     end
@@ -56,18 +56,11 @@ module Deja
       end
     end
 
-    def save!
-      if persisted?
-        update
-      else
-        create
-      end
-    end
-
-    def create
+    def create!
       run_callbacks :create do
         @id = Deja::Query.create_node(persisted_attributes)
       end
+      self
     end
 
     def update!(opts = {})
@@ -75,11 +68,13 @@ module Deja
       run_callbacks :update do
         Deja::Query.update_node(@id, persisted_attributes)
       end
+      self
     end
 
     def destroy
       Deja::Query.delete_node(@id) if @id
       @id = nil
+      true
     end
 
     def add_to_index(index, key, value, unique = false)

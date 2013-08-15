@@ -44,10 +44,28 @@ module Deja
       obj.save!
     end
 
+    def save!
+      if persisted?
+        update!
+      else
+        create!
+      end
+      self
+    end
+
+    def create
+      begin
+        create!
+        true
+      rescue
+        false
+      end
+    end
+
     def update(opts = {})
       begin
         update!(opts)
-        self
+        true
       rescue BadImplementationError => e
         raise e
       rescue StandardError
@@ -67,9 +85,7 @@ module Deja
     def save
       begin
         save!
-        self
-      rescue BadImplementationError => e
-        raise e
+        true
       rescue StandardError
         false
       end
@@ -85,8 +101,12 @@ module Deja
       !!@id
     end
 
-    def save!
-      raise BadImplementationError.new "You must implement the #save! method in each class that includes Deja::Model"
+    def create!
+      raise BadImplementationError.new "You must implement the #create! method in each class that includes Deja::Model"
+    end
+
+    def update!
+      raise BadImplementationError.new "You must implement the #update! method in each class that includes Deja::Model"
     end
 
     def destroy
