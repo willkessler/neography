@@ -124,7 +124,7 @@ describe Query do
 
     context "given a node id, and argument :none" do
       it "should return a single node" do
-        response = Deja::Query.load_node(@first_node, :include => :none)
+        response = Deja::Query.load_node(@first_node)
         response.should be_a(Array)
         response.first[:name].should eq('Jerry Wang')
       end

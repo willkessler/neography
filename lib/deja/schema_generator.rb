@@ -42,7 +42,7 @@ module Deja
           self.add_to_index("idx_#{self.class.name}", key, value, unique)
         end
         define_method("remove_#{key}_from_index") do
-          self.remove_from_index("idx_#{self.class.name}", self.id)
+          self.remove_from_index("idx_#{self.class.name}", key, send(key))
         end
         private("add_#{key}_to_index")
         private("remove_#{key}_from_index")

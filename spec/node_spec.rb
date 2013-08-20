@@ -30,6 +30,7 @@ describe Node do
         @first_node.save.should be_true
         id = @first_node.id
         @first_node.name = 'M'
+        @first_node.save!
         @first_node.save.should be_true
         graph_node = Person.find_by_neo_id(id)
         expect(graph_node.name).to eq('M')

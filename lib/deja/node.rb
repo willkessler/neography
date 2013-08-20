@@ -7,42 +7,81 @@ module Deja
     class << self
       attr_reader :relationship_names
 
-      def relationships(*args)
-        @relationship_names ||= Set.new
-        args.each do |arg|
-          @relationship_names << arg
-          attr_writer arg
+      def relationship(name, opts = {})
+        return StandardError, "'as' alias must be specified" unless opts.is_a? Hash and opts[:as]
+        @relationship_names ||= {}
+        if opts[:reverse] then
+          @relationship_names[name] = {
+            :out_singular => opts[:as].to_s.singularize,
+            :out_plural   => opts[:as].to_s.pluralize,
+            :in_singular  => opts[:reverse].to_s.singularize,
+            :in_plural    => opts[:reverse].to_s.pluralize
+          }
+        else
+          @relationship_names[name] = {
+            :out_singular => opts[:as].to_s.singularize,
+            :out_plural   => opts[:as].to_s.pluralize
+          }
         end
+        attr_writer name
       end
     end
 
     def initialize(*args)
       super do
         if self.class.relationship_names
-          self.class.relationship_names.each do |rel|
-            self.class.class_eval do
-              define_method rel do
-                rel_instance = instance_variable_get("@#{rel}")
-                if rel_instance
-                  rel_instance
-                else
-                  send(:related_nodes, rel)
-                  instance_variable_get("@#{rel}")
-                end
-              end
-            end
+          self.class.relationship_names.each do |rel, aliases|
+            define_alias_methods(rel, aliases)
           end
         end
       end
     end
 
-    def related_nodes(*relationships)
-      related_nodes = Deja::Query.load_related_nodes(@id, :include => relationships)
+    def define_alias_methods(rel, aliases)
+      self.class_eval do
+        define_method aliases[:out_plural] do
+          rel_instance = instance_variable_get("@#{rel}")
+          if rel_instance
+            rel_instance
+          else
+            send(:related_nodes, {:include => rel, :direction => :out})
+            instance_variable_get("@#{rel}")
+          end
+        end
+
+        define_method aliases[:out_singular] do |&b|
+          relation = send(aliases[:out_plural]).first
+          b.call(relation[0], relation[1]) if b
+          relation
+        end
+
+        if aliases[:in_plural] and aliases[:in_singular] then
+          define_method aliases[:in_plural] do
+            rel_instance = instance_variable_get("@#{rel}")
+            if rel_instance
+              rel_instance
+            else
+              send(:related_nodes, {:include => rel, :direction => :in})
+              instance_variable_get("@#{rel}")
+            end
+          end
+
+          define_method aliases[:in_singular] do |&b|
+            relation = send(aliases[:in_plural]).first
+            b.call(relation[0], relation[1]) if b
+            relation
+          end
+        end
+      end
+    end
+
+    def related_nodes(opts = {})
+      related_nodes = Deja::Query.load_related_nodes(@id, opts)
       erectify(related_nodes)
     end
 
     def relationships
-      self.class.relationship_names.inject({}) do |memo, rel_name|
+      self.class.relationship_names.keys.inject({}) do |memo, rel_name|
         memo[rel_name] = instance_variable_get("@#{rel_name}")
         memo
       end
@@ -81,8 +120,8 @@ module Deja
       Deja.add_node_to_index(index, key, value, @id, unique)
     end
 
-    def remove_from_index(*args)
-      Deja.remove_node_from_index(*args)
+    def remove_from_index(index, key, value)
+      Deja.remove_node_from_index(index, key, value, @id)
     end
 
     def persisted_attributes

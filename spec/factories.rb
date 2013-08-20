@@ -4,6 +4,8 @@ class Company < Deja::Node
   attribute :name, String
   attribute :permalink, String, :index => true
   attribute :type, String
+
+  relationship :invested_in, :as => :investment, :reverse => :investor
 end
 
 class Person < Deja::Node
@@ -11,7 +13,9 @@ class Person < Deja::Node
   attribute :permalink, String, :index => true
   attribute :type, String
 
-  relationships(:invested_in, :friends, :hates)
+  relationship :invested_in, :as => :investment
+  relationship :friends_with, :as => :friends
+  relationship :has_hate, :as => :hates
 end
 
 

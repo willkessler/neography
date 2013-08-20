@@ -37,7 +37,7 @@ module Deja
               end
               relationship   = rel_class.new(rel[:rel][:type], initial_node, related_node, 'both', rel_attributes)
               relationship.instance_variable_set('@id', rel[:rel][:id])
-              Deja::RelNodeWrapper.new(related_node, relationship)
+              [related_node, relationship]
             end
           end
           initial_node.send("#{name}=", relationship_array.compact) if self.relationship_names.include?(name.to_sym)

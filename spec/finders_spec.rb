@@ -4,12 +4,12 @@ require 'rake/testtask'
 
 def full_node_type_test(node)
   node.should be_a(Node)
-  node.class.relationships.each do |rel|
-    node.send(rel).should be_a(Array)
-    node.send(rel).each do |relnode|
-      relnode.should be_a(RelNodeWrapper)
-      relnode.node.should be_a(Node)
-      relnode.rel.should be_a(Relationship)
+  node.class.relationship_names.each do |k, v|
+    node.send(v[:out_plural]).should be_a(Array)
+    node.send(v[:out_plural]).each do |relnode|
+      relnode.should be_a(Array)
+      relnode[0].should be_a(Node)
+      relnode[1].should be_a(Relationship)
     end
   end
 end
@@ -18,17 +18,17 @@ def node_type_test(node, rel)
   node.should be_a(Node)
   node.send(rel).should be_a(Array)
   node.send(rel).each do |relnode|
-    relnode.should be_a(RelNodeWrapper)
-    relnode.node.should be_a(Node)
-    relnode.rel.should be_a(Relationship)
+    relnode.should be_a(Array)
+    relnode[0].should be_a(Node)
+    relnode[1].should be_a(Relationship)
   end
 end
 
 Deja.create_node_index('idx_Person')
 
 class InvestedIn < Relationship; end
-class Friends < Relationship; end
-class Hates < Relationship; end
+class FriendsWith < Relationship; end
+class HasHate < Relationship; end
 
 describe Finders do
   after :each do
@@ -39,15 +39,15 @@ describe Finders do
     @first_node = FactoryGirl.create(:person);
     @second_node = FactoryGirl.create(:person);
     @third_node = FactoryGirl.create(:company);
-    @invested_in = Deja::Query.create_relationship(@first_node.id, @second_node.id, :invested_in)
-    @friends = Deja::Query.create_relationship(@first_node.id, @second_node.id, :friends)
-    @hates = Deja::Query.create_relationship(@first_node.id, @third_node.id, :hates)
+    @invested_in = InvestedIn.new(:invested_in, @first_node, @second_node, :out).create
+    @friends = FriendsWith.new(:friends_with, @first_node, @second_node, :out).create
+    @hates = HasHate.new(:has_hate, @first_node, @third_node, :out).create
   end
 
   describe ".find_by_neo_id" do
     context "given a node id and no filters" do
       before :each do
-        @node = Person.find_by_neo_id(@first_node.id)
+        @node = Person.find_by_neo_id(@first_node.id, :include => :all)
       end
 
       it "should return a node and all related nodes by default" do
@@ -58,12 +58,12 @@ describe Finders do
 
       it "calling invested_in should not call related_nodes" do
         @node.should_not_receive(:related_nodes).with(:invested_in)
-        @node.invested_in
+        @node.investment
       end
 
       it "calling invested_in should return an array of relNodeWrappers" do
-        @node.invested_in.should be_a(Array)
-        @node.invested_in[0].should be_a(RelNodeWrapper)
+        @node.investments.should be_a(Array)
+        @node.investments[0].should be_a(Array)
       end
     end
 
@@ -76,7 +76,7 @@ describe Finders do
         first_node = Person.find_by_neo_id(@first_node.id, :include => :invested_in)
         first_node.name.should eq(@first_node.name)
         first_node.permalink.should eq(@first_node.permalink)
-        node_type_test(first_node, :invested_in)
+        node_type_test(first_node, :investments)
       end
     end
 
@@ -89,26 +89,25 @@ describe Finders do
         first_node = Person.find_by_neo_id(@first_node.id, :include => [:invested_in, :friends])
         first_node.name.should eq(@first_node.name)
         first_node.permalink.should eq(@first_node.permalink)
-        node_type_test(first_node, :invested_in)
+        node_type_test(first_node, :investments)
         node_type_test(first_node, :friends)
       end
     end
 
     context "given a node id with a :none filter" do
       it "should return a node and no related nodes" do
-        first_node = Person.find_by_neo_id(@first_node.id, :include => :none)
-        first_node.should_receive(:related_nodes)
-        first_node.invested_in
+        first_node = Person.find_by_neo_id(@first_node.id)
+        first_node.should_receive(:related_nodes).exactly(3).times.and_call_original
         full_node_type_test(first_node)
       end
     end
   end
 
   describe ".find" do
-    context "given an index with associated nodes" do
+    context "given a neo_id with associated nodes and :all argument" do
       it "should return node objects with relationships" do
-        first_node = Person.find_by_neo_id(@first_node.id)
-        first_node.invested_in.should_not be_nil
+        first_node = Person.find_by_neo_id(@first_node.id, :include => :all)
+        first_node.investments.should_not be_nil
         first_node.friends.should_not be_nil
         first_node.hates.should_not be_nil
         full_node_type_test(first_node)
@@ -119,17 +118,17 @@ describe Finders do
   describe ".related_nodes" do
     context "on an instance of a single node" do
       before :each do
-        @node = Person.find_by_neo_id(@first_node.id)
+        @node = Person.find_by_neo_id(@first_node.id, :include => :all)
       end
 
       it "should not call related_nodes on already loaded relations" do
         @node.should_not_receive(:related_nodes)
-        @node.invested_in
+        @node.investment
       end
 
       it "should load all related nodes" do
         @node.related_nodes
-        @node.invested_in.should be_a(Array)
+        @node.investment.should be_a(Array)
         full_node_type_test(@node)
       end
     end
