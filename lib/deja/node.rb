@@ -8,7 +8,7 @@ module Deja
       attr_reader :relationship_names
 
       def relationship(name, opts = {})
-        return StandardError, "'as' alias must be specified" unless opts.is_a? Hash and opts[:as]
+        raise StandardError, "'as' alias must be specified" unless opts.is_a? Hash and opts[:as]
         @relationship_names ||= {}
         if opts[:reverse] then
           @relationship_names[name] = {
@@ -39,14 +39,9 @@ module Deja
 
     def define_alias_methods(rel, aliases)
       self.class_eval do
-        define_method aliases[:out_plural] do
-          rel_instance = instance_variable_get("@#{rel}")
-          if rel_instance
-            rel_instance
-          else
-            send(:related_nodes, {:include => rel, :direction => :out})
-            instance_variable_get("@#{rel}")
-          end
+        define_method aliases[:out_plural] do |filter = nil|
+          r = send(:related_nodes, {:include => rel, :direction => :out, :filter => filter})
+          instance_variable_get("@#{rel}")
         end
 
         define_method aliases[:out_singular] do |&b|
@@ -56,14 +51,9 @@ module Deja
         end
 
         if aliases[:in_plural] and aliases[:in_singular] then
-          define_method aliases[:in_plural] do
-            rel_instance = instance_variable_get("@#{rel}")
-            if rel_instance
-              rel_instance
-            else
-              send(:related_nodes, {:include => rel, :direction => :in})
-              instance_variable_get("@#{rel}")
-            end
+          define_method aliases[:in_plural] do |filter = nil|
+            send(:related_nodes, {:include => rel, :direction => :in, :filter => filter})
+            instance_variable_get("@#{rel}")
           end
 
           define_method aliases[:in_singular] do |&b|
@@ -77,7 +67,11 @@ module Deja
 
     def related_nodes(opts = {})
       related_nodes = Deja::Query.load_related_nodes(@id, opts)
-      erectify(related_nodes)
+      if related_nodes.empty? then
+        instance_variable_set("@#{opts[:include]}", [])
+      else
+        erectify(related_nodes)
+      end
     end
 
     def relationships

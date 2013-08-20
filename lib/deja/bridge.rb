@@ -164,9 +164,9 @@
       def rels_from_id(neo_id, opts)
         rels = opts[:include] == :all ? nil : opts[:include]
         case opts[:direction]
-        when :out  then outgoing_pair(neo_id, rels)
-        when :in   then incoming_pair(neo_id, rels)
-        when :both then in_out_pair(neo_id, rels)
+        when :out  then outgoing_pair(neo_id, rels, opts[:filter])
+        when :in   then incoming_pair(neo_id, rels, opts[:filter])
+        when :both then in_out_pair(neo_id, rels, opts[:filter])
         else false
         end
       end
@@ -174,35 +174,58 @@
       def rels_from_index(index, opts)
         rels = opts[:include] == :all ? nil : opts[:include]
         case opts[:direction]
-        when :out  then outgoing_pair(index, rels)
-        when :in   then incoming_pair(index, rels)
-        when :both then in_out_pair(index, rels)
+        when :out  then idx_outgoing_pair(index, rels, opts[:filter])
+        when :in   then idx_incoming_pair(index, rels, opts[:filter])
+        when :both then idx_in_out_pair(index, rels, opts[:filter])
         else false
         end
       end
 
-      def outgoing_pair(id, rels = nil)
-        cypher { node(id).outgoing(rel(*rels).ret).ret }
+      def attach_filter(result, filter = nil)
+        result.where{|n| n[:type] == filter.to_s}.ret if filter
+        result
       end
 
-      def idx_outgoing_pair(index, rels = nil)
-        cypher { lookup(index[:index], index[:key], index[:value]).outgoing(rel(*rels).ret).ret }
+      def outgoing_pair(id, rels = nil, filter = nil)
+        cypher {
+          r = node(id).outgoing(rel(*rels).ret)
+          ret Deja::Bridge.attach_filter(r, filter)
+        }
       end
 
-      def incoming_pairs(id, rels = nil)
-        cypher { node(id).incoming(rel(*rels).ret).ret }
+      def idx_outgoing_pair(index, rels = nil, filter = nil)
+        cypher {
+          r = lookup(index[:index], index[:key], index[:value]).outgoing(rel(*rels).ret).ret
+          ret Deja::Bridge.attach_filter(r, filter)
+        }
       end
 
-      def idx_incoming_pair(index, rels = nil)
-        cypher { lookup(index[:index], index[:key], index[:value]).incoming(rel(*rels).ret).ret }
+      def incoming_pairs(id, rels = nil, filter = nil)
+        cypher {
+          r = node(id).incoming(rel(*rels).ret).ret
+          ret Deja::Bridge.attach_filter(r, filter)
+        }
       end
 
-      def in_out_pair(id, rels = nil)
-        cypher { node(id).both(rel(*rels).ret).ret }
+      def idx_incoming_pair(index, rels = nil, filter = nil)
+        cypher {
+          r = lookup(index[:index], index[:key], index[:value]).incoming(rel(*rels).ret).ret
+          ret Deja::Bridge.attach_filter(r, filter)
+        }
       end
 
-      def idx_in_out_pair(index, rels = nil)
-        cypher { lookup(index[:index], index[:key], index[:value]) - rel(*rels).ret - node.ret }
+      def in_out_pair(id, rels = nil, filter = nil)
+        cypher {
+          r = node(id).both(rel(*rels).ret).ret
+          ret Deja::Bridge.attach_filter(r, filter)
+        }
+      end
+
+      def idx_in_out_pair(index, rels = nil, filter = nil)
+        cypher {
+          r = lookup(index[:index], index[:key], index[:value]) - rel(*rels).ret - node.ret
+          ret Deja::Bridge.attach_filter(r, filter)
+        }
       end
     end
   end

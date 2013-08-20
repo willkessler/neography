@@ -8,7 +8,9 @@ module Deja
       end
 
       def load_related_nodes(neo_id, options = {})
-        load_related_nodes_with_args(neo_id, options)
+        r = load_related_nodes_with_args(neo_id, options)
+        #puts r.inspect
+        r
       end
 
       def create_node(attributes = {})
