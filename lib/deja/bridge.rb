@@ -111,7 +111,7 @@
       end
 
       def nodes_from_index(index, opts)
-        return cypher { lookup(id[:index], id[:key], id[:value])} unless opts[:include]
+        return cypher { lookup(index[:index], index[:key], index[:value])} unless opts[:include]
         rels = opts[:include] == :all ? nil : opts[:include]
         case opts[:direction]
         when :out  then idx_outgoing_triplet(index, rels)
