@@ -182,7 +182,7 @@
       end
 
       def attach_filter(result, filter = nil)
-        result.where{|n| n[:type] == filter.to_s}.ret if filter
+        result.where{|n| n[:type] == filter.to_s.camelize}.ret if filter
         result
       end
 
