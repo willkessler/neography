@@ -123,7 +123,7 @@ describe Finders do
 
       it "should not call related_nodes on already loaded relations" do
         @node.should_receive(:related_nodes).and_call_original
-        @node.investments(:Person).each do |node, rel|
+        @node.investments(:person).each do |node, rel|
            node.should be_a(Node)
            rel.should be_a(Relationship)
         end

@@ -28,13 +28,22 @@ To implement a model using Deja, inherit from Deja::Node
   ```
 Relationship Structure:
 -----------------------
-Relationships are returned as instances of **RelNodeWrapper**. These are convenience objects that contain both the node and the relationship. Convenience methods for given relationships are created for each instance based on the naming defined in the class which inherits **Deja::Node**. These convenience methods return arrays of **RelNodeWrapper** objects, which can be interated over.
+Relationships are returned as (node/rel) pairs(Arrays). This allows us to iterate over both the relationship and the related node in the same step.
   ```ruby
-  Person.friends.each do |friend|
-    friend.node                      # returns the related Node attributes
-    friend.rel                       # returns the Relationship attributes
+  Person.friends.each do |node, rel|
+    puts node                      # returns the related Node
+    puts rel                       # returns the Relationship
   end
   ```
+
+Both plural and singular methods are generated for every relationship - the singular form returning the first (node/rel) pair in the plural method. It accepts a block.
+  ```ruby
+  Company.address do |node, rel|
+    puts node
+    puts rel
+  end
+  ```
+
 Interface:
 ----------
 ### Loading Nodes:
@@ -67,12 +76,11 @@ To delete a node from the graph, call the **delete** method on the node.
   node.delete
   ```
 ### Lazy Loading:
-By default Deja supports lazy loading. To load a given relationship on the fly, simply call method with the same name as the relationship. If the relationship does not yet exist, it will be fetched from the graph.
+By default Deja supports lazy loading. To load a given relationship on the fly, simply call method with the same name as the relationship. Deja by default will always reload the relationship each time the method is called
   ```ruby
   node = Person.load(3)
-  node.invested_in.each do |investement|  # fetches the investments from the graph
-    investment.class                      # returns RelNodeWrapper an object containing a node and a relationship
-    investment.node.class                 # returns the Node object at the end of the relationship
-    investment.rel.class                  # returns the Relationship object in between the two nodes
+  node.invested_in.each do |investment, rel|  # fetches the investments from the graph
+    investment.class                      # returns the Investment node object
+    investment.rel.class                  # returns the InvestedIn relationship object
   end
   ```
