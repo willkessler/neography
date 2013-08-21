@@ -25,8 +25,9 @@ module Deja
       def sans_initial_node(relation_hash, initial_node)
         return if relation_hash.nil? or relation_hash.empty?
         relation_hash.each do |name, relationship|
+          rel_type = name.underscore
           relationship_array = relationship.map do |rel|
-            if self.relationship_names.include?(rel[:rel][:type].to_sym)
+            if self.relationship_names.include?(rel_type.to_sym)
               node_class     = rel[:node][:type].constantize
               related_node   = node_class.new(rel[:node].except(:id))
               related_node.instance_variable_set('@id', rel[:node][:id])
@@ -40,7 +41,7 @@ module Deja
               [related_node, relationship]
             end
           end
-          initial_node.send("#{name}=", relationship_array.compact) if self.relationship_names.include?(name.to_sym)
+          initial_node.send("#{rel_type}=", relationship_array.compact) if self.relationship_names.include?(rel_type.to_sym)
         end
       end
 

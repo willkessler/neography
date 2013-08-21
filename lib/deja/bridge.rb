@@ -200,7 +200,7 @@
         }
       end
 
-      def incoming_pairs(id, rels = nil, filter = nil)
+      def incoming_pair(id, rels = nil, filter = nil)
         cypher {
           r = node(id).incoming(rel(*rels).ret).ret
           ret Deja::Bridge.attach_filter(r, filter)
