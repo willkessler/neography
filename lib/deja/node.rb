@@ -8,19 +8,19 @@ module Deja
       attr_reader :relationship_names
 
       def relationship(name, opts = {})
-        raise StandardError, "'as' alias must be specified" unless opts.is_a? Hash and opts[:as]
+        raise StandardError, "'out' or 'in' aliases must be specified" unless opts.is_a? Hash and (opts[:out] or opts[:in])
         @relationship_names ||= {}
         if opts[:reverse] then
           @relationship_names[name] = {
-            :out_singular => opts[:as].to_s.singularize,
-            :out_plural   => opts[:as].to_s.pluralize,
-            :in_singular  => opts[:reverse].to_s.singularize,
-            :in_plural    => opts[:reverse].to_s.pluralize
+            :out_singular => opts[:out].to_s.singularize,
+            :out_plural   => opts[:out].to_s.pluralize,
+            :in_singular  => opts[:in].to_s.singularize,
+            :in_plural    => opts[:in].to_s.pluralize
           }
         else
           @relationship_names[name] = {
-            :out_singular => opts[:as].to_s.singularize,
-            :out_plural   => opts[:as].to_s.pluralize
+            :out_singular => opts[:out].to_s.singularize,
+            :out_plural   => opts[:out].to_s.pluralize
           }
         end
         attr_writer name
