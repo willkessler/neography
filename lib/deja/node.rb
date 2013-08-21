@@ -10,7 +10,7 @@ module Deja
       def relationship(name, opts = {})
         raise StandardError, "'out' or 'in' aliases must be specified" unless opts.is_a? Hash and (opts[:out] or opts[:in])
         @relationship_names ||= {}
-        if opts[:reverse] then
+        if opts[:in] then
           @relationship_names[name] = {
             :out_singular => opts[:out].to_s.singularize,
             :out_plural   => opts[:out].to_s.pluralize,
@@ -67,6 +67,7 @@ module Deja
 
     def related_nodes(opts = {})
       related_nodes = Deja::Query.load_related_nodes(@id, opts)
+
       if related_nodes.empty? then
         instance_variable_set("@#{opts[:include]}", [])
       else
