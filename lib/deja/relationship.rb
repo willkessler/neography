@@ -7,7 +7,7 @@ module Deja
       @directionality = {}
 
       def from(from_type=nil, opts={})
-        return StandardError, "'from' and 'to' must be specified" unless from_type and opts.is_a? Hash and opts[:to]
+        raise StandardError, "'from' and 'to' must be specified" unless from_type and opts.is_a? Hash and opts[:to]
 
         to_type = opts[:to]
 

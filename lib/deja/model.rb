@@ -5,6 +5,7 @@ module Deja
     include ActiveModel::Model
     include ActiveModel::Dirty
     include ActiveSupport::Concern
+    include ActiveSupport::Inflector
 
     include Deja::Error
     include Deja::SchemaGenerator

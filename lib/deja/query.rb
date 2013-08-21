@@ -8,7 +8,9 @@ module Deja
       end
 
       def load_related_nodes(neo_id, options = {})
-        load_related_nodes_with_args(neo_id, options)
+        r = load_related_nodes_with_args(neo_id, options)
+        #puts r.inspect
+        r
       end
 
       def create_node(attributes = {})
@@ -67,15 +69,13 @@ module Deja
       end
 
       def load_node_with_args(neo_id, options)
-        options[:include] ||= :all
-        cypher_query = Deja::Bridge.get_node_with_rels(neo_id, options[:include])
+        cypher_query = Deja::Bridge.get_node_with_rels(neo_id, options)
         result_hash  = Deja.execute_cypher(cypher_query)
         normalize(result_hash)
       end
 
       def load_related_nodes_with_args(neo_id, options)
-        options[:include] ||= :all
-        cypher_query = Deja::Bridge.get_related_nodes(neo_id, options[:include])
+        cypher_query = Deja::Bridge.get_related_nodes(neo_id, options)
         result_hash  = Deja.execute_cypher(cypher_query)
         normalize(result_hash, :lazy)
       end
