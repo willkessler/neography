@@ -44,6 +44,14 @@ module Deja
           instance_variable_get("@#{rel}")
         end
 
+        define_method "#{aliases[:out_plural]}=" do |relationship|
+          current_rel = instance_variable_get("@#{rel}") || []
+          current_rel << [relationship.end_node, relationship]
+          instance_variable_set("@#{rel}", current_rel)
+        end
+
+        alias_method "#{aliases[:out_plural]}<<", "#{aliases[:out_plural]}="
+
         define_method aliases[:out_singular] do |&b|
           relation = send(aliases[:out_plural]).first
           b.call(relation[0], relation[1]) if b
@@ -55,6 +63,14 @@ module Deja
             send(:related_nodes, {:include => rel, :direction => :in, :filter => filter})
             instance_variable_get("@#{rel}")
           end
+
+          define_method "#{aliases[:in_plural]}=" do |relationship|
+            current_rel = instance_variable_get("@#{rel}") || []
+            current_rel << [relationship.start_node, relationship]
+            instance_variable_set("@#{rel}", current_rel)
+          end
+
+          alias_method "#{aliases[:in_plural]}<<", "#{aliases[:in_plural]}="
 
           define_method aliases[:in_singular] do |&b|
             relation = send(aliases[:in_plural]).first
@@ -80,6 +96,16 @@ module Deja
         memo[rel_name] = instance_variable_get("@#{rel_name}")
         memo
       end
+    end
+
+    def outgoing_rel(type, cardinality="plural")
+      selector = ("out_" + cardinality).to_sym
+      self.class.relationship_names[type.underscore.to_sym][selector]
+    end
+
+    def incoming_rel(type, cardinality="plural")
+      selector = ("in_" + cardinality).to_sym
+      self.class.relationship_names[type.underscore.to_sym][selector]
     end
 
     def count_relationships(type = :all)
@@ -129,4 +155,3 @@ module Deja
     end
   end
 end
-
