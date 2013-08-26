@@ -93,7 +93,7 @@ module Deja
 
     def relationships
       self.class.relationship_names.keys.inject({}) do |memo, rel_name|
-        next unless instance_variable_get("@#{rel_name}")
+        memo unless instance_variable_get("@#{rel_name}")
         memo[rel_name] = instance_variable_get("@#{rel_name}")
         memo
       end
