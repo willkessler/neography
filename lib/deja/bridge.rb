@@ -1,8 +1,8 @@
  module Deja
   class Bridge
     class << self
-      def is_index?(node_lookup)
-        node_lookup.is_a?(Hash)
+      def is_index?(id_or_index)
+        id_or_index.is_a?(Hash)
       end
 
       def cypher(&block)
@@ -51,10 +51,8 @@
         end
       end
 
-      def create_relationship(start_node, end_node, name, direction = :none, attributes = {})
+      def create_relationship(start_node, end_node, name, direction = :out, attributes = {})
         case direction
-        when :none
-          cypher { create_path{ node(start_node) - rel(name, attributes).as(:r).neo_id.ret - node(end_node)} }
         when :out
           cypher { create_path{ node(start_node) > rel(name, attributes).as(:r).neo_id.ret > node(end_node)} }
         when :in
@@ -64,10 +62,8 @@
         end
       end
 
-      def create_relationship_from_index(start_node, end_node, name, direction = :none, attributes = {})
+      def create_relationship_from_index(start_node, end_node, name, direction = :out, attributes = {})
         case direction
-        when :none
-          cypher { create_path{ lookup(start_node[:index], start_node[:key], start_node[:value]) - rel(name, attributes).as(:r).neo_id.ret - lookup(end_node[:index], end_node[:key], end_node[:value])} }
         when :out
           cypher { create_path{ lookup(start_node[:index], start_node[:key], start_node[:value]) > rel(name, attributes).as(:r).neo_id.ret > lookup(end_node[:index], end_node[:key], end_node[:value])} }
         when :in
@@ -75,6 +71,48 @@
         else
           return false
         end
+      end
+
+      def get_relationship(index_or_id, opts = {})
+        is_index?(index_or_id) ? rels_from_index(index_or_id, opts) : rels_from_id(index_or_id, opts)
+      end
+
+      def rels_from_index(index, opts = {})
+        case opts[:include]
+        when :none
+          cypher { lookup_rel(index[:index], index[:key], index[:value]).ret - node.ret }
+        when :out
+          cypher { lookup_rel(index[:index], index[:key], index[:value]).ret > node.ret }
+        when :in
+          cypher { lookup_rel(index[:index], indexp[:key], index[:value]).ret < node.ret }
+        else
+          cypher { lookup_rel(index[:index], index[:key], index[:value]) }
+        end
+      end
+
+      def rels_from_id(id, opts = {})
+        case opts[:include]
+        when :none
+          cypher { rel(id) - node.ret }
+        when :out
+          cypher { rel(id) > node.ret }
+        when :in
+          cypher { rel(id) < node.ret }
+        else
+          cypher { rel(id) }
+        end
+      end
+
+      def update_relationship(index_or_id, opts = {})
+
+      end
+
+      def update_relationship_by_index(index, opts = {})
+
+      end
+
+      def update_relationship_by_id(id, opts = {})
+
       end
 
       def delete_relationship(id)
@@ -87,10 +125,6 @@
 
       def delete_relationship_by_id(neo_id)
         cypher { rel(neo_id).del }
-      end
-
-      def get_single_relationship(rel_id)
-        cypher { rel(rel_id) }
       end
 
       # includes origin node
@@ -158,10 +192,10 @@
       # does not include origin node
       def get_related_nodes(id, opts = {})
         opts[:direction] ||= :both
-        is_index?(id) ? rels_from_index(id, opts) : rels_from_id(id, opts)
+        is_index?(id) ? rels_from_node_index(id, opts) : rels_from_node_id(id, opts)
       end
 
-      def rels_from_id(neo_id, opts)
+      def rels_from_node_id(neo_id, opts)
         rels = opts[:include] == :all ? nil : opts[:include]
         case opts[:direction]
         when :out  then outgoing_pair(neo_id, rels, opts[:filter])
@@ -171,7 +205,7 @@
         end
       end
 
-      def rels_from_index(index, opts)
+      def rels_from_node_index(index, opts)
         rels = opts[:include] == :all ? nil : opts[:include]
         case opts[:direction]
         when :out  then idx_outgoing_pair(index, rels, opts[:filter])

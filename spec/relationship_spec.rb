@@ -13,7 +13,7 @@ describe Node do
     @second_node = FactoryGirl.create(:person);
 
     @relationship_properties = {:uuid => rand(100), :name => "FooBar"}
-    @relationship = Friends.new(:friends, @first_node, @second_node, :none, @relationship_properties)
+    @relationship = Friends.new(:friends, @first_node, @second_node, :out, @relationship_properties)
   end
 
   describe ".save" do
