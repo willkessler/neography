@@ -9,7 +9,6 @@ module Deja
 
       def load_related_nodes(neo_id, options = {})
         r = load_related_nodes_with_args(neo_id, options)
-        #puts r.inspect
         r
       end
 
@@ -40,12 +39,12 @@ module Deja
       end
 
       def load_relationship(rel_id)
-        cypher_query = Deja::Bridge.get_single_relationship(rel_id)
+        cypher_query = Deja::Bridge.get_relationship(rel_id)
         result_hash  = Deja.execute_cypher(cypher_query)
         normalize(result_hash, :lazy)
       end
 
-      def create_relationship(start_node, end_node, label, direction = :none, attributes = {})
+      def create_relationship(start_node, end_node, label, direction = :out, attributes = {})
         cypher_query = Deja::Bridge.create_relationship(start_node, end_node, label, direction, attributes)
         result_hash  = Deja.execute_cypher(cypher_query)
         rel_id       = result_hash['data'].first.first

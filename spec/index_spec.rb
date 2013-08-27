@@ -11,7 +11,9 @@ describe Deja::RestIndex do
   before :each do
     @first_node = FactoryGirl.create(:person);
     @second_node = FactoryGirl.create(:person);
-    @relationship = Friends.new(:friends, @first_node, @second_node, :none)
+    @relationship = Friends.new(:friends, @first_node, @second_node, :out).create!
+    Deja.create_node_index('test_node_index')
+    Deja.create_relationship_index('test_relationship_index')
   end
 
   describe "list indexes" do
@@ -23,7 +25,6 @@ describe Deja::RestIndex do
     end
 
     it "can get a listing of relationship indexes" do
-      @relationship.save()
       key = generate_text(6)
       value = generate_text
       Deja.add_relationship_to_index("test_relationship_index", key, value, @relationship.id)
@@ -80,7 +81,6 @@ describe Deja::RestIndex do
     end
 
     it "can add a relationship to an index" do
-      @relationship.save
       key = generate_text(6)
       value = generate_text
       Deja.add_relationship_to_index("test_relationship_index", key, value, @relationship.id)
@@ -125,7 +125,6 @@ describe Deja::RestIndex do
     end
 
     it "can remove a relationship from an index" do
-      @relationship.save
       key = generate_text(6)
       value = generate_text
       Deja.add_relationship_to_index("test_relationship_index", key, value, @relationship.id)
@@ -137,7 +136,6 @@ describe Deja::RestIndex do
     end
 
     it "can remove a relationship from an index without supplying value" do
-      @relationship.save
       key = generate_text(6)
       value = generate_text
       Deja.add_relationship_to_index("test_relationship_index", key, value, @relationship.id)
@@ -149,7 +147,6 @@ describe Deja::RestIndex do
     end
 
     it "can remove a relationship from an index without supplying key nor value" do
-      @relationship.save
       key = generate_text(6)
       value = generate_text
       Deja.add_relationship_to_index("test_relationship_index", key, value, @relationship.id)
