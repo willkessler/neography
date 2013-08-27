@@ -80,11 +80,11 @@
       def rels_from_index(index, opts = {})
         case opts[:include]
         when :none
-          cypher { lookup_rel(index[:index], index[:key], index[:value]).ret - node.ret }
+          cypher { node.ret - lookup_rel(index[:index], index[:key], index[:value]).ret - node.ret }
         when :out
-          cypher { lookup_rel(index[:index], index[:key], index[:value]).ret > node.ret }
+          cypher { node.ret > lookup_rel(index[:index], index[:key], index[:value]).ret > node.ret }
         when :in
-          cypher { lookup_rel(index[:index], indexp[:key], index[:value]).ret < node.ret }
+          cypher { node.ret < lookup_rel(index[:index], indexp[:key], index[:value]).ret < node.ret }
         else
           cypher { lookup_rel(index[:index], index[:key], index[:value]) }
         end
@@ -93,26 +93,38 @@
       def rels_from_id(id, opts = {})
         case opts[:include]
         when :none
-          cypher { rel(id) - node.ret }
+          cypher { node.ret - rel(id).ret - node.ret }
         when :out
-          cypher { rel(id) > node.ret }
+          cypher { node.ret > rel(id).ret > node.ret }
         when :in
-          cypher { rel(id) < node.ret }
+          cypher { node.ret < rel(id).ret < node.ret }
         else
           cypher { rel(id) }
         end
       end
 
       def update_relationship(index_or_id, opts = {})
-
+        is_index?(index_or_id) ? update_relationship_by_index(index_or_id, opts) : update_relationship_by_id(index_or_id, opts)
       end
 
-      def update_relationship_by_index(index, opts = {})
-
+      def update_relationship_by_index(index, attributes)
+        cypher do
+          lookup_rel(index[:index], index[:key], index[:value]).tap do |r|
+            attributes.each do |key, value|
+              r[key] = value
+            end
+          end
+        end
       end
 
-      def update_relationship_by_id(id, opts = {})
-
+      def update_relationship_by_id(id, attributes)
+        cypher do
+          rel(id).tap do |r|
+            attributes.each do |key, value|
+              r[key] = value
+            end
+          end
+        end
       end
 
       def delete_relationship(id)
