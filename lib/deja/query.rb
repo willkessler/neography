@@ -38,8 +38,8 @@ module Deja
         result_hash = Deja.execute_cypher(cypher_query)
       end
 
-      def load_relationship(rel_id)
-        cypher_query = Deja::Bridge.get_relationship(rel_id)
+      def load_relationship(id_or_index, options = {})
+        cypher_query = Deja::Bridge.get_relationship(id_or_index)
         result_hash  = Deja.execute_cypher(cypher_query)
         normalize(result_hash, :lazy)
       end
