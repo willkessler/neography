@@ -2,7 +2,7 @@ require 'deja'
 require 'spec_helper'
 require 'rake/testtask'
 
-class Friends < Relationship
+class FriendsWith < Relationship
   attribute :uuid, Integer
   attribute :name, String
 end
@@ -13,7 +13,7 @@ describe Node do
     @second_node = FactoryGirl.create(:person);
 
     @relationship_properties = {:uuid => rand(100), :name => "FooBar"}
-    @relationship = Friends.new(:friends, @first_node, @second_node, :out, @relationship_properties)
+    @relationship = FriendsWith.new(:friends_with, @first_node, @second_node, :out, @relationship_properties)
   end
 
   describe ".save" do
@@ -41,6 +41,18 @@ describe Node do
         @relationship.save
         @relationship.delete
         @relationship.id.should be_nil
+      end
+    end
+  end
+
+  describe ".find" do
+    context "given a relationship id which exists in the graph" do
+      it "should return a relationship object with related nodes" do
+        @relationship.save
+        new_rel = FriendsWith.find(@relationship.id)
+        new_rel.should be_a(Relationship)
+        new_rel.start_node.should be_a(Node)
+        new_rel.end_node.should be_a(Node)
       end
     end
   end

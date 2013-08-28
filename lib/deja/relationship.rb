@@ -1,6 +1,8 @@
 module Deja
   class Relationship < Model
 
+    include Deja::Cast
+
     attr_accessor :label, :start_node, :end_node, :direction
 
     class << self
@@ -36,17 +38,17 @@ module Deja
         @label      = config[0]
         @start_node = config[1]
         @end_node   = config[2]
-        @direction  = config[3]
       end
     end
 
-    def self.load()
-      # stub
+    def self.find(id_or_index)
+      relationship = Deja::Query.load_relationship(id_or_index)
+      relationize(relationship)
     end
 
     def create!
       run_callbacks :create do
-        @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, @direction, persisted_attributes)
+        @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, persisted_attributes)
       end
       self
     end

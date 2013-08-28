@@ -51,56 +51,24 @@
         end
       end
 
-      def create_relationship(start_node, end_node, name, direction = :out, attributes = {})
-        case direction
-        when :out
-          cypher { create_path{ node(start_node) > rel(name, attributes).as(:r).neo_id.ret > node(end_node)} }
-        when :in
-          cypher { create_path{ node(start_node) < rel(name, attributes).as(:r).neo_id.ret < node(end_node)} }
-        else
-          return false
-        end
+      def create_relationship(start_node, end_node, name, attributes = {})
+        cypher { create_path{ node(start_node) > rel(name, attributes).as(:r).neo_id.ret > node(end_node)} }
       end
 
-      def create_relationship_from_index(start_node, end_node, name, direction = :out, attributes = {})
-        case direction
-        when :out
-          cypher { create_path{ lookup(start_node[:index], start_node[:key], start_node[:value]) > rel(name, attributes).as(:r).neo_id.ret > lookup(end_node[:index], end_node[:key], end_node[:value])} }
-        when :in
-          cypher { create_path{ lookup(start_node[:index], start_node[:key], start_node[:value]) < rel(name, attributes).as(:r).neo_id.ret < lookup(end_node[:index], end_node[:key], end_node[:value])} }
-        else
-          return false
-        end
+      def create_relationship_from_index(start_node, end_node, name, attributes = {})
+        cypher { create_path{ lookup(start_node[:index], start_node[:key], start_node[:value]) > rel(name, attributes).as(:r).neo_id.ret > lookup(end_node[:index], end_node[:key], end_node[:value])} }
       end
 
-      def get_relationship(index_or_id, opts = {})
-        is_index?(index_or_id) ? rels_from_index(index_or_id, opts) : rels_from_id(index_or_id, opts)
+      def get_relationship(index_or_id)
+        is_index?(index_or_id) ? rels_from_index(index_or_id) : rels_from_id(index_or_id)
       end
 
-      def rels_from_index(index, opts = {})
-        case opts[:include]
-        when :none
-          cypher { node.ret - lookup_rel(index[:index], index[:key], index[:value]).ret - node.ret }
-        when :out
-          cypher { node.ret > lookup_rel(index[:index], index[:key], index[:value]).ret > node.ret }
-        when :in
-          cypher { node.ret < lookup_rel(index[:index], indexp[:key], index[:value]).ret < node.ret }
-        else
-          cypher { lookup_rel(index[:index], index[:key], index[:value]) }
-        end
+      def rels_from_index(index)
+        cypher { node.ret - lookup_rel(index[:index], index[:key], index[:value]).ret - node.ret.limit(1) }
       end
 
       def rels_from_id(id, opts = {})
-        case opts[:include]
-        when :none
-          cypher { node.ret - rel(id).ret - node.ret }
-        when :out
-          cypher { node.ret > rel(id).ret > node.ret }
-        when :in
-          cypher { node.ret < rel(id).ret < node.ret }
-        else
-          cypher { rel(id) }
-        end
+        cypher { node.ret - rel(id).ret - node.ret.limit(1) }
       end
 
       def update_relationship(index_or_id, opts = {})
