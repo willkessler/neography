@@ -64,11 +64,11 @@
       end
 
       def rels_from_index(index)
-        cypher { node.ret - lookup_rel(index[:index], index[:key], index[:value]).ret - node.ret.limit(1) }
+        cypher { node.ret > lookup_rel(index[:index], index[:key], index[:value]).ret > node.ret }
       end
 
       def rels_from_id(id, opts = {})
-        cypher { node.ret - rel(id).ret - node.ret.limit(1) }
+        cypher { node.ret > rel(id).ret > node.ret }
       end
 
       def update_relationship(index_or_id, opts = {})
