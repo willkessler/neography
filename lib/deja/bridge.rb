@@ -78,7 +78,7 @@
       end
 
       def rels_from_index(index)
-        cypher { node.ret - lookup_rel(index[:index], index[:key], index[:value]).ret - node.ret }
+        cypher { node.ret - lookup_rel(index[:index], index[:key], index[:value]).ret - node.ret.limit(1) }
       end
 
       def rels_from_id(id, opts = {})
