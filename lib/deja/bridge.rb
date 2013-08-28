@@ -73,34 +73,16 @@
         end
       end
 
-      def get_relationship(index_or_id, opts = {})
-        is_index?(index_or_id) ? rels_from_index(index_or_id, opts) : rels_from_id(index_or_id, opts)
+      def get_relationship(index_or_id)
+        is_index?(index_or_id) ? rels_from_index(index_or_id) : rels_from_id(index_or_id)
       end
 
-      def rels_from_index(index, opts = {})
-        case opts[:include]
-        when :none
-          cypher { node.ret - lookup_rel(index[:index], index[:key], index[:value]).ret - node.ret }
-        when :out
-          cypher { node.ret > lookup_rel(index[:index], index[:key], index[:value]).ret > node.ret }
-        when :in
-          cypher { node.ret < lookup_rel(index[:index], indexp[:key], index[:value]).ret < node.ret }
-        else
-          cypher { lookup_rel(index[:index], index[:key], index[:value]) }
-        end
+      def rels_from_index(index)
+        cypher { node.ret - lookup_rel(index[:index], index[:key], index[:value]).ret - node.ret }
       end
 
       def rels_from_id(id, opts = {})
-        case opts[:include]
-        when :none
-          cypher { node.ret - rel(id).ret - node.ret }
-        when :out
-          cypher { node.ret > rel(id).ret > node.ret }
-        when :in
-          cypher { node.ret < rel(id).ret < node.ret }
-        else
-          cypher { rel(id) }
-        end
+        cypher { node.ret - rel(id).ret - node.ret.limit(1) }
       end
 
       def update_relationship(index_or_id, opts = {})

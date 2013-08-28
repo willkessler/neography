@@ -47,7 +47,7 @@ describe Query do
         first_node = Deja::Query.load_node(@first_node, :include => :none)
         first_node.should be_a(Array)
         first_rel = Deja::Query.load_relationship(@relationship)
-        first_rel.should be_a(Hash)
+        first_rel.should be_a(Array)
         response = Deja::Query.delete_node(@first_node)
         expect{Deja::Query.load_node(@first_node, :include => :none)}.to raise_error()
         expect{Deja::Query.load_relationship(@relationship)}.to raise_error()
@@ -98,7 +98,7 @@ describe Query do
     context "given a relationship id" do
       it "should delete a single relationship" do
         first_rel = Deja::Query.load_relationship(@relationship)
-        first_rel.should be_a(Hash)
+        first_rel.should be_a(Array)
         response = Deja::Query.delete_relationship(@relationship)
         expect{Deja::Query.load_relationship(@relationship)}.to raise_error()
       end

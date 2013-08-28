@@ -38,10 +38,10 @@ module Deja
         result_hash = Deja.execute_cypher(cypher_query)
       end
 
-      def load_relationship(id_or_index, options = {})
+      def load_relationship(id_or_index)
         cypher_query = Deja::Bridge.get_relationship(id_or_index)
         result_hash  = Deja.execute_cypher(cypher_query)
-        normalize(result_hash, :lazy)
+        normalize(result_hash)
       end
 
       def create_relationship(start_node, end_node, label, direction = :out, attributes = {})

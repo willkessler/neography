@@ -15,19 +15,26 @@ module Deja
         with_initial_node(array)
       end
 
-      def with_initial_node(entity_array)
-        initial_node = self.new(entity_array.first.except(:id).except(:relationships))
+      def relationize(array)
+        return nil if array.empty?
+        with_initial_node(array, false)
+      end
+
+      def with_initial_node(entity_array, return_node = true)
+        node_class = entity_array.first[:type].constantize
+        initial_node = node_class.new(entity_array.first.except(:id).except(:relationships))
         initial_node.instance_variable_set('@id', entity_array.first[:id])
-        sans_initial_node(entity_array.first[:relationships], initial_node)
-        initial_node
+        relationship = sans_initial_node(entity_array.first[:relationships], initial_node)
+        return_node ? initial_node : relationship
       end
 
       def sans_initial_node(relation_hash, initial_node)
         return if relation_hash.nil? or relation_hash.empty?
+        last_relationship = nil
         relation_hash.each do |name, relationship|
           rel_type = name.underscore
           relationship_array = relationship.map do |rel|
-            if self.relationship_names.include?(rel_type.to_sym)
+            if initial_node.class.relationship_names.include?(rel_type.to_sym)
               node_class     = rel[:node][:type].constantize
               related_node   = node_class.new(rel[:node].except(:id))
               related_node.instance_variable_set('@id', rel[:node][:id])
@@ -37,12 +44,14 @@ module Deja
                 memo
               end
               relationship   = rel_class.new(rel[:rel][:type], initial_node, related_node, :out, rel_attributes)
+              last_relationship = relationship
               relationship.instance_variable_set('@id', rel[:rel][:id])
               [related_node, relationship]
             end
           end
-          initial_node.send("#{rel_type}=", relationship_array.compact) if self.relationship_names.include?(rel_type.to_sym)
+          initial_node.send("#{rel_type}=", relationship_array.compact) if initial_node.class.relationship_names.include?(rel_type.to_sym)
         end
+        last_relationship
       end
 
     end

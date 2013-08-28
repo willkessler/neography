@@ -1,6 +1,8 @@
 module Deja
   class Relationship < Model
 
+    include Deja::Cast
+
     attr_accessor :label, :start_node, :end_node, :direction
 
     class << self
@@ -40,8 +42,9 @@ module Deja
       end
     end
 
-    def self.load()
-      # stub
+    def self.find(id_or_index)
+      relationship = Deja::Query.load_relationship(id_or_index)
+      relationize(relationship)
     end
 
     def create!
