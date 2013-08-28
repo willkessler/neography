@@ -51,26 +51,12 @@
         end
       end
 
-      def create_relationship(start_node, end_node, name, direction = :out, attributes = {})
-        case direction
-        when :out
-          cypher { create_path{ node(start_node) > rel(name, attributes).as(:r).neo_id.ret > node(end_node)} }
-        when :in
-          cypher { create_path{ node(start_node) < rel(name, attributes).as(:r).neo_id.ret < node(end_node)} }
-        else
-          return false
-        end
+      def create_relationship(start_node, end_node, name, attributes = {})
+        cypher { create_path{ node(start_node) > rel(name, attributes).as(:r).neo_id.ret > node(end_node)} }
       end
 
-      def create_relationship_from_index(start_node, end_node, name, direction = :out, attributes = {})
-        case direction
-        when :out
-          cypher { create_path{ lookup(start_node[:index], start_node[:key], start_node[:value]) > rel(name, attributes).as(:r).neo_id.ret > lookup(end_node[:index], end_node[:key], end_node[:value])} }
-        when :in
-          cypher { create_path{ lookup(start_node[:index], start_node[:key], start_node[:value]) < rel(name, attributes).as(:r).neo_id.ret < lookup(end_node[:index], end_node[:key], end_node[:value])} }
-        else
-          return false
-        end
+      def create_relationship_from_index(start_node, end_node, name, attributes = {})
+        cypher { create_path{ lookup(start_node[:index], start_node[:key], start_node[:value]) > rel(name, attributes).as(:r).neo_id.ret > lookup(end_node[:index], end_node[:key], end_node[:value])} }
       end
 
       def get_relationship(index_or_id)

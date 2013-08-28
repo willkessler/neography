@@ -74,7 +74,7 @@ describe Bridge do
   describe ".create_relationship" do
     context "with no attributes" do
       it "returns a cypher result" do
-        query = Deja::Bridge.create_relationship(1, 2, :friends, :out, {:some => :attr})
+        query = Deja::Bridge.create_relationship(1, 2, :friends, {:some => :attr})
         query.should be_a(Neo4j::Cypher::Result)
       end
     end

@@ -38,7 +38,6 @@ module Deja
         @label      = config[0]
         @start_node = config[1]
         @end_node   = config[2]
-        @direction  = config[3]
       end
     end
 
@@ -49,7 +48,7 @@ module Deja
 
     def create!
       run_callbacks :create do
-        @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, @direction, persisted_attributes)
+        @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, persisted_attributes)
       end
       self
     end
