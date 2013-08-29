@@ -67,8 +67,8 @@ module Deja
       true
     end
 
-    def add_to_index(index, key, value, unique = false)
-      Deja.add_relationship_to_index(index, key, value)
+    def add_to_index(index, key, value, space = nil)
+      Deja.add_relationship_to_index(index, key, value, @id)
     end
 
     def remove_from_index(*args)
