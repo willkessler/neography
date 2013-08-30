@@ -40,7 +40,7 @@ module Deja
     def define_alias_methods(rel, aliases)
       self.class_eval do
         define_method aliases[:out_plural] do |filter = nil|
-          r = send(:related_nodes, {:include => rel, :direction => :out, :filter => filter})
+          send(:related_nodes, {:include => rel, :direction => :out, :filter => filter})
           instance_variable_get("@#{rel}")
         end
 
