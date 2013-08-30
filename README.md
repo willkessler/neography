@@ -64,8 +64,8 @@ To load a node with a given id, and eager load all related nodes, use the **:all
 To load a relationship with a given id, use the **find** method:
   ```ruby
   friend_rel = FriendsWith.find(5)
-  friend_rel.start_node // returns the beginning node
-  friend_rel.end_node   // returns the ending node
+  friend_rel.start_node   # returns the beginning node
+  friend_rel.end_node     # returns the ending node
   ```
 
 ### Saving Nodes:
@@ -88,8 +88,8 @@ By default Deja supports lazy loading. To load a given relationship on the fly, 
   ```ruby
   node = Person.load(3)
   node.invested_in.each do |investment, rel|  # fetches the investments from the graph
-    investment.class                      # returns the Investment node object
-    investment.rel.class                  # returns the InvestedIn relationship object
+    investment.class                          # returns the Investment node object
+    rel.class                                 # returns the InvestedIn relationship object
   end
   ```
 
@@ -111,7 +111,7 @@ And for relationships
 
 Deja also supports a where method, which is a convenience for index searches:
   ```ruby
-  Person.where(:permalink, 'john_smith')  // searches the idx_Person index for permalink of john_smith
+  Person.where(:permalink, 'john_smith')  # searches the idx_Person index for permalink of john_smith
   ```
 
 
