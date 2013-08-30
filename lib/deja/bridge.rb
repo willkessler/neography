@@ -64,7 +64,7 @@
       end
 
       def get_relationship_from_nodes(start_node, end_node, type)
-        cypher { node(start_node).ret - rel(type).ret - node(end_node).ret }
+        cypher { node(start_node).ret > rel(type).ret > node(end_node).ret }
       end
 
       def rels_from_index(index)
