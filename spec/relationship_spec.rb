@@ -15,7 +15,7 @@ describe Node do
     @second_node = FactoryGirl.create(:person);
 
     @relationship_properties = {:uuid => rand(100), :name => "FooBar"}
-    @relationship = FriendsWith.new(:friends_with, @first_node, @second_node, :out, @relationship_properties)
+    @relationship = FriendsWith.new(@first_node, @second_node, @relationship_properties)
   end
 
   after :each do
@@ -26,6 +26,7 @@ describe Node do
     context "with a relationship that has not yet been saved to the graph" do
       it "should create a new relationship in the graph" do
         @relationship.id.should be_nil
+
         @relationship.save
 
         @relationship.id.should be_a(Fixnum)
@@ -69,6 +70,25 @@ describe Node do
         new_rel.should be_a(Relationship)
         new_rel.start_node.should be_a(Node)
         new_rel.end_node.should be_a(Node)
+      end
+    end
+  end
+
+  describe ".find_between_nodes" do
+    context "given two nodes which exist in the graph" do
+      it "should return a relationship of the given type" do
+        @relationship.save
+        friend_rel = FriendsWith.find_between_nodes(@first_node, @second_node)
+        friend_rel.should be_a(Relationship)
+        friend_rel.start_node.should be_a(Node)
+        friend_rel.end_node.should be_a(Node)
+      end
+    end
+
+    context "given two unrelated nodes which exist in the graph" do
+      it "should return nil if relationship cannot be found" do
+        friend_rel = FriendsWith.find_between_nodes(@first_node, @second_node)
+        friend_rel.should be_nil
       end
     end
   end

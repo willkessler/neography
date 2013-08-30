@@ -47,17 +47,25 @@ Both plural and singular methods are generated for every relationship - the sing
 Interface:
 ----------
 ### Loading Nodes:
-To load a node with a given id, use the **load** method:
+To load a node with a given id, use the **find** method:
   ```ruby
-  Person.load(3)
+  Person.find(3)
   ```
 To load a person with a given id, and eager load a specific relationship, use the **:include** option:
   ```ruby
-  Person.load(3, :include => :invested_in)
+  Person.find(3, :include => :invested_in)
   ```
 To load a node with a given id, and eager load all related nodes, use the **:all** argument:
   ```ruby
-  Person.load(3, :include => :all)
+  Person.find(3, :include => :all)
+  ```
+
+### Loading Relationships:
+To load a relationship with a given id, use the **find** method:
+  ```ruby
+  friend_rel = FriendsWith.find(5)
+  friend_rel.start_node // returns the beginning node
+  friend_rel.end_node   // returns the ending node
   ```
 
 ### Saving Nodes:
@@ -84,3 +92,26 @@ By default Deja supports lazy loading. To load a given relationship on the fly, 
     investment.rel.class                  # returns the InvestedIn relationship object
   end
   ```
+
+### Index Methods:
+Deja allows you to create indexes for both nodes and relationships.
+  ```ruby
+  Deja.create_node_index('idx_Person')
+  Deja.create_relationship_index('idx_FriendsWith')
+  ```
+
+Deja also supports finding by index
+  ```ruby
+  Person.find_by_index('idx_Person', :permalink, 'john_smith')
+  ```
+And for relationships
+  ```ruby
+  FriendsWith.find({:index => 'idx_FriendsWith', :key => 'permalink', :value => 'john_and_mary'})
+  ```
+
+Deja also supports a where method, which is a convenience for index searches:
+  ```ruby
+  Person.where(:permalink, 'john_smith')  // searches the idx_Person index for permalink of john_smith
+  ```
+
+

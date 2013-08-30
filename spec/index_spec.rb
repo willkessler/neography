@@ -11,7 +11,7 @@ describe Deja::RestIndex do
   before :each do
     @first_node = FactoryGirl.create(:person);
     @second_node = FactoryGirl.create(:person);
-    @relationship = Friends.new(:friends, @first_node, @second_node).create!
+    @relationship = Friends.new(@first_node, @second_node).create!
     Deja.create_node_index('test_node_index')
     Deja.create_relationship_index('test_relationship_index')
   end
