@@ -31,7 +31,7 @@ module Deja
       end
     end
 
-    # initialize(label, start_node, end_node, direction, options = {})
+    # initialize(label, start_node, end_node, options = {})
     # the method below ensures that the relationship configuration is done between before_initialize and after_initialize
     def initialize(*args)
       super(*args) do |config|
