@@ -50,6 +50,12 @@ module Deja
         normalize(result_hash)
       end
 
+      def load_relationship_from_node_indexes(start_node, end_node, type)
+        cypher_query = Deja::Bridge.get_relationship_from_node_indexes(start_node, end_node, type)
+        result_hash  = Deja.execute_cypher(cypher_query)
+        normalize(result_hash)
+      end
+
       def create_relationship(start_node, end_node, label, attributes = {})
         cypher_query = Deja::Bridge.create_relationship(start_node, end_node, label, attributes)
         result_hash  = Deja.execute_cypher(cypher_query)
