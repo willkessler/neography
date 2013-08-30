@@ -119,7 +119,7 @@ describe Query do
     end
 
     it "should throw an error if node id doesn't exist" do
-      expect{Deja::Query.load_node(@first_node + 5)}.to raise_error()
+      expect{Deja::Query.load_node(10000)}.to raise_error()
     end
 
     context "given a node id, and argument :none" do

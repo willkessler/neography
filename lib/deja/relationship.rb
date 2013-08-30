@@ -3,7 +3,7 @@ module Deja
 
     include Deja::Cast
 
-    attr_accessor :start_node, :end_node, :direction
+    attr_accessor :start_node, :end_node
 
     class << self
       @directionality = {}
