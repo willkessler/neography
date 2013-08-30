@@ -33,7 +33,8 @@ module Deja
         end
       end
 
-      def create_index_methods(key, values = nil, unique = nil)
+      def create_index_methods(key, values = nil, unique = false)
+
         define_attribute_method(key)
         @@indexed_attributes[self.name] ||= []
         @@indexed_attributes[self.name] << key

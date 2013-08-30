@@ -4,8 +4,10 @@ require 'rake/testtask'
 
 class FriendsWith < Relationship
   attribute :uuid, Integer
-  attribute :name, String
+  attribute :name, String, :index => true
 end
+
+Deja.create_relationship_index('idx_FriendsWith')
 
 describe Node do
   before :each do
@@ -14,6 +16,10 @@ describe Node do
 
     @relationship_properties = {:uuid => rand(100), :name => "FooBar"}
     @relationship = FriendsWith.new(:friends_with, @first_node, @second_node, :out, @relationship_properties)
+  end
+
+  after :each do
+    Deja.neo.execute_query("START n=node(*) MATCH n-[r?]->() WHERE ID(n) <> 0 DELETE r DELETE n")
   end
 
   describe ".save" do
@@ -50,6 +56,16 @@ describe Node do
       it "should return a relationship object with related nodes" do
         @relationship.save
         new_rel = FriendsWith.find(@relationship.id)
+        new_rel.should be_a(Relationship)
+        new_rel.start_node.should be_a(Node)
+        new_rel.end_node.should be_a(Node)
+      end
+    end
+
+    context "given a relationship index which exists in the graph" do
+      it "should return a relationship object with related nodes" do
+        @relationship.save
+        new_rel = FriendsWith.find({:index => 'idx_FriendsWith', :key => 'name', :value => @relationship.name})
         new_rel.should be_a(Relationship)
         new_rel.start_node.should be_a(Node)
         new_rel.end_node.should be_a(Node)
