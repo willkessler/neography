@@ -63,6 +63,10 @@
         is_index?(index_or_id) ? rels_from_index(index_or_id) : rels_from_id(index_or_id)
       end
 
+      def get_relationship_from_nodes(start_node, end_node, type)
+        cypher { node(start_node).ret - rel(type).ret - node(end_node).ret }
+      end
+
       def rels_from_index(index)
         cypher { node.ret > lookup_rel(index[:index], index[:key], index[:value]).ret > node.ret }
       end
