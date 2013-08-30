@@ -31,7 +31,7 @@ module Deja
       end
     end
 
-    # new(label, start_node, end_node, attributes = {})
+    # initialize(label, start_node, end_node, options = {})
     # the method below ensures that the relationship configuration is done between before_initialize and after_initialize
     def initialize(*args)
       super(*args) do |config|
@@ -67,8 +67,8 @@ module Deja
       true
     end
 
-    def add_to_index(index, key, value, unique = false)
-      Deja.add_relationship_to_index(index, key, value)
+    def add_to_index(index, key, value, space = nil)
+      Deja.add_relationship_to_index(index, key, value, @id)
     end
 
     def remove_from_index(*args)
