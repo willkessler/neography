@@ -43,7 +43,7 @@ module Deja
                 memo[k]   = rel[:rel][k]
                 memo
               end
-              relationship   = rel_class.new(rel[:rel][:type], initial_node, related_node, :out, rel_attributes)
+              relationship   = rel_class.new(rel[:rel][:type], initial_node, related_node, rel_attributes)
               last_relationship = relationship
               relationship.instance_variable_set('@id', rel[:rel][:id])
               [related_node, relationship]
