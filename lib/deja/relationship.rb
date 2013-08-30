@@ -3,7 +3,7 @@ module Deja
 
     include Deja::Cast
 
-    attr_accessor :label, :start_node, :end_node
+    attr_accessor :start_node, :end_node
 
     class << self
       @directionality = {}
@@ -29,26 +29,35 @@ module Deja
 
         @directionality.key?(from_type) and @directionality[from_type].include?(to_type)
       end
+
+      def label
+        return self.name.underscore.to_sym
+      end
+
+      def find(id_or_index)
+        relationship = Deja::Query.load_relationship(id_or_index)
+        relationize(relationship)
+      end
+
+      def find_between_nodes(start_node, end_node)
+        relationship = Deja::Query.load_relationship_from_nodes(start_node.id, end_node.id, self.label)
+        relationize(relationship)
+      end
+
     end
 
-    # initialize(label, start_node, end_node, options = {})
+    # initialize(start_node, end_node, options = {})
     # the method below ensures that the relationship configuration is done between before_initialize and after_initialize
     def initialize(*args)
       super(*args) do |config|
-        @label      = config[0]
-        @start_node = config[1]
-        @end_node   = config[2]
+        @start_node = config[0]
+        @end_node   = config[1]
       end
-    end
-
-    def self.find(id_or_index)
-      relationship = Deja::Query.load_relationship(id_or_index)
-      relationize(relationship)
     end
 
     def create!
       run_callbacks :create do
-        @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, @label, persisted_attributes)
+        @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, self.class.label, persisted_attributes)
       end
       self
     end

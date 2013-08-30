@@ -39,9 +39,9 @@ describe Finders do
     @first_node = FactoryGirl.create(:person);
     @second_node = FactoryGirl.create(:person);
     @third_node = FactoryGirl.create(:company);
-    @invested_in = InvestedIn.new(:invested_in, @first_node, @second_node).create
-    @friends = FriendsWith.new(:friends_with, @first_node, @second_node).create
-    @hates = HasHate.new(:has_hate, @first_node, @third_node).create
+    @invested_in = InvestedIn.new(@first_node, @second_node).create
+    @friends = FriendsWith.new(@first_node, @second_node).create
+    @hates = HasHate.new(@first_node, @third_node).create
   end
 
   describe ".find_by_neo_id" do
