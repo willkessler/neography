@@ -3,7 +3,7 @@ module Deja
 
     include Deja::Cast
 
-    attr_accessor :label, :start_node, :end_node, :direction
+    attr_accessor :label, :start_node, :end_node
 
     class << self
       @directionality = {}
@@ -31,7 +31,7 @@ module Deja
       end
     end
 
-    # initialize(label, start_node, end_node, direction, options = {})
+    # new(label, start_node, end_node, attributes = {})
     # the method below ensures that the relationship configuration is done between before_initialize and after_initialize
     def initialize(*args)
       super(*args) do |config|
