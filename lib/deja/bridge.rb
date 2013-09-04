@@ -154,7 +154,7 @@
 
       def idx_outgoing_triplet(index, rels = nil)
         rels = rel_or_nil(rels)
-        cypher { lookup(id[:index], id[:key], id[:value]).ret.outgoing(rel(*rels).ret).ret }
+        cypher { lookup(index[:index], index[:key], index[:value]).ret.outgoing(rel(*rels).ret).ret }
       end
 
       def incoming_triplet(id, rels = nil)
@@ -164,7 +164,7 @@
 
       def idx_incoming_triplet(index, rels = nil)
         rels = rel_or_nil(rels)
-        cypher { lookup(id[:index], id[:key], id[:value]).ret.incoming(rel(*rels).ret).ret }
+        cypher { lookup(index[:index], index[:key], index[:value]).ret.incoming(rel(*rels).ret).ret }
       end
 
       def in_out_triplet(id, rels = nil)

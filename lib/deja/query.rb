@@ -8,8 +8,7 @@ module Deja
       end
 
       def load_related_nodes(neo_id, options = {})
-        r = load_related_nodes_with_args(neo_id, options)
-        r
+        load_related_nodes_with_args(neo_id, options)
       end
 
       def create_node(attributes = {})
