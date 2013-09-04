@@ -66,7 +66,7 @@ module Deja
 
           define_method "#{aliases[:in_plural]}=" do |relationship|
             current_rel = instance_variable_get("@#{rel}") || []
-            current_rel << [relationship.end_node, relationship]
+            current_rel << [relationship.start_node, relationship]
             instance_variable_set("@#{rel}", current_rel)
           end
 
