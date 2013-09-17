@@ -28,7 +28,7 @@ module Deja
       def attr_accessorize(name, opts)
         send(:attr_reader, name)
         define_method("#{name}=") do |new_value|
-          send("#{name}_will_change!") if (new_value != instance_variable_get("@#{name}") && opts[:index])
+          send("#{name}_will_change!") if (new_value != instance_variable_get("@#{name}") && !instance_variable_get("@#{name}").nil? && opts[:index])
           instance_variable_set("@#{name}", new_value)
         end
       end
@@ -45,8 +45,6 @@ module Deja
         define_method("remove_#{key}_from_index") do
           self.remove_from_index("idx_#{self.class.name}", key, send(key))
         end
-        private("add_#{key}_to_index")
-        private("remove_#{key}_from_index")
       end
 
       def index(name, attrs, opts = {})
