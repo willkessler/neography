@@ -25,6 +25,18 @@ module Deja
         end
         attr_writer name
       end
+
+      def outgoing_rel(type, cardinality="plural")
+        return nil unless @relationship_names and @relationship_names[type.underscore.to_sym]
+        selector = ("out_" + cardinality).to_sym
+        @relationship_names[type.underscore.to_sym][selector]
+      end
+
+      def incoming_rel(type, cardinality="plural")
+        return nil unless @relationship_names and @relationship_names[type.underscore.to_sym]
+        selector = ("in_" + cardinality).to_sym
+        @relationship_names[type.underscore.to_sym][selector]
+      end
     end
 
     def initialize(*args)
@@ -99,13 +111,11 @@ module Deja
     end
 
     def outgoing_rel(type, cardinality="plural")
-      selector = ("out_" + cardinality).to_sym
-      self.class.relationship_names[type.underscore.to_sym][selector]
+      self.class.outgoing_rel(type, cardinality)
     end
 
     def incoming_rel(type, cardinality="plural")
-      selector = ("in_" + cardinality).to_sym
-      self.class.relationship_names[type.underscore.to_sym][selector]
+      self.class.incoming_rel(type, cardinality)
     end
 
     def count_relationships(type = :all)
