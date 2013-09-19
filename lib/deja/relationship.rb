@@ -44,6 +44,17 @@ module Deja
         relationize(relationship)
       end
 
+      # Returns all (from_node, to_node pairs) for this relationship
+      # e.g., [["Organization", "OrganizationAcquisitionActivity"], ["OrganizationAcquisitionActivity", "Organization"]]
+      def node_pairs
+        return [] if @directionality.blank?
+
+        pairs = []
+        @directionality.each do |from_node, to_nodes|
+          to_nodes.map { |to| pairs << [from_node, to] }
+        end
+        pairs
+      end
     end
 
     # initialize(start_node, end_node, options = {})

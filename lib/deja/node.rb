@@ -10,20 +10,33 @@ module Deja
       def relationship(name, opts = {})
         raise StandardError, "'out' or 'in' aliases must be specified" unless opts.is_a? Hash and (opts[:out] or opts[:in])
         @relationship_names ||= {}
-        if opts[:in] then
-          @relationship_names[name] = {
-            :out_singular => opts[:out].to_s.singularize,
-            :out_plural   => opts[:out].to_s.pluralize,
-            :in_singular  => opts[:in].to_s.singularize,
-            :in_plural    => opts[:in].to_s.pluralize
-          }
-        else
-          @relationship_names[name] = {
-            :out_singular => opts[:out].to_s.singularize,
-            :out_plural   => opts[:out].to_s.pluralize
-          }
+        if opts[:in]
+          @relationship_names[name] ||= {}
+          @relationship_names[name].merge!({
+                      :in_singular  => opts[:in].to_s.singularize,
+                      :in_plural    => opts[:in].to_s.pluralize
+                    })
+        end
+        if opts[:out]
+          @relationship_names[name] ||= {}
+          @relationship_names[name].merge!({
+                      :out_singular => opts[:out].to_s.singularize,
+                      :out_plural   => opts[:out].to_s.pluralize
+                    })
         end
         attr_writer name
+      end
+
+      def outgoing_rel(type, cardinality="plural")
+        return nil unless @relationship_names and @relationship_names[type.underscore.to_sym]
+        selector = ("out_" + cardinality).to_sym
+        @relationship_names[type.underscore.to_sym][selector]
+      end
+
+      def incoming_rel(type, cardinality="plural")
+        return nil unless @relationship_names and @relationship_names[type.underscore.to_sym]
+        selector = ("in_" + cardinality).to_sym
+        @relationship_names[type.underscore.to_sym][selector]
       end
     end
 
@@ -39,26 +52,28 @@ module Deja
 
     def define_alias_methods(rel, aliases)
       self.class_eval do
-        define_method aliases[:out_plural] do |filter = nil|
-          send(:related_nodes, {:include => rel, :direction => :out, :filter => filter})
-          instance_variable_get("@#{rel}")
+        if aliases[:out_plural] and aliases[:out_singular]
+          define_method aliases[:out_plural] do |filter = nil|
+            send(:related_nodes, {:include => rel, :direction => :out, :filter => filter})
+            instance_variable_get("@#{rel}")
+          end
+
+          define_method "#{aliases[:out_plural]}=" do |relationship|
+            current_rel = instance_variable_get("@#{rel}") || []
+            current_rel << [relationship.end_node, relationship]
+            instance_variable_set("@#{rel}", current_rel)
+          end
+
+          alias_method "#{aliases[:out_plural]}<<", "#{aliases[:out_plural]}="
+
+          define_method aliases[:out_singular] do |&b|
+            relation = send(aliases[:out_plural]).first
+            b.call(relation[0], relation[1]) if b
+            relation
+          end
         end
 
-        define_method "#{aliases[:out_plural]}=" do |relationship|
-          current_rel = instance_variable_get("@#{rel}") || []
-          current_rel << [relationship.end_node, relationship]
-          instance_variable_set("@#{rel}", current_rel)
-        end
-
-        alias_method "#{aliases[:out_plural]}<<", "#{aliases[:out_plural]}="
-
-        define_method aliases[:out_singular] do |&b|
-          relation = send(aliases[:out_plural]).first
-          b.call(relation[0], relation[1]) if b
-          relation
-        end
-
-        if aliases[:in_plural] and aliases[:in_singular] then
+        if aliases[:in_plural] and aliases[:in_singular]
           define_method aliases[:in_plural] do |filter = nil|
             send(:related_nodes, {:include => rel, :direction => :in, :filter => filter})
             instance_variable_get("@#{rel}")
@@ -99,13 +114,11 @@ module Deja
     end
 
     def outgoing_rel(type, cardinality="plural")
-      selector = ("out_" + cardinality).to_sym
-      self.class.relationship_names[type.underscore.to_sym][selector]
+      self.class.outgoing_rel(type, cardinality)
     end
 
     def incoming_rel(type, cardinality="plural")
-      selector = ("in_" + cardinality).to_sym
-      self.class.relationship_names[type.underscore.to_sym][selector]
+      self.class.incoming_rel(type, cardinality)
     end
 
     def count_relationships(type = :all)
