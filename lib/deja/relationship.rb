@@ -6,6 +6,8 @@ module Deja
     attr_accessor :start_node, :end_node
 
     class << self
+      attr_reader :directionality
+
       @directionality = {}
 
       def from(from_type=nil, opts={})
