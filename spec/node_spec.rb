@@ -76,7 +76,7 @@ describe Node do
     end
   end
 
-  describe 'in transactions' do
+  describe "in batch" do
     context "with two nodes" do
       before :each do
         @first_node.save()
