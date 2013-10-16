@@ -31,13 +31,13 @@ module Deja
 
   class << self; attr_accessor :neo, :tx, :batch ; end
 
-  def self.execute_cypher(query, params = nil)
+  def self.execute_cypher(query)
     if Deja.tx
       Deja.neo.in_transaction(Deja.tx, query.to_s)
     elsif Deja.batch
       Deja.batch << [:execute_query, query.to_s]
     else
-      self.neo.execute_query(query.to_s, params)
+      self.neo.execute_query(query.to_s)
     end
   end
 
