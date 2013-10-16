@@ -204,7 +204,7 @@
       end
 
       def attach_filter(result, filter = nil)
-        result.where{|n| n[:type] == filter.to_s.camelize}.ret if filter
+        result.where{|n| n[:type] == filter.to_s.camelize} if filter
         result
       end
 
@@ -217,28 +217,28 @@
 
       def idx_outgoing_pair(index, rels = nil, filter = nil)
         cypher {
-          r = lookup(index[:index], index[:key], index[:value]).outgoing(rel(*rels).ret).ret
+          r = lookup(index[:index], index[:key], index[:value]).outgoing(rel(*rels).ret)
           ret Deja::Bridge.attach_filter(r, filter)
         }
       end
 
       def incoming_pair(id, rels = nil, filter = nil)
         cypher {
-          r = node(id).incoming(rel(*rels).ret).ret
+          r = node(id).incoming(rel(*rels).ret)
           ret Deja::Bridge.attach_filter(r, filter)
         }
       end
 
       def idx_incoming_pair(index, rels = nil, filter = nil)
         cypher {
-          r = lookup(index[:index], index[:key], index[:value]).incoming(rel(*rels).ret).ret
+          r = lookup(index[:index], index[:key], index[:value]).incoming(rel(*rels).ret)
           ret Deja::Bridge.attach_filter(r, filter)
         }
       end
 
       def in_out_pair(id, rels = nil, filter = nil)
         cypher {
-          r = node(id).both(rel(*rels).ret).ret
+          r = node(id).both(rel(*rels).ret)
           ret Deja::Bridge.attach_filter(r, filter)
         }
       end

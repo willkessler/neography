@@ -5,6 +5,7 @@ require 'rake/testtask'
 describe Node do
   before :each do
     @first_node = FactoryGirl.build(:person);
+    @second_node = FactoryGirl.build(:company);
   end
 
   describe ".save!" do
@@ -75,4 +76,29 @@ describe Node do
     end
   end
 
+  describe 'in transactions' do
+    context "with two nodes" do
+      before :each do
+        @first_node.save()
+        @first_node = Person.find_by_neo_id(@first_node.id)
+        @second_node.save()
+        @second_node = Person.find_by_neo_id(@second_node.id)
+      end
+      it "should commit in single request" do
+        @first_node.name = "shark"
+        @second_node.name = "speak"
+
+        Deja::Batch.commit do
+          @first_node.save()
+          @second_node.save()
+        end
+
+        @first_node_new = Person.find_by_neo_id(@first_node.id)
+        @second_node_new = Person.find_by_neo_id(@second_node.id)
+
+        expect(@first_node_new.name).to eq("shark")
+        expect(@second_node_new.name).to eq("speak")
+      end
+    end
+  end
 end
