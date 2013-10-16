@@ -146,30 +146,4 @@ describe Finders do
     end
   end
 
-  describe "in transactions" do
-    context "updating multiple nodes" do
-      before :each do
-        @u_node1 = Person.find_by_neo_id(@first_node.id)
-        @u_node2 = Person.find_by_neo_id(@second_node.id)
-      end
-
-      it "should do some shit" do
-        @u_node1.name = "shark"
-        @u_node2.name = "speak"
-
-        Deja::Transaction.commit do
-          @u_node1.save()
-          @u_node2.save()
-        end
-
-        @u_node1_new = Person.find_by_neo_id(@first_node.id)
-        @u_node2_new = Person.find_by_neo_id(@second_node.id)
-
-        expect(@u_node1_new.name).to eq("shark")
-        expect(@u_node2_new.name).to eq("speak")
-      end
-
-    end
-  end
-
 end
