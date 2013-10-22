@@ -72,11 +72,11 @@
       end
 
       def rels_from_index(index)
-        cypher { node.ret > lookup_rel(index[:index], index[:key], index[:value]).ret > node.ret }
+        cypher { node.ret < lookup_rel(index[:index], index[:key], index[:value]).ret < node.ret }
       end
 
       def rels_from_id(id, opts = {})
-        cypher { node.ret > rel(id).ret > node.ret }
+        cypher { node.ret < rel(id).ret < node.ret }
       end
 
       def update_relationship(index_or_id, opts = {})
@@ -204,7 +204,7 @@
       end
 
       def attach_filter(result, filter = nil)
-        result.where{|n| n[:type] == filter.to_s.camelize}.ret if filter
+        result.where{|n| n[:type] == filter.to_s.camelize} if filter
         result
       end
 
@@ -217,28 +217,28 @@
 
       def idx_outgoing_pair(index, rels = nil, filter = nil)
         cypher {
-          r = lookup(index[:index], index[:key], index[:value]).outgoing(rel(*rels).ret).ret
+          r = lookup(index[:index], index[:key], index[:value]).outgoing(rel(*rels).ret)
           ret Deja::Bridge.attach_filter(r, filter)
         }
       end
 
       def incoming_pair(id, rels = nil, filter = nil)
         cypher {
-          r = node(id).incoming(rel(*rels).ret).ret
+          r = node(id).incoming(rel(*rels).ret)
           ret Deja::Bridge.attach_filter(r, filter)
         }
       end
 
       def idx_incoming_pair(index, rels = nil, filter = nil)
         cypher {
-          r = lookup(index[:index], index[:key], index[:value]).incoming(rel(*rels).ret).ret
+          r = lookup(index[:index], index[:key], index[:value]).incoming(rel(*rels).ret)
           ret Deja::Bridge.attach_filter(r, filter)
         }
       end
 
       def in_out_pair(id, rels = nil, filter = nil)
         cypher {
-          r = node(id).both(rel(*rels).ret).ret
+          r = node(id).both(rel(*rels).ret)
           ret Deja::Bridge.attach_filter(r, filter)
         }
       end
@@ -248,6 +248,17 @@
           r = lookup(index[:index], index[:key], index[:value]) - rel(*rels).ret - node.ret
           ret Deja::Bridge.attach_filter(r, filter)
         }
+      end
+
+      def count_rels(id, rel = nil, direction = nil)
+        case direction
+        when :out_plural, :out_singular
+          cypher { node(id).outgoing(rel).count }
+        when :in_plural, :in_singular
+          cypher { node(id).incoming(rel).count }
+        else
+          return false
+        end
       end
     end
   end

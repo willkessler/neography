@@ -14,6 +14,7 @@ module Deja
   autoload :Node
   autoload :Cast
   autoload :Query
+  autoload :Batch
   autoload :Transaction
   autoload :Relationship
   autoload :SchemaGenerator
@@ -28,13 +29,19 @@ module Deja
 
   INDEX_DELIM   = '^^^'
 
-  class << self; attr_accessor :neo, :tx ; end
+  class << self; attr_accessor :neo, :tx, :batch ; end
 
   def self.execute_cypher(query)
     if Deja.tx
       Deja.neo.in_transaction(Deja.tx, query.to_s)
+    elsif Deja.batch
+      Deja.batch << [:execute_query, query.to_s]
     else
       self.neo.execute_query(query.to_s)
     end
+  end
+
+  def self.execute_gremlin(query)
+    self.neo.execute_script(query)
   end
 end

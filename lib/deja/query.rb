@@ -28,13 +28,10 @@ module Deja
         result_hash["data"].empty? ? false : true
       end
 
-      def count_relationships(id, type = :all)
-        if type
-          cypher_query = Deja::Bridge.count_relationships(id, type)
-        else
-          cypher_query = Deja::Bridge.count_relationships(id)
-        end
-        result_hash = Deja.execute_cypher(cypher_query)
+      def count_relationships(id, type, direction)
+        cypher_query = Deja::Bridge.count_rels(id, type, direction)
+        result_hash  = Deja.execute_cypher(cypher_query)
+        rel_count    = result_hash['data'].first.first
       end
 
       def load_relationship(id_or_index)

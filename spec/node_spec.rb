@@ -1,10 +1,14 @@
 require 'deja'
 require 'spec_helper'
 require 'rake/testtask'
+require 'benchmark'
+
+class InvestedIn < Relationship; end
 
 describe Node do
   before :each do
     @first_node = FactoryGirl.build(:person);
+    @second_node = FactoryGirl.build(:company);
   end
 
   describe ".save!" do
@@ -67,6 +71,33 @@ describe Node do
     end
   end
 
+  describe ".count" do
+    before :each do
+      @first_node.save()
+      @second_node.save()
+      @third_node = FactoryGirl.create(:company);
+      @invested_in = InvestedIn.new(@first_node, @second_node).create
+    end
+
+    context "given a relationship alias that exists in graph and models" do
+      it "should return an accurate count" do
+        @first_node.count(:investments).should be(1)
+      end
+    end
+
+    context "given a relationship alias that exists in models but not graph" do
+      it "should return an accurate count" do
+        @first_node.count(:hates).should be(0)
+      end
+    end
+
+    context "given a relationship alias that is in neither models or graph" do
+      it "should return false" do
+        @first_node.count(:made_up_alias).should be_false
+      end
+    end
+  end
+
   describe ".relationships" do
     context "with a node having relationships" do
       it "should return a list of relationships" do
@@ -75,4 +106,30 @@ describe Node do
     end
   end
 
+  describe "in batch" do
+    context "with two nodes" do
+      before :each do
+        @first_node.save()
+        @first_node = Person.find_by_neo_id(@first_node.id)
+        @second_node.save()
+        @second_node = Person.find_by_neo_id(@second_node.id)
+      end
+
+      it "should commit in single request" do
+        @first_node.name = "shark"
+        @second_node.name = "speak"
+
+        Deja::Batch.commit do
+          @first_node.save()
+          @second_node.save()
+        end
+
+        @first_node_new = Person.find_by_neo_id(@first_node.id)
+        @second_node_new = Person.find_by_neo_id(@second_node.id)
+
+        expect(@first_node_new.name).to eq("shark")
+        expect(@second_node_new.name).to eq("speak")
+      end
+    end
+  end
 end

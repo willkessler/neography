@@ -69,7 +69,7 @@ describe Query do
 
     context "given a non-existant node id" do
       it "should throw neography error" do
-        expect{Deja::Query.update_node(-1, {:name => 'Manly Man'})}.to raise_error(Neography::NotFoundException)
+        expect{Deja::Query.update_node(6666666, {:name => 'Manly Man'})}.to raise_error(Neography::NotFoundException)
       end
     end
   end

@@ -113,20 +113,21 @@ module Deja
       end
     end
 
+    def count(rel_alias)
+      self.class.relationship_names.each do |name, aliases|
+        aliases.each do |direction, alias_val|
+          return Deja::Query.count_relationships(@id, name, direction) if alias_val == rel_alias.to_s
+        end
+      end
+      return false
+    end
+
     def outgoing_rel(type, cardinality="plural")
       self.class.outgoing_rel(type, cardinality)
     end
 
     def incoming_rel(type, cardinality="plural")
       self.class.incoming_rel(type, cardinality)
-    end
-
-    def count_relationships(type = :all)
-      if type == :all
-        Deja::Query.count_relationships(@id)
-      else
-        Deja::Query.count_relationships(@id, type)
-      end
     end
 
     def create!
