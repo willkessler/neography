@@ -72,11 +72,11 @@
       end
 
       def rels_from_index(index)
-        cypher { node.ret > lookup_rel(index[:index], index[:key], index[:value]).ret > node.ret }
+        cypher { node.ret < lookup_rel(index[:index], index[:key], index[:value]).ret < node.ret }
       end
 
       def rels_from_id(id, opts = {})
-        cypher { node.ret > rel(id).ret > node.ret }
+        cypher { node.ret < rel(id).ret < node.ret }
       end
 
       def update_relationship(index_or_id, opts = {})
@@ -248,6 +248,17 @@
           r = lookup(index[:index], index[:key], index[:value]) - rel(*rels).ret - node.ret
           ret Deja::Bridge.attach_filter(r, filter)
         }
+      end
+
+      def count_rels(id, rel = nil, direction = nil)
+        case direction
+        when :out_plural, :out_singular
+          cypher { node(id).outgoing(rel).count }
+        when :in_plural, :in_singular
+          cypher { node(id).incoming(rel).count }
+        else
+          return false
+        end
       end
     end
   end
