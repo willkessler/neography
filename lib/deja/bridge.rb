@@ -9,6 +9,8 @@
         Neo4j::Cypher.query(&block)
       end
 
+      ## these methods take a cypher block context as an argument,
+      ## it allows us to treat nodes the same regardless of index or id
       def node(id, context, return_root = true)
         if return_root
           is_index?(id) ? context.lookup(id[:index], id[:key], id[:value]).ret : context.node(id).ret
