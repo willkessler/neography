@@ -21,9 +21,9 @@ To implement a model using Deja, inherit from Deja::Node
   class Person < Deja::Node
     attr_accessor :name, :permalink, :type
 
-    relationship :invested_in
-    relationship :friends
-    relationship :hates
+    relationship :invested_in, :out => investment, :in => investor
+    relationship :friends, :out => friend 
+    relationship :hates, :out => hates
   end
   ```
 Relationship Structure:
@@ -91,6 +91,30 @@ By default Deja supports lazy loading. To load a given relationship on the fly, 
     investment.class                          # returns the Investment node object
     rel.class                                 # returns the InvestedIn relationship object
   end
+  ```
+
+### Count:
+To count the number of related nodes without actually fetching them, call the count method passing in the name of the relationship alias as an argument.
+  ```ruby
+  node.count(:investments)                    # returns the total count of all investments
+  ```
+
+### Order:
+To order by a given property on end nodes of a relationship, pass an order option into the relationship alias method.
+  ```ruby
+  node.investments(:order => 'name ASC')      # returns the related nodes ordered by name
+  ```
+  
+### Limit:
+To limit the results of relationship load query, pass in a limit argument.
+  ```ruby
+  node.investments(:limit => 10)              # returns only the first 10 investments
+  ```
+
+### Offset:
+To offset the results of relationship load query, pass in a offset argument.
+  ```ruby
+  node.investments(:offset => 5)              # returns all investments offset by the first 5
   ```
 
 ### Index Methods:
