@@ -36,7 +36,7 @@ describe Node do
         @first_node.name = 'M'
         @first_node.save!
         @first_node.save.should be_true
-        graph_node = Person.find_by_neo_id(id)
+        graph_node = Person.find(id)
         expect(graph_node.name).to eq('M')
       end
     end
@@ -58,7 +58,7 @@ describe Node do
         id = @first_node.id
         @first_node.delete.should be_true
         expect(@first_node.id).to be_nil
-        expect{Person.find_by_neo_id(id)}.to raise_error()
+        expect{Person.find(id)}.to raise_error()
       end
     end
 
@@ -147,9 +147,9 @@ describe Node do
     context "with two nodes" do
       before :each do
         @first_node.save()
-        @first_node = Person.find_by_neo_id(@first_node.id)
+        @first_node = Person.find(@first_node.id)
         @second_node.save()
-        @second_node = Person.find_by_neo_id(@second_node.id)
+        @second_node = Person.find(@second_node.id)
       end
 
       it "should commit in single request" do
@@ -161,8 +161,8 @@ describe Node do
           @second_node.save()
         end
 
-        @first_node_new = Person.find_by_neo_id(@first_node.id)
-        @second_node_new = Person.find_by_neo_id(@second_node.id)
+        @first_node_new = Person.find(@first_node.id)
+        @second_node_new = Person.find(@second_node.id)
 
         expect(@first_node_new.name).to eq("shark")
         expect(@second_node_new.name).to eq("speak")
