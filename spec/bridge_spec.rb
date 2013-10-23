@@ -98,16 +98,6 @@ describe Bridge do
     end
   end
 
-  describe ".get_node_with_rels" do
-    context "given a node id, and argument" do
-      it "should return a cypher result" do
-        query = Deja::Bridge.get_node_with_rels(1, :include => :friends)
-        query.should be_a(Neo4j::Cypher::Result)
-      end
-    end
-  end
-
-
   describe ".get_related_nodes" do
     context "given a node id" do
       it "should return a cypher result" do

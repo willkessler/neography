@@ -46,20 +46,8 @@ module Deja
         normalize(result_hash)
       end
 
-      def load_relationship_from_node_indexes(start_node, end_node, type)
-        cypher_query = Deja::Bridge.get_relationship_from_node_indexes(start_node, end_node, type)
-        result_hash  = Deja.execute_cypher(cypher_query)
-        normalize(result_hash)
-      end
-
       def create_relationship(start_node, end_node, label, attributes = {})
         cypher_query = Deja::Bridge.create_relationship(start_node, end_node, label, attributes)
-        result_hash  = Deja.execute_cypher(cypher_query)
-        rel_id       = result_hash['data'].first.first
-      end
-
-      def create_relationship_from_index(start_node, end_node, label, attributes = {})
-        cypher_query = Deja::Bridge.create_relationship_from_index(start_node, end_node, label, attributes)
         result_hash  = Deja.execute_cypher(cypher_query)
         rel_id       = result_hash['data'].first.first
       end
@@ -76,12 +64,14 @@ module Deja
       end
 
       def load_node_with_args(neo_id, options)
-        cypher_query = Deja::Bridge.get_node_with_rels(neo_id, options)
+        options[:return_root] ||= true
+        cypher_query = Deja::Bridge.get_related_nodes(neo_id, options)
         result_hash  = Deja.execute_cypher(cypher_query)
         normalize(result_hash)
       end
 
       def load_related_nodes_with_args(neo_id, options)
+        options[:return_root] ||= false
         cypher_query = Deja::Bridge.get_related_nodes(neo_id, options)
         result_hash  = Deja.execute_cypher(cypher_query)
         normalize(result_hash, :lazy)
