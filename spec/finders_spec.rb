@@ -42,26 +42,27 @@ describe Finders do
     @invested_in = InvestedIn.new(@first_node, @second_node).create
     @friends = FriendsWith.new(@first_node, @second_node).create
     @hates = HasHate.new(@first_node, @third_node).create
+    @hates2 = HasHate.new(@first_node, @second_node).create
   end
 
-  describe ".find_by_neo_id" do
+  describe ".find" do
     context "given a node id and no filters" do
       before :each do
-        @node = Person.find_by_neo_id(@first_node.id, :include => :all)
+        @node = Person.find(@first_node.id, :include => :all)
       end
 
-      it "should return a node and all related nodes by default" do
+      it "should return a node and all related nodes" do
         @node.should_not_receive(:related_nodes)
         @node.name.should eq(@first_node.name)
         @node.permalink.should eq(@first_node.permalink)
       end
 
-      it "calling invested_in should not call related_nodes" do
-        @node.should_not_receive(:related_nodes).with(:invested_in)
+      it "calling invested_in should call related_nodes" do
+        @node.should_receive(:related_nodes).and_call_original
         @node.investment
       end
 
-      it "calling invested_in should return an array of relNodeWrappers" do
+      it "calling invested_in should return an array of rel/node pairs" do
         @node.investments.should be_a(Array)
         @node.investments[0].should be_a(Array)
       end
@@ -69,11 +70,11 @@ describe Finders do
 
     context "given a node id with an :invested_in argument" do
       it "should not call related_nodes when eager loading" do
-        Person.find_by_neo_id(@first_node.id, :include => :invested_in).should_not_receive(:related_nodes)
+        Person.find(@first_node.id, :include => :invested_in).should_not_receive(:related_nodes)
       end
 
       it "should return only the invested_in relationship" do
-        first_node = Person.find_by_neo_id(@first_node.id, :include => :invested_in)
+        first_node = Person.find(@first_node.id, :include => :invested_in)
         first_node.name.should eq(@first_node.name)
         first_node.permalink.should eq(@first_node.permalink)
         node_type_test(first_node, :investments)
@@ -82,11 +83,11 @@ describe Finders do
 
     context "given a node id with an :invested_in and :friends argument" do
       it "should not call related_nodes when eager loading multiple relations" do
-        first_node = Person.find_by_neo_id(@first_node.id, :include => [:invested_in, :friends]).should_not_receive(:related_nodes)
+        first_node = Person.find(@first_node.id, :include => [:invested_in, :friends]).should_not_receive(:related_nodes)
       end
 
       it "should return both relationships" do
-        first_node = Person.find_by_neo_id(@first_node.id, :include => [:invested_in, :friends])
+        first_node = Person.find(@first_node.id, :include => [:invested_in, :friends])
         first_node.name.should eq(@first_node.name)
         first_node.permalink.should eq(@first_node.permalink)
         node_type_test(first_node, :investments)
@@ -96,7 +97,7 @@ describe Finders do
 
     context "given a node id with a :none filter" do
       it "should return a node and no related nodes" do
-        first_node = Person.find_by_neo_id(@first_node.id)
+        first_node = Person.find(@first_node.id, :include => :none)
         first_node.should_receive(:related_nodes).at_least(:once).and_call_original
         full_node_type_test(first_node)
       end
@@ -106,7 +107,7 @@ describe Finders do
   describe ".find" do
     context "given a neo_id with associated nodes and :all argument" do
       it "should return node objects with relationships" do
-        first_node = Person.find_by_neo_id(@first_node.id, :include => :all)
+        first_node = Person.find(@first_node.id, :include => :all)
         first_node.investments.should_not be_nil
         first_node.friends.should_not be_nil
         first_node.hates.should_not be_nil
@@ -118,12 +119,12 @@ describe Finders do
   describe ".related_nodes" do
     context "on an instance of a single node" do
       before :each do
-        @node = Person.find_by_neo_id(@first_node.id, :include => :all)
+        @node = Person.find(@first_node.id, :include => :none)
       end
 
-      it "should not call related_nodes on already loaded relations" do
+      it "should call related_nodes on relations" do
         @node.should_receive(:related_nodes).and_call_original
-        @node.investments(:person).each do |node, rel|
+        @node.investments(:filter => :person).each do |node, rel|
            node.should be_a(Node)
            rel.should be_a(Relationship)
         end

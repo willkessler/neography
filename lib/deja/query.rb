@@ -4,11 +4,17 @@ module Deja
 
     class << self
       def load_node(neo_id, options = {})
-        load_node_with_args(neo_id, options)
+        options[:return_root] ||= true
+        cypher_query = Deja::Bridge.get_nodes(neo_id, options)
+        result_hash  = Deja.execute_cypher(cypher_query)
+        normalize(result_hash)
       end
 
       def load_related_nodes(neo_id, options = {})
-        load_related_nodes_with_args(neo_id, options)
+        options[:return_root] ||= false
+        cypher_query = Deja::Bridge.get_nodes(neo_id, options)
+        result_hash  = Deja.execute_cypher(cypher_query)
+        normalize(result_hash, :lazy)
       end
 
       def create_node(attributes = {})
@@ -61,20 +67,6 @@ module Deja
         cypher_query = Deja::Bridge.update_relationship(rel_id, attributes)
         result_hash  = Deja.execute_cypher(cypher_query)
         result_hash["data"].empty? ? false : true
-      end
-
-      def load_node_with_args(neo_id, options)
-        options[:return_root] ||= true
-        cypher_query = Deja::Bridge.get_related_nodes(neo_id, options)
-        result_hash  = Deja.execute_cypher(cypher_query)
-        normalize(result_hash)
-      end
-
-      def load_related_nodes_with_args(neo_id, options)
-        options[:return_root] ||= false
-        cypher_query = Deja::Bridge.get_related_nodes(neo_id, options)
-        result_hash  = Deja.execute_cypher(cypher_query)
-        normalize(result_hash, :lazy)
       end
     end
   end

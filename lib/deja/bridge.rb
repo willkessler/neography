@@ -27,9 +27,33 @@
         end
       end
 
-      def attach_filter(result, filter = nil)
-        result.where{|n| n[:type] == filter.to_s.camelize} if filter
-        result
+      def apply_options(context, options = {})
+        context = filter(context, options[:filter]) if options[:filter]
+        context = order(context, options[:order])   if options[:order]
+        context = limit(context, options[:limit])   if options[:limit]
+        context = skip(context, options[:offset])   if options[:offset]
+        context
+      end
+
+      def filter(context, filter)
+        context.where{|n| n[:type] == filter.to_s.camelize}
+      end
+
+      def order(context, order_string)
+        property, order = order_string.split(' ')
+        if order == 'ASC'
+          context.asc(property.to_sym)
+        else
+          context.desc(property.to_sym)
+        end
+      end
+
+      def limit(context, size)
+        context.limit(size)
+      end
+
+      def skip(context, offset)
+        context.skip(offset)
       end
 
       def create_node(attributes = {})
@@ -39,7 +63,7 @@
       end
 
       def delete_node(id)
-        cypher{
+        cypher {
           Deja::Bridge.node(id, self, false).del.both(rel().as(:r).del)
         }
       end
@@ -82,36 +106,40 @@
         }
       end
 
-      def get_related_nodes(id, opts = {})
+      def get_nodes(id, opts = {})
+        return single_node(id) if opts[:include] == :none
         opts[:direction]   ||= :both
-        opts[:filter]      ||= nil
         rels = opts[:include] == :all ? nil : opts[:include]
         case opts[:direction]
-        when :out  then outgoing_rel(id, rels, opts[:return_root], opts[:filter])
-        when :in   then incoming_rel(id, rels, opts[:return_root], opts[:filter])
-        when :both then in_out_rel(id, rels, opts[:return_root], opts[:filter])
+        when :out  then outgoing_rel(id, rels, opts[:return_root], opts)
+        when :in   then incoming_rel(id, rels, opts[:return_root], opts)
+        when :both then in_out_rel(id, rels, opts[:return_root], opts)
         else false
         end
       end
 
-      def outgoing_rel(id, rels = nil, root = nil, filter = nil)
+      def single_node(id)
+        cypher { Deja::Bridge.node(id, self, true) }
+      end
+
+      def outgoing_rel(id, rels = nil, root = nil, opts = nil)
         cypher {
           r = Deja::Bridge.node(id, self, root).outgoing(rel(*rels).ret)
-          ret Deja::Bridge.attach_filter(r, filter)
+          ret Deja::Bridge.apply_options(r, opts)
         }
       end
 
-      def incoming_rel(id, rels = nil, root = nil, filter = nil)
+      def incoming_rel(id, rels = nil, root = nil, opts = nil)
         cypher {
           r = Deja::Bridge.node(id, self, root).incoming(rel(*rels).ret)
-          ret Deja::Bridge.attach_filter(r, filter)
+          ret Deja::Bridge.apply_options(r, opts)
         }
       end
 
-      def in_out_rel(id, rels = nil, root = nil, filter = nil)
+      def in_out_rel(id, rels = nil, root = nil, opts = nil)
         cypher {
           r = Deja::Bridge.node(id, self, root).both(rel(*rels).ret)
-          ret Deja::Bridge.attach_filter(r, filter)
+          ret Deja::Bridge.apply_options(r, opts)
         }
       end
 

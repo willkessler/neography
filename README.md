@@ -21,9 +21,9 @@ To implement a model using Deja, inherit from Deja::Node
   class Person < Deja::Node
     attr_accessor :name, :permalink, :type
 
-    relationship :invested_in
-    relationship :friends
-    relationship :hates
+    relationship :invested_in, :out => investment, :in => investor
+    relationship :friends, :out => friend 
+    relationship :hates, :out => hates
   end
   ```
 Relationship Structure:
@@ -49,7 +49,7 @@ Interface:
 ### Loading Nodes:
 To load a node with a given id, use the **find** method:
   ```ruby
-  Person.find(3)
+  Person.find(3, :include => :none)     # does not include any related nodes
   ```
 To load a person with a given id, and eager load a specific relationship, use the **:include** option:
   ```ruby
@@ -93,6 +93,30 @@ By default Deja supports lazy loading. To load a given relationship on the fly, 
   end
   ```
 
+### Count:
+To count the number of related nodes without actually fetching them, call the count method passing in the name of the relationship alias as an argument.
+  ```ruby
+  node.count(:investments)                    # returns the total count of all investments
+  ```
+
+### Order:
+To order by a given property on end nodes of a relationship, pass an order option into the relationship alias method.
+  ```ruby
+  node.investments(:order => 'name ASC')      # returns the related nodes ordered by name
+  ```
+  
+### Limit:
+To limit the results of relationship load query, pass in a limit argument.
+  ```ruby
+  node.investments(:limit => 10)              # returns only the first 10 investments
+  ```
+
+### Offset:
+To offset the results of relationship load query, pass in a offset argument.
+  ```ruby
+  node.investments(:offset => 5)              # returns all investments offset by the first 5
+  ```
+
 ### Index Methods:
 Deja allows you to create indexes for both nodes and relationships.
   ```ruby
@@ -102,7 +126,7 @@ Deja allows you to create indexes for both nodes and relationships.
 
 Deja also supports finding by index
   ```ruby
-  Person.find_by_index('idx_Person', :permalink, 'john_smith')
+  Person.find({:index => 'idx_Person', :key => :permalink, :value => 'john_smith'})
   ```
 And for relationships
   ```ruby
