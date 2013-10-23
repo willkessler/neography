@@ -53,8 +53,8 @@ module Deja
     def define_alias_methods(rel, aliases)
       self.class_eval do
         if aliases[:out_plural] and aliases[:out_singular]
-          define_method aliases[:out_plural] do |filter = nil|
-            send(:related_nodes, {:include => rel, :direction => :out, :filter => filter})
+          define_method aliases[:out_plural] do |opts = {}|
+            send(:related_nodes, {:include => rel, :direction => :out}.merge(opts))
             instance_variable_get("@#{rel}")
           end
 
@@ -74,8 +74,8 @@ module Deja
         end
 
         if aliases[:in_plural] and aliases[:in_singular]
-          define_method aliases[:in_plural] do |filter = nil|
-            send(:related_nodes, {:include => rel, :direction => :in, :filter => filter})
+          define_method aliases[:in_plural] do |opts = {}|
+            send(:related_nodes, {:include => rel, :direction => :in}.merge(opts))
             instance_variable_get("@#{rel}")
           end
 

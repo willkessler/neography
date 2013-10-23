@@ -62,7 +62,7 @@ describe Bridge do
     end
   end
 
-  describe ".update_node_by_id" do
+  describe ".update_node" do
     context "given a node id" do
       it "should return a cypher result" do
         query = Deja::Bridge.update_node(1, {:some => :attr})
@@ -101,7 +101,7 @@ describe Bridge do
   describe ".get_related_nodes" do
     context "given a node id" do
       it "should return a cypher result" do
-        query = Deja::Bridge.get_related_nodes(1, :include => :all)
+        query = Deja::Bridge.get_nodes(1, :include => :all)
         query.should be_a(Neo4j::Cypher::Result)
       end
     end

@@ -106,6 +106,43 @@ describe Node do
     end
   end
 
+  describe "relationship filters and options" do
+    before :each do
+      @first_node.save()
+      @second_node = FactoryGirl.create(:person);
+      10.times do
+        InvestedIn.new(@first_node, FactoryGirl.create(:company)).create
+      end
+      InvestedIn.new(@first_node, @second_node).create
+    end
+
+    context "given a filter" do
+      it "should filter results" do
+        @first_node.investments(:filter => :person).size.should be 1
+      end
+    end
+
+    context "given an order" do
+      it "should order results" do
+        desc = @first_node.investments(:order => 'name DESC').collect {|node, rel| node.name }
+        asc = @first_node.investments(:order => 'name ASC').collect {|node, rel| node.name }
+        desc.should eq(asc.reverse)
+      end
+    end
+
+    context "given a limit" do
+      it "should limit results" do
+        @first_node.investments(:limit => 2).size.should be 2
+      end
+    end
+
+    context "given a offset" do
+      it "should offset results" do
+        @first_node.investments(:offset => 2).size.should be @first_node.count(:investments) - 2
+      end
+    end
+  end
+
   describe "in batch" do
     context "with two nodes" do
       before :each do
