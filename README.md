@@ -49,7 +49,7 @@ Interface:
 ### Loading Nodes:
 To load a node with a given id, use the **find** method:
   ```ruby
-  Person.find(3)
+  Person.find(3, :include => :none)     # does not include any related nodes
   ```
 To load a person with a given id, and eager load a specific relationship, use the **:include** option:
   ```ruby
@@ -126,7 +126,7 @@ Deja allows you to create indexes for both nodes and relationships.
 
 Deja also supports finding by index
   ```ruby
-  Person.find_by_index('idx_Person', :permalink, 'john_smith')
+  Person.find({:index => 'idx_Person', :key => :permalink, :value => 'john_smith'})
   ```
 And for relationships
   ```ruby
