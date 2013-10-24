@@ -63,7 +63,6 @@ describe Query do
     context "given an existing node id" do
       it "should return true" do
         response = Deja::Query.update_node(@first_node, {:name => 'Manly Man'})
-        tirst_node = Deja::Query.load_node(@first_node, :include => :none)
         response.should be_true
       end
     end
