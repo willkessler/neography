@@ -8,9 +8,17 @@ describe Bridge do
   end
 
   describe ".is_index" do
-    context "given a hash" do
+    context "given a hash with correct structure" do
       it "should return true" do
-        Deja::Bridge.is_index?({}).should be_true
+        Deja::Bridge.is_index?({:index => '', :key => '', :value => ''}).should be_true
+      end
+    end
+  end
+
+  describe ".is_query" do
+    context "given a hash with correct structure" do
+      it "should return true" do
+        Deja::Bridge.is_query?({:index => '', :query => ''}).should be_true
       end
     end
   end
