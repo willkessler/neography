@@ -169,4 +169,34 @@ describe Node do
       end
     end
   end
+
+  describe "auto indexing of nodes" do
+    before :each do
+      Deja.get_node_auto_index_properties.each do |index_property|
+        Deja.remove_node_auto_index_property(index_property)
+      end
+      Deja.set_node_auto_index_status(false)
+    end
+
+    context "creating a node after auto index is set to true" do
+      it "should add the node to the auto index" do
+        Deja.set_node_auto_index_status(true)
+        Deja.add_node_auto_index_property('name')
+        @first_node.save()
+        @grabit = Deja::Node.find({:index => 'node_auto_index', :key => 'name', :value => @first_node.name}, :include => :none)
+        @grabit.id.should eq(@first_node.id)
+      end
+    end
+
+    context "creating a node after index is created on two properties" do
+      it "should allow queries across two keys" do
+        Deja.set_node_auto_index_status(true)
+        Deja.add_node_auto_index_property('name')
+        Deja.add_node_auto_index_property('type')
+        @first_node.save()
+        #@grabit = Deja::Node.find({:index => 'node_auto_index', :query => "name:#{@first_node.name}"}, :include => :none)
+        #@grabit.id.should eq(@first_node.id)
+      end
+    end
+  end
 end

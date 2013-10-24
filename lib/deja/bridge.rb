@@ -1,29 +1,41 @@
  module Deja
   class Bridge
     class << self
-      def is_index?(id_or_index)
-        id_or_index.is_a?(Hash)
-      end
-
       def cypher(&block)
         Neo4j::Cypher.query(&block)
+      end
+
+      def is_index?(id)
+        id.is_a?(Hash) && id[:index] && id[:key] && id[:value]
+      end
+
+      def is_query?(id)
+        id.is_a?(Hash) && id[:index] && id[:query]
       end
 
       ## these methods take a cypher block context as an argument,
       ## it allows us to treat nodes/rels the same regardless of index or id
       def node(id, context, return_root = true)
         if return_root
-          is_index?(id) ? context.lookup(id[:index], id[:key], id[:value]).ret : context.node(id).ret
+          return context.lookup(id[:index], id[:key], id[:value]).ret if is_index?(id)
+          return context.query(id[:index], id[:query]).ret if is_query?(id)
+          context.node(id).ret
         else
-          is_index?(id) ? context.lookup(id[:index], id[:key], id[:value]) : context.node(id)
+          return context.lookup(id[:index], id[:key], id[:value]) if is_index?(id)
+          return context.query(id[:index], id[:query]) if is_query?(id)
+          context.node(id)
         end
       end
 
       def rel(id, context, return_root = true)
         if return_root
-          is_index?(id) ? context.lookup_rel(id[:index], id[:key], id[:value]).ret : context.rel(id).ret
+          return context.lookup_rel(id[:index], id[:key], id[:value]).ret if is_index?(id)
+          return context.query_rel(id[:index], id[:query]).ret if is_query?(id)
+          context.rel(id).ret
         else
-          is_index?(id) ? context.lookup_rel(id[:index], id[:key], id[:value]) : context.rel(id)
+          return context.lookup_rel(id[:index], id[:key], id[:value]) if is_index?(id)
+          return context.query_rel(id[:index], id[:query]) if is_query?(id)
+          context.rel(id)
         end
       end
 
@@ -74,7 +86,7 @@
             attributes.each do |key, value|
               n[key] = value
             end
-          end
+          end.ret
         end
       end
 
@@ -96,7 +108,7 @@
             attributes.each do |key, value|
               r[key] = value
             end
-          end
+          end.ret
         end
       end
 
