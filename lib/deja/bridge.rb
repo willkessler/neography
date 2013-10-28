@@ -18,11 +18,11 @@
       def node(id, context, return_root = true)
         if return_root
           return context.lookup(id[:index], id[:key], id[:value]).ret if is_index?(id)
-          return context.query(id[:index], id[:query]).ret if is_query?(id)
+          return context.query(id[:index], id[:query].gsub("'", %q(\\\'))).ret if is_query?(id)
           context.node(id).ret
         else
           return context.lookup(id[:index], id[:key], id[:value]) if is_index?(id)
-          return context.query(id[:index], id[:query]) if is_query?(id)
+          return context.query(id[:index], id[:query].gsub("'", %q(\\\'))) if is_query?(id)
           context.node(id)
         end
       end
@@ -30,11 +30,11 @@
       def rel(id, context, return_root = true)
         if return_root
           return context.lookup_rel(id[:index], id[:key], id[:value]).ret if is_index?(id)
-          return context.query_rel(id[:index], id[:query]).ret if is_query?(id)
+          return context.query_rel(id[:index], id[:query].gsub("'", %q(\\\'))).ret if is_query?(id)
           context.rel(id).ret
         else
           return context.lookup_rel(id[:index], id[:key], id[:value]) if is_index?(id)
-          return context.query_rel(id[:index], id[:query]) if is_query?(id)
+          return context.query_rel(id[:index], id[:query].gsub("'", %q(\\\'))) if is_query?(id)
           context.rel(id)
         end
       end

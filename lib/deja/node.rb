@@ -1,9 +1,5 @@
 module Deja
   class Node < Model
-
-    include Deja::Cast
-    include Deja::Finders
-
     class << self
       attr_reader :relationship_names
 
@@ -41,6 +37,25 @@ module Deja
         return nil unless @relationship_names and @relationship_names[type.underscore.to_sym]
         selector = ("in_" + cardinality).to_sym
         @relationship_names[type.underscore.to_sym][selector]
+      end
+
+      def add_property_to_index(property)
+        begin
+          Deja.add_node_auto_index_property(property)
+        ensure
+          @@indexed_attributes[self.name] ||= []
+          @@indexed_attributes[self.name] << property
+        end
+      end
+
+      def find(id, options = {})
+        options[:include] ||= :all
+        result = Deja::Query.load_node(id, options)
+        objectify result
+      end
+
+      def where(key, value, options = {})
+        find({:index => "node_auto_index", :key => key, :value => value}, options)
       end
     end
 
@@ -153,14 +168,6 @@ module Deja
       Deja::Query.delete_node(@id) if @id
       @id = nil
       true
-    end
-
-    def add_to_index(index, key, value, unique = false)
-      Deja.add_node_to_index(index, key, value, @id, unique)
-    end
-
-    def remove_from_index(index, key, value)
-      Deja.remove_node_from_index(index, key, value, @id)
     end
 
     def persisted_attributes

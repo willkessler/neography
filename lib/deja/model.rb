@@ -7,6 +7,7 @@ module Deja
     include ActiveSupport::Concern
     include ActiveSupport::Inflector
 
+    include Deja::Cast
     include Deja::Error
     include Deja::SchemaGenerator
 
@@ -16,9 +17,6 @@ module Deja
     attr_reader :id
 
     define_model_callbacks :initialize, :create, :update, :delete, :save
-
-    after_create :create_indices
-    after_update :update_indices
 
     def initialize(*args)
       attrs = self.class.class_variable_get(:@@all_attributes)
@@ -120,21 +118,5 @@ module Deja
     end
 
     class BadImplementationError < StandardError; end
-
-
-    def create_indices
-      (self.class.indexes || {}).each do |name|
-        send("add_#{name}_to_index")
-      end
-    end
-
-    def update_indices
-      (self.class.indexes || {}).each do |name|
-        if(send("#{name}_changed?") == true)
-          send("remove_#{name}_from_index")
-          send("add_#{name}_to_index")
-        end
-      end
-    end
   end
 end

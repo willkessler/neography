@@ -16,6 +16,7 @@ class Person < Deja::Node
   relationship :invested_in, :out => :investment
   relationship :friends_with, :out => :friends
   relationship :has_hate, :out => :hates
+  relationship :waits_for, :out => :waits
 end
 
 

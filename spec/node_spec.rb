@@ -3,12 +3,151 @@ require 'spec_helper'
 require 'rake/testtask'
 require 'benchmark'
 
+def full_node_type_test(node)
+  node.should be_a(Node)
+  node.class.relationship_names.each do |k, v|
+    node.send(v[:out_plural]).should be_a(Array)
+    node.send(v[:out_plural]).each do |relnode|
+      relnode.should be_a(Array)
+      relnode[0].should be_a(Node)
+      relnode[1].should be_a(Relationship)
+    end
+  end
+end
+
+def node_type_test(node, rel)
+  node.should be_a(Node)
+  node.send(rel).should be_a(Array)
+  node.send(rel).each do |relnode|
+    relnode.should be_a(Array)
+    relnode[0].should be_a(Node)
+    relnode[1].should be_a(Relationship)
+  end
+end
+
+def build_nodes
+  @first_node = FactoryGirl.build(:person);
+  @second_node = FactoryGirl.build(:company);
+end
+
 class InvestedIn < Relationship; end
+class FriendsWith < Relationship; end
+class HasHate < Relationship; end
 
 describe Node do
+  after :each do
+    Deja.neo.execute_query("START n=node(*) MATCH n-[r?]->() WHERE ID(n) <> 0 DELETE r DELETE n")
+  end
+
   before :each do
-    @first_node = FactoryGirl.build(:person);
-    @second_node = FactoryGirl.build(:company);
+    @first_node = FactoryGirl.create(:person);
+    @second_node = FactoryGirl.create(:company);
+    @third_node = FactoryGirl.create(:company);
+    @invested_in = InvestedIn.new(@first_node, @second_node).create
+    @friends = FriendsWith.new(@first_node, @second_node).create
+    @hates = HasHate.new(@first_node, @third_node).create
+    @hates2 = HasHate.new(@first_node, @second_node).create
+
+  end
+
+  describe ".find" do
+    context "given a node id and no filters" do
+      before :each do
+        @node = Person.find(@first_node.id, :include => :all)
+      end
+
+      it "should return a node and all related nodes" do
+        @node.should_not_receive(:related_nodes)
+        @node.name.should eq(@first_node.name)
+        @node.permalink.should eq(@first_node.permalink)
+      end
+
+      it "calling invested_in should call related_nodes" do
+        @node.should_receive(:related_nodes).and_call_original
+        @node.investment
+      end
+
+      it "calling invested_in should return an array of rel/node pairs" do
+        @node.investments.should be_a(Array)
+        @node.investments[0].should be_a(Array)
+      end
+    end
+
+    context "given a node id with an :invested_in argument" do
+      it "should not call related_nodes when eager loading" do
+        Person.find(@first_node.id, :include => :invested_in).should_not_receive(:related_nodes)
+      end
+
+      it "should return only the invested_in relationship" do
+        first_node = Person.find(@first_node.id, :include => :invested_in)
+        first_node.name.should eq(@first_node.name)
+        first_node.permalink.should eq(@first_node.permalink)
+        node_type_test(first_node, :investments)
+      end
+    end
+
+    context "given a node id with an :invested_in and :friends argument" do
+      it "should not call related_nodes when eager loading multiple relations" do
+        first_node = Person.find(@first_node.id, :include => [:invested_in, :friends]).should_not_receive(:related_nodes)
+      end
+
+      it "should return both relationships" do
+        first_node = Person.find(@first_node.id, :include => [:invested_in, :friends])
+        first_node.name.should eq(@first_node.name)
+        first_node.permalink.should eq(@first_node.permalink)
+        node_type_test(first_node, :investments)
+        node_type_test(first_node, :friends)
+      end
+    end
+
+    context "given a node id with a :none filter" do
+      it "should return a node and no related nodes" do
+        first_node = Person.find(@first_node.id, :include => :none)
+        first_node.should_receive(:related_nodes).at_least(:once).and_call_original
+        full_node_type_test(first_node)
+      end
+    end
+
+    context "given a neo_id with associated nodes and :all argument" do
+      it "should return node objects with relationships" do
+        first_node = Person.find(@first_node.id, :include => :all)
+        first_node.investments.should_not be_nil
+        first_node.friends.should_not be_nil
+        first_node.hates.should_not be_nil
+        full_node_type_test(first_node)
+      end
+    end
+  end
+
+  describe ".related_nodes" do
+    context "on an instance of a single node" do
+      before :each do
+        @node = Person.find(@first_node.id, :include => :none)
+      end
+
+      it "should call related_nodes on relations" do
+        @node.should_receive(:related_nodes).and_call_original
+        @node.investments(:filter => :person).each do |node, rel|
+           node.should be_a(Node)
+           rel.should be_a(Relationship)
+        end
+      end
+
+      it "should load all related nodes" do
+        @node.related_nodes
+        @node.investment.should be_a(Array)
+        full_node_type_test(@node)
+      end
+    end
+  end
+
+  describe ".where" do
+    context "given an indexed property" do
+      it "should return a node with the given index" do
+        @indexed_node = Person.where(:permalink, @first_node.permalink)
+        @indexed_node.name.should eq(@first_node.name)
+      end
+    end
   end
 
   describe ".save!" do
@@ -20,6 +159,9 @@ describe Node do
   end
 
   describe ".save" do
+    before :each do
+      build_nodes
+    end
     context "with a node object which has not yet been saved to the graph" do
       it "should create a new node in the graph" do
         @first_node.id.should be_nil
@@ -52,6 +194,9 @@ describe Node do
   end
 
   describe ".delete" do
+    before :each do
+      build_nodes
+    end
     context "with a node which already exists in the graph" do
       it "should delete the node from the graph" do
         @first_node.save.should be_true
@@ -72,13 +217,6 @@ describe Node do
   end
 
   describe ".count" do
-    before :each do
-      @first_node.save()
-      @second_node.save()
-      @third_node = FactoryGirl.create(:company);
-      @invested_in = InvestedIn.new(@first_node, @second_node).create
-    end
-
     context "given a relationship alias that exists in graph and models" do
       it "should return an accurate count" do
         @first_node.count(:investments).should be(1)
@@ -87,7 +225,7 @@ describe Node do
 
     context "given a relationship alias that exists in models but not graph" do
       it "should return an accurate count" do
-        @first_node.count(:hates).should be(0)
+        @first_node.count(:waits).should be(0)
       end
     end
 
@@ -176,15 +314,16 @@ describe Node do
         Deja.remove_node_auto_index_property(index_property)
       end
       Deja.set_node_auto_index_status(false)
+      @index_node = FactoryGirl.build(:person);
     end
 
     context "creating a node after auto index is set to true" do
       it "should add the node to the auto index" do
         Deja.set_node_auto_index_status(true)
         Deja.add_node_auto_index_property('name')
-        @first_node.save()
-        @grabit = Deja::Node.find({:index => 'node_auto_index', :key => 'name', :value => @first_node.name}, :include => :none)
-        @grabit.id.should eq(@first_node.id)
+        @index_node.save()
+        @grabit = Deja::Node.find({:index => 'node_auto_index', :key => 'name', :value => @index_node.name}, :include => :none)
+        @grabit.id.should eq(@index_node.id)
       end
     end
 
@@ -193,9 +332,9 @@ describe Node do
         Deja.set_node_auto_index_status(true)
         Deja.add_node_auto_index_property('name')
         Deja.add_node_auto_index_property('type')
-        @first_node.save()
-        #@grabit = Deja::Node.find({:index => 'node_auto_index', :query => "name:#{@first_node.name}"}, :include => :none)
-        #@grabit.id.should eq(@first_node.id)
+        @index_node.save()
+        @grabit = Deja::Node.find({:index => 'node_auto_index', :query => "name:\"#{@index_node.name}\" AND type: Person"}, :include => :none)
+        @grabit.id.should eq(@index_node.id)
       end
     end
   end
