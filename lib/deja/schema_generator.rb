@@ -21,16 +21,8 @@ module Deja
       def attribute(name, type, opts = {})
         self.define_class_key
         @@all_attributes[self.name][name] = opts.merge(:type => type)
-        attr_accessorize(name, opts)
+        send(:attr_accessor, name)
         add_property_to_index(name) if opts[:index]
-      end
-
-      def attr_accessorize(name, opts)
-        send(:attr_reader, name)
-        define_method("#{name}=") do |new_value|
-          send("#{name}_will_change!") if (new_value != instance_variable_get("@#{name}") && !instance_variable_get("@#{name}").nil? && opts[:index])
-          instance_variable_set("@#{name}", new_value)
-        end
       end
 
       def indexed_attributes
