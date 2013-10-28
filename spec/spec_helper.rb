@@ -25,5 +25,3 @@ class SpecHelper
     Deja.neo.execute_query("START n=node(*) MATCH n-[r?]->() WHERE ID(n) <> 0 DELETE r DELETE n")
   end
 end
-# Start Neo4j server
-Deja.neo = Neography::Rest.new()

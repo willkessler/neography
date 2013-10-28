@@ -27,9 +27,11 @@ module Deja
 
   extend Deja::RestIndex
 
-  INDEX_DELIM   = '^^^'
-
   class << self; attr_accessor :neo, :tx, :batch ; end
+
+  Deja.neo = Neography::Rest.new()
+  Deja.set_node_auto_index_status(true)
+  Deja.set_relationship_auto_index_status(true)
 
   def self.execute_cypher(query)
     if Deja.tx

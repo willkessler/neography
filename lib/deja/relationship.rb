@@ -1,8 +1,5 @@
 module Deja
   class Relationship < Model
-
-    include Deja::Cast
-
     attr_accessor :start_node, :end_node
 
     class << self
@@ -41,6 +38,10 @@ module Deja
         relationize(relationship)
       end
 
+      def where(key, value)
+        find({:index => 'relationship_auto_index', :key =>  key, :value => value})
+      end
+
       def find_between_nodes(start_node, end_node)
         relationship = Deja::Query.load_relationship_from_nodes(start_node.id, end_node.id, self.label)
         relationize(relationship)
@@ -56,6 +57,15 @@ module Deja
           to_nodes.map { |to| pairs << [from_node, to] }
         end
         pairs
+      end
+
+      def add_property_to_index(property)
+        begin
+          Deja.add_relationship_auto_index_property(property)
+        ensure
+          @@indexed_attributes[self.name] ||= []
+          @@indexed_attributes[self.name] << property
+        end
       end
     end
 
@@ -87,14 +97,6 @@ module Deja
       Deja::Query.delete_relationship(@id) if @id
       @id = nil
       true
-    end
-
-    def add_to_index(index, key, value, space = nil)
-      Deja.add_relationship_to_index(index, key, value, @id)
-    end
-
-    def remove_from_index(*args)
-      Deja.remove_relationship_from_index(*args)
     end
 
     def persisted_attributes

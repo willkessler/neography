@@ -7,8 +7,6 @@ class FriendsWith < Relationship
   attribute :name, String, :index => true
 end
 
-Deja.create_relationship_index('idx_FriendsWith')
-
 describe Node do
   before :each do
     @first_node = FactoryGirl.create(:person);
@@ -62,11 +60,13 @@ describe Node do
         new_rel.end_node.should be_a(Node)
       end
     end
+  end
 
+  describe ".where" do
     context "given a relationship index which exists in the graph" do
       it "should return a relationship object with related nodes" do
         @relationship.save
-        new_rel = FriendsWith.find({:index => 'idx_FriendsWith', :key => 'name', :value => @relationship.name})
+        new_rel = FriendsWith.where(:name, @relationship.name)
         new_rel.should be_a(Relationship)
         new_rel.start_node.should be_a(Node)
         new_rel.end_node.should be_a(Node)
