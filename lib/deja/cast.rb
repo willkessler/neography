@@ -11,15 +11,17 @@ module Deja
     module ClassMethods
       # creating objects and their relationships (if any)
       def objectify(array)
-        return nil if array.empty?
-        n_array = array.inject([]) { |nodes, node| nodes << with_initial_node(node) }
-        return n_array.size == 1 ? n_array.first : n_array
+        if array.present?
+          n_array = array.map { |node| with_initial_node(node) }
+          n_array.size == 1 ? n_array.first : n_array
+        end
       end
 
       def relationize(array)
-        return nil if array.empty?
-        r_array = array.inject([]) { |rels, rel| rels << with_initial_node(rel, false) }
-        return r_array.size == 1 ? r_array.first : r_array
+        if array.present?
+          r_array = array.map { |rel| with_initial_node(rel, false) }
+          r_array.size == 1 ? r_array.first : r_array
+        end
       end
 
       def with_initial_node(entity_array, return_node = true)
