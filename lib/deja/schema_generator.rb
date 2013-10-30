@@ -5,7 +5,7 @@ module Deja
     module ClassMethods
       @@all_attributes ||= {}
       @@indexed_attributes ||= {}
-      @@composed_attributes ||= []
+      @@composed_attributes ||= {}
 
       def schema
         {
@@ -42,11 +42,13 @@ module Deja
       end
 
       def composed_attributes(attrs = nil)
+        @@composed_attributes[self.name] ||= []
+
         if attrs
-          @@composed_attributes += attrs
-          @@composed_attributes.uniq!
+          @@composed_attributes[self.name] += attrs
+          @@composed_attributes[self.name].uniq!
         else
-          @@composed_attributes
+          @@composed_attributes[self.name]
         end
       end
 

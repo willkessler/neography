@@ -28,7 +28,7 @@ module Deja
       run_callbacks :initialize do
         @id = nil
         options = args.extract_options!
-        options = options.select { |k, v| self.class.attributes.include?(k)}
+        options = options.select { |k, v| self.class.attributes.include?(k) || self.class.composed_attributes.include?(k)}
         super(options)
         yield(args) if block_given?
       end
