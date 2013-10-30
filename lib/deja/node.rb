@@ -3,6 +3,10 @@ module Deja
     class << self
       attr_reader :relationship_names
 
+      def relationship_names
+        @relationship_names || {}
+      end
+
       def relationship(name, opts = {})
         raise StandardError, "'out' or 'in' aliases must be specified" unless opts.is_a? Hash and (opts[:out] or opts[:in])
         @relationship_names ||= {}
