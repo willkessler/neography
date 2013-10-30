@@ -34,6 +34,12 @@ module Deja
         result_hash["data"].empty? ? false : true
       end
 
+      def count_nodes(index)
+        cypher_query = Deja::Bridge.count_nodes(index)
+        result_hash  = Deja.execute_cypher(cypher_query)
+        rel_count    = result_hash['data'].first.first
+      end
+
       def count_relationships(id, type, direction)
         cypher_query = Deja::Bridge.count_rels(id, type, direction)
         result_hash  = Deja.execute_cypher(cypher_query)

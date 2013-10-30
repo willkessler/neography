@@ -57,6 +57,10 @@ module Deja
       def where(key, value, options = {})
         find({:index => "node_auto_index", :key => key, :value => value}, options)
       end
+
+      def count(index)
+        Deja::Query.count_nodes(index)
+      end
     end
 
     def initialize(*args)

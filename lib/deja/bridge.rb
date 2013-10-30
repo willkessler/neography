@@ -155,6 +155,12 @@
         }
       end
 
+      def count_nodes(index)
+        cypher {
+          Deja::Bridge.node(index, self, false).count
+        }
+      end
+
       def count_rels(id, rel = nil, direction = nil)
         case direction
         when :out_plural, :out_singular
