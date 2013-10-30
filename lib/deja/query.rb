@@ -36,7 +36,6 @@ module Deja
 
       def count_nodes(index)
         cypher_query = Deja::Bridge.count_nodes(index)
-        puts cypher_query
         result_hash  = Deja.execute_cypher(cypher_query)
         rel_count    = result_hash['data'].first.first
       end
