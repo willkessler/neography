@@ -11,19 +11,25 @@ module Deja
       private
       # separate neo4j returned data into flat array of node/relationship data
       def sane_hash(hash)
-        hash['data'].map do |slice|
-          slice.map do |record|
-            next unless record
-            attr_hash = {
-              :id   => record['self'].split('/').last.to_i,
-              :type => record['type']
-            }
-            attr_hash[:start_node] = record['start'].split('/').last.to_i if record['start']
-            attr_hash[:end_node]   = record['end'].split('/').last.to_i if record['end']
-            record['data'].each do |key, value|
-              attr_hash[key.to_sym] = value
+        hash['data'].each_with_index.map do |slice, i|
+          ## if we are selecting specific columns, we trigger this first condition
+          unless slice.first && slice.first.is_a?(Hash)
+            Hash[hash['columns'].map{|x|(x.split('.')[1] || x).to_sym}.zip(slice)]
+          ## otherwise we are grabbing every field and we parse the data
+          else
+            slice.map do |record|
+              next unless record
+              attr_hash = {
+                :id   => record['self'].split('/').last.to_i,
+                :type => record['type']
+              }
+              attr_hash[:start_node] = record['start'].split('/').last.to_i if record['start']
+              attr_hash[:end_node]   = record['end'].split('/').last.to_i if record['end']
+              record['data'].each do |key, value|
+                attr_hash[key.to_sym] = value
+              end
+              attr_hash
             end
-            attr_hash
           end
         end.flatten
       end

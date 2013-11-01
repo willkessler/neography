@@ -49,7 +49,6 @@ module Deja
       end
 
       def find(id, options = {})
-        options[:include] ||= :all
         result = Deja::Query.load_node(id, options)
         objectify result
       end
@@ -143,6 +142,10 @@ module Deja
         end
       end
       return false
+    end
+
+    def connections
+      return Deja::Query.count_connections(@id)
     end
 
     def outgoing_rel(type, cardinality="plural")
