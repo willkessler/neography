@@ -36,7 +36,7 @@ class HasHate < Relationship; end
 
 describe Node do
   after :each do
-    Deja.neo.execute_query("START n=node(*) MATCH n-[r?]->() WHERE ID(n) <> 0 DELETE r DELETE n")
+    #Deja.neo.execute_query("START n=node(*) MATCH n-[r?]->() WHERE ID(n) <> 0 DELETE r DELETE n")
   end
 
   before :each do
@@ -47,7 +47,6 @@ describe Node do
     @friends = FriendsWith.new(@first_node, @second_node).create
     @hates = HasHate.new(@first_node, @third_node).create
     @hates2 = HasHate.new(@first_node, @second_node).create
-
   end
 
   describe ".find" do
@@ -115,6 +114,14 @@ describe Node do
         first_node.friends.should_not be_nil
         first_node.hates.should_not be_nil
         full_node_type_test(first_node)
+      end
+    end
+
+    context "given a node id and a select filter" do
+      it "should return a node object with only the selected fields" do
+        first_node = Person.find(@first_node.id, :include => :none, :select => [:name, :type])
+        first_node.name.should_not be_nil
+        first_node.permalink.should be_nil
       end
     end
   end
@@ -232,6 +239,16 @@ describe Node do
     context "given a relationship alias that is in neither models or graph" do
       it "should return false" do
         @first_node.count(:made_up_alias).should be_false
+      end
+    end
+  end
+
+  describe ".connections" do
+    context "given a node with relationships" do
+      it "should return an accurate count of all relationships" do
+        @first_node.connections.should be 4
+        @second_node.connections.should be 3
+        @third_node.connections.should be 1
       end
     end
   end

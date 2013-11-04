@@ -15,28 +15,16 @@
 
       ## these methods take a cypher block context as an argument,
       ## it allows us to treat nodes/rels the same regardless of index or id
-      def node(id, context, return_root = true)
-        if return_root
-          return context.lookup(id[:index], id[:key], id[:value]).ret if is_index?(id)
-          return context.query(id[:index], id[:query].gsub("'", %q(\\\'))).ret if is_query?(id)
-          context.node(id).ret
-        else
-          return context.lookup(id[:index], id[:key], id[:value]) if is_index?(id)
-          return context.query(id[:index], id[:query].gsub("'", %q(\\\'))) if is_query?(id)
-          context.node(id)
-        end
+      def node(id, context, identifier = :root)
+        return context.lookup(id[:index], id[:key], id[:value]).as(identifier) if is_index?(id)
+        return context.query(id[:index], id[:query].gsub("'", %q(\\\'))).as(identifier) if is_query?(id)
+        context.node(id).as(identifier)
       end
 
-      def rel(id, context, return_root = true)
-        if return_root
-          return context.lookup_rel(id[:index], id[:key], id[:value]).ret if is_index?(id)
-          return context.query_rel(id[:index], id[:query].gsub("'", %q(\\\'))).ret if is_query?(id)
-          context.rel(id).ret
-        else
-          return context.lookup_rel(id[:index], id[:key], id[:value]) if is_index?(id)
-          return context.query_rel(id[:index], id[:query].gsub("'", %q(\\\'))) if is_query?(id)
-          context.rel(id)
-        end
+      def rel(id, context, identifier = :relation)
+        return context.lookup_rel(id[:index], id[:key], id[:value]).as(identifier) if is_index?(id)
+        return context.query_rel(id[:index], id[:query].gsub("'", %q(\\\'))).as(identifier) if is_query?(id)
+        context.rel(id).as(identifier)
       end
 
       def apply_options(context, options = {})
@@ -44,7 +32,8 @@
         context = order(context, options[:order])   if options[:order]
         context = limit(context, options[:limit])   if options[:limit]
         context = skip(context, options[:offset])   if options[:offset]
-        context
+        return select(context, options[:select]) if options[:select].present?
+        return_query(context, options[:return_root])
       end
 
       def filter(context, filter)
@@ -68,6 +57,17 @@
         context.skip(offset)
       end
 
+      def select(context, properties)
+        properties << :type
+        context.ret { |n| properties.map{|p| node(:root)[p]} << node(:root).neo_id.as(:id)}
+      end
+
+      def return_query(context, return_root = :root_rel_end)
+        context.ret { :root } if return_root == :root_only
+        context.ret { [:relation, :end]} if return_root == :rel_end
+        context.ret { [:root, :relation, :end] } if return_root == :root_rel_end
+      end
+
       def create_node(attributes = {})
         raise Deja::Error::InvalidParameter unless attributes
         raise Deja::Error::NoParameter if attributes.empty?
@@ -76,13 +76,13 @@
 
       def delete_node(id)
         cypher {
-          Deja::Bridge.node(id, self, false).del.both(rel().as(:r).del)
+          Deja::Bridge.node(id, self).del.both(rel().as(:relation).del)
         }
       end
 
       def update_node(id, attributes)
         cypher do
-          Deja::Bridge.node(id, self, false).tap do |n|
+          Deja::Bridge.node(id, self).tap do |n|
             attributes.each do |key, value|
               n[key] = value
             end
@@ -91,15 +91,21 @@
       end
 
       def create_relationship(start_node, end_node, name, attributes = {})
-        cypher { create_path{ Deja::Bridge.node(start_node, self, false) > rel(name, attributes).as(:r).neo_id.ret > Deja::Bridge.node(end_node, self, false)} }
+        cypher { create_path{ Deja::Bridge.node(start_node, self, :root) > rel(name, attributes).as(:relation).neo_id.ret > Deja::Bridge.node(end_node, self, :end)} }
       end
 
       def get_relationship(id)
-        cypher { node.ret < Deja::Bridge.rel(id, self) < node.ret }
+        cypher {
+          r = node.as(:root) < Deja::Bridge.rel(id, self) < node.as(:end)
+          Deja::Bridge.apply_options(r, {:return_root => :root_rel_end})
+        }
       end
 
       def get_relationship_from_nodes(start_node, end_node, type)
-        cypher { Deja::Bridge.node(start_node, self) > rel(type).ret > Deja::Bridge.node(end_node, self) }
+        cypher {
+          r = Deja::Bridge.node(start_node, self, :root) > rel(type).as(:relation) > Deja::Bridge.node(end_node, self, :end)
+          Deja::Bridge.apply_options(r, {:return_root => :root_rel_end})
+        }
       end
 
       def update_relationship(id, attributes = {})
@@ -108,56 +114,59 @@
             attributes.each do |key, value|
               r[key] = value
             end
-          end.ret
-        end
+          end.ret        end
       end
 
       def delete_relationship(id)
         cypher {
-          Deja::Bridge.rel(id, self, false).del
+          Deja::Bridge.rel(id, self).del
         }
       end
 
       def get_nodes(id, opts = {})
-        return single_node(id) if opts[:include] == :none
+        return single_node(id, opts) if opts[:include] == :none
         opts[:direction]   ||= :both
         rels = opts[:include] == :all ? nil : opts[:include]
         case opts[:direction]
-        when :out  then outgoing_rel(id, rels, opts[:return_root], opts)
-        when :in   then incoming_rel(id, rels, opts[:return_root], opts)
-        when :both then in_out_rel(id, rels, opts[:return_root], opts)
+        when :out  then outgoing_rel(id, rels, opts)
+        when :in   then incoming_rel(id, rels, opts)
+        when :both then in_out_rel(id, rels, opts)
         else false
         end
       end
 
-      def single_node(id)
-        cypher { Deja::Bridge.node(id, self, true) }
-      end
-
-      def outgoing_rel(id, rels = nil, root = nil, opts = nil)
+      def single_node(id, opts = {})
+        opts[:return_root] = :root_only
         cypher {
-          r = Deja::Bridge.node(id, self, root).outgoing(rel(*rels).ret)
-          ret Deja::Bridge.apply_options(r, opts)
+          n = Deja::Bridge.node(id, self)
+          Deja::Bridge.apply_options(n, opts)
         }
       end
 
-      def incoming_rel(id, rels = nil, root = nil, opts = nil)
+      def outgoing_rel(id, rels = nil, opts = nil)
         cypher {
-          r = Deja::Bridge.node(id, self, root).incoming(rel(*rels).ret)
-          ret Deja::Bridge.apply_options(r, opts)
+          r = Deja::Bridge.node(id, self).outgoing(rel(*rels).as(:relation)).as(:end)
+          Deja::Bridge.apply_options(r, opts)
         }
       end
 
-      def in_out_rel(id, rels = nil, root = nil, opts = nil)
+      def incoming_rel(id, rels = nil, opts = nil)
         cypher {
-          r = Deja::Bridge.node(id, self, root).both(rel(*rels).ret)
-          ret Deja::Bridge.apply_options(r, opts)
+          r = Deja::Bridge.node(id, self).incoming(rel(*rels).as(:relation)).as(:end)
+          Deja::Bridge.apply_options(r, opts)
+        }
+      end
+
+      def in_out_rel(id, rels = nil, opts = nil)
+        cypher {
+          r = Deja::Bridge.node(id, self).both(rel(*rels).as(:relation)).as(:end)
+          Deja::Bridge.apply_options(r, opts)
         }
       end
 
       def count_nodes(index)
         cypher {
-          Deja::Bridge.node(index, self, false).count
+          Deja::Bridge.node(index, self).count
         }
       end
 
@@ -170,6 +179,10 @@
         else
           return false
         end
+      end
+
+      def count_connections(id)
+        cypher { node(id).both().count }
       end
     end
   end
