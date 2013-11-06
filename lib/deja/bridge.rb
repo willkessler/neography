@@ -6,7 +6,7 @@
       end
 
       def is_index?(id)
-        id.is_a?(Hash) && id[:index] && id[:key] && id[:value]
+        id.is_a?(Hash) && id[:index] && id[:key]
       end
 
       def is_query?(id)
