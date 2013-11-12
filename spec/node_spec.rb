@@ -36,7 +36,7 @@ class HasHate < Relationship; end
 
 describe Node do
   after :each do
-    #Deja.neo.execute_query("START n=node(*) MATCH n-[r?]->() WHERE ID(n) <> 0 DELETE r DELETE n")
+    Deja.neo.execute_query("START n=node(*) MATCH n-[r?]->() WHERE ID(n) <> 0 DELETE r DELETE n")
   end
 
   before :each do

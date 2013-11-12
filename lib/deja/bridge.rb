@@ -96,7 +96,7 @@
 
       def get_relationship(id)
         cypher {
-          r = node.as(:root) < Deja::Bridge.rel(id, self) < node.as(:end)
+          r = node.as(:end) < Deja::Bridge.rel(id, self) < node.as(:root)
           Deja::Bridge.apply_options(r, {:return_root => :root_rel_end})
         }
       end

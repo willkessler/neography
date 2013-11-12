@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/andreasronge/neo4j-cypher.git
-  revision: 36766b29714b623c7df24d6a682ba1628e3bf169
+  revision: 05e589ca79fb8e5e1abb2e4d2a9192f46d173660
   specs:
     neo4j-cypher (1.0.1)
 
