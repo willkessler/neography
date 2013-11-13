@@ -1,0 +1,16 @@
+languages:
+  ruby: 2.0.0-p247
+setup:
+- scripts:
+  - wget -O - http://debian.neo4j.org/neotechnology.gpg.key | sudo apt-key add -
+  - echo 'deb http://debian.neo4j.org/repo stable/' > /etc/apt/sources.list.d/neo4j.list
+  - apt-get update
+  - apt-get install neo4j=1.9.4 -y --force-yes
+  - bundle install --gemfile=Gemfile.server
+test:
+  machines: 1
+  scripts:
+  - tests:
+      script: BUNDLE_GEMFILE=Gemfile.server rake
+      timeout: 1800
+      xunit: spec/reports
