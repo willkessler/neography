@@ -1,9 +1,0 @@
-machine:
-  ruby:
-    version: 2.0.0-p247
-dependencies:
-  pre:
-    - "[[ -d ~/neo4j-community-1.9.4 ]] || ( curl -L 'http://download.neo4j.org/artifact?edition=community&version=1.9.4&distribution=tarball&dlid=2355712' | tar -xzf - -C ~ )"
-    - ~/neo4j-community-1.9.4/bin/neo4j start
-  cache_directories:
-    - "~/neo4j-community-1.9.4"
