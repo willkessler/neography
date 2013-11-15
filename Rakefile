@@ -12,8 +12,15 @@ Bundler::GemHelper.install_tasks
 
 $: << File.expand_path("#{File.dirname(__FILE__)}/lib")
 
-RSpec::Core::RakeTask.new('spec')
+RSpec::Core::RakeTask.new(:spec) do |t|
+  t.rspec_opts = "--color --format documentation"
+  t.pattern = "spec/**/*_spec.rb"
+end
 
-desc "Run Tests"
-task :spec => 'ci:setup:rspec'
+desc 'Run Tests'
 task :default => :spec
+
+RSpec::Core::RakeTask.new('ci_spec')
+
+desc 'Run Koality Tests'
+task :ci_spec => 'ci:setup:rspec'

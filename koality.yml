@@ -11,6 +11,6 @@ test:
   machines: 1
   scripts:
   - tests:
-      script: BUNDLE_GEMFILE=Gemfile.server rake
+      script: BUNDLE_GEMFILE=Gemfile.server rake ci_spec
       timeout: 1800
       xunit: spec/reports
