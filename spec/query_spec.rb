@@ -10,13 +10,13 @@ describe Query do
   describe ".create_node" do
     context "with no attributes" do
       it "should raise an exception" do
-        expect{Deja::Query.create_node()}.to raise_error()
+        Deja::Query.create_node().should be_nil
       end
     end
 
     context "with nil attribute" do
       it "should raise an exception" do
-        expect{Deja::Query.create_node(nil)}.to raise_error()
+        Deja::Query.create_node(nil).should be_nil
       end
     end
 

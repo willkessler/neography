@@ -24,7 +24,7 @@ module Deja
           result_hash  = Deja.execute_cypher(cypher_query)
           node_id      = result_hash['data'].first.first
         rescue
-          nil
+          return nil
         end
       end
 
