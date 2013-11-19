@@ -19,9 +19,13 @@ module Deja
       end
 
       def create_node(attributes = {})
-        cypher_query = Deja::Bridge.create_node(attributes)
-        result_hash  = Deja.execute_cypher(cypher_query)
-        node_id      = result_hash['data'].first.first
+        begin
+          cypher_query = Deja::Bridge.create_node(attributes)
+          result_hash  = Deja.execute_cypher(cypher_query)
+          node_id      = result_hash['data'].first.first
+        rescue
+          nil
+        end
       end
 
       def delete_node(node_id)
@@ -66,9 +70,13 @@ module Deja
       end
 
       def create_relationship(start_node, end_node, label, attributes = {})
-        cypher_query = Deja::Bridge.create_relationship(start_node, end_node, label, attributes)
-        result_hash  = Deja.execute_cypher(cypher_query)
-        rel_id       = result_hash['data'].first.first
+        begin
+          cypher_query = Deja::Bridge.create_relationship(start_node, end_node, label, attributes)
+          result_hash  = Deja.execute_cypher(cypher_query)
+          rel_id       = result_hash['data'].first.first
+        rescue
+          nil
+        end
       end
 
       def delete_relationship(rel_id)
