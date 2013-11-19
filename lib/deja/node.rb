@@ -159,6 +159,7 @@ module Deja
     def create!
       run_callbacks :create do
         @id = Deja::Query.create_node(persisted_attributes)
+        raise Deja::Error::OperationFailed, "Failed to create node" unless @id
       end
       self
     end

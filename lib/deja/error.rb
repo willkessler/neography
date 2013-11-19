@@ -15,5 +15,7 @@ module Deja
     class RelationshipDoesNotExist < StandardError; end
 
     class CreationFailure < StandardError; end
+
+    class OperationFailed < StandardError; end
   end
 end
