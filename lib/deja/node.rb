@@ -14,14 +14,16 @@ module Deja
           @relationship_names[name] ||= {}
           @relationship_names[name].merge!({
                       :in_singular  => opts[:in].to_s.singularize,
-                      :in_plural    => opts[:in].to_s.pluralize
+                      :in_plural    => opts[:in].to_s.pluralize,
+                      :in           => opts[:in]
                     })
         end
         if opts[:out]
           @relationship_names[name] ||= {}
           @relationship_names[name].merge!({
                       :out_singular => opts[:out].to_s.singularize,
-                      :out_plural   => opts[:out].to_s.pluralize
+                      :out_plural   => opts[:out].to_s.pluralize,
+                      :out          => opts[:out]
                     })
         end
         attr_writer name
