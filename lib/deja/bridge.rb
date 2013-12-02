@@ -42,7 +42,7 @@
 
       def order(context, order_string)
         property, order = order_string.split(' ')
-        if order == 'ASC'
+        if order.casecmp('ASC') == 0
           context.asc(property.to_sym)
         else
           context.desc(property.to_sym)

@@ -278,9 +278,15 @@ describe Node do
     end
 
     context "given an order" do
-      it "should order results" do
+      it "should order results given capitals" do
         desc = @first_node.investments(:order => 'name DESC').collect {|node, rel| node.name }
         asc = @first_node.investments(:order => 'name ASC').collect {|node, rel| node.name }
+        desc.should eq(asc.reverse)
+      end
+
+      it "should order results given lower case" do
+        desc = @first_node.investments(:order => 'name desc').collect {|node, rel| node.name }
+        asc = @first_node.investments(:order => 'name asc').collect {|node, rel| node.name }
         desc.should eq(asc.reverse)
       end
     end
