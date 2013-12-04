@@ -159,17 +159,21 @@ module Deja
     end
 
     def create!
-      run_callbacks :create do
-        @id = Deja::Query.create_node(persisted_attributes)
-        raise Deja::Error::OperationFailed, "Failed to create node" unless @id
+      run_callbacks :save do
+        run_callbacks :create do
+          @id = Deja::Query.create_node(persisted_attributes)
+          raise Deja::Error::OperationFailed, "Failed to create node" unless @id
+        end
       end
       self
     end
 
     def update!(opts = {})
       opts.each { |attribute, value| send("#{attribute}=", value) }
-      run_callbacks :update do
-        Deja::Query.update_node(@id, persisted_attributes)
+      run_callbacks :save do
+        run_callbacks :update do
+          Deja::Query.update_node(@id, persisted_attributes)
+        end
       end
       self
     end

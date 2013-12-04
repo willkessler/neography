@@ -79,17 +79,21 @@ module Deja
     end
 
     def create!
-      run_callbacks :create do
-        @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, self.class.label, persisted_attributes)
-        raise Deja::Error::OperationFailed, "Failed to create relationship" unless @id
+      run_callbacks :save do
+        run_callbacks :create do
+          @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, self.class.label, persisted_attributes)
+          raise Deja::Error::OperationFailed, "Failed to create relationship" unless @id
+        end
       end
       self
     end
 
     def update!(opts = {})
       opts.each { |attribute, value| send("#{attribute}=", value) }
-      run_callbacks :update do
-        Deja::Query.update_relationship(@id, persisted_attributes)
+      run_callbacks :save do
+        run_callbacks :update do
+          Deja::Query.update_relationship(@id, persisted_attributes)
+        end
       end
       self
     end
