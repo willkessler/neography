@@ -4,8 +4,8 @@ module Deja
     extend ActiveSupport::Concern
 
     # creating relationships to be attached to already exisitng objects
-    def erectify(hash)
-      self.class.sans_initial_node(hash, self)
+    def erectify(hash, direction = :out)
+      self.class.sans_initial_node(hash, self, direction)
     end
 
     module ClassMethods
@@ -32,7 +32,7 @@ module Deja
         return_node ? initial_node : relationship
       end
 
-      def sans_initial_node(relation_hash, initial_node)
+      def sans_initial_node(relation_hash, initial_node, direction = :out)
         return if relation_hash.nil? or relation_hash.empty?
         last_relationship = nil
         relation_hash.each do |name, relationship|
@@ -47,7 +47,11 @@ module Deja
                 memo[k]   = rel[:rel][k]
                 memo
               end
-              relationship   = rel_class.new(initial_node, related_node, rel_attributes)
+              if direction == :in
+                relationship   = rel_class.new(related_node, initial_node, rel_attributes)
+              else
+                relationship   = rel_class.new(initial_node, related_node, rel_attributes)
+              end
               last_relationship = relationship
               relationship.instance_variable_set('@id', rel[:rel][:id])
               [related_node, relationship]

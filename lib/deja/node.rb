@@ -126,7 +126,7 @@ module Deja
       if related_nodes.empty? then
         instance_variable_set("@#{opts[:include]}", [])
       else
-        erectify(related_nodes)
+        erectify(related_nodes, opts[:direction])
       end
     end
 
