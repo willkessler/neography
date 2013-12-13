@@ -1,6 +1,7 @@
 module Deja
   module SchemaGenerator
     extend ActiveSupport::Concern
+    include TypeCaster
 
     module ClassMethods
       @@all_attributes ||= {}
@@ -29,8 +30,9 @@ module Deja
         send(:attr_accessor, name)
         define_attribute_methods name
         define_method("#{name}=") do |new_value|
-          send("#{name}_will_change!") if (new_value != instance_variable_get("@#{name}") && !instance_variable_get("@#{name}").nil?)
-          instance_variable_set("@#{name}", new_value)
+          casted_value = typecast(name, new_value)
+          send("#{name}_will_change!") if (casted_value != instance_variable_get("@#{name}") && !instance_variable_get("@#{name}").nil?)
+          instance_variable_set("@#{name}", casted_value)
         end
       end
 
