@@ -20,8 +20,8 @@ module Deja
         if opts[:in]
           in_singular = opts[:in].to_s.singularize
           in_plural   = opts[:in].to_s.pluralize
-          @aliases_hash[in_singular] = [name, :in]
-          @aliases_hash[in_plural] = [name, :in]
+          @aliases_hash[in_singular] = [name, :in, :singular]
+          @aliases_hash[in_plural] = [name, :in, :plural]
           @relationship_names[name] ||= {}
           @relationship_names[name].merge!({
                       :in_singular  => in_singular,
@@ -32,8 +32,8 @@ module Deja
         if opts[:out]
           out_singular = opts[:out].to_s.singularize
           out_plural   = opts[:out].to_s.pluralize
-          @aliases_hash[out_singular] = [name, :out]
-          @aliases_hash[out_plural] = [name, :out]
+          @aliases_hash[out_singular] = [name, :out, :singular]
+          @aliases_hash[out_plural] = [name, :out, :plural]
           @relationship_names[name] ||= {}
           @relationship_names[name].merge!({
                       :out_singular => out_singular,
@@ -162,10 +162,16 @@ module Deja
 
     def link(rel_alias)
       rel_alias = rel_alias.to_s
-      return false unless self.class.aliases_hash[rel_alias]
+      rel_aliases = self.class.aliases_hash[rel_alias]
+      return false unless rel_aliases
       related_nodes(
-        :include   => self.class.aliases_hash[rel_alias][0],
-        :direction => self.class.aliases_hash[rel_alias][1])
+        :include   => rel_aliases[0],
+        :direction => rel_aliases[1])
+      if rel_aliases[2] == :singular
+        instance_variable_get("@#{rel_aliases[0]}").first
+      else
+        instance_variable_get("@#{rel_aliases[0]}")
+      end
     end
 
     def connections

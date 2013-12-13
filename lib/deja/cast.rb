@@ -59,7 +59,7 @@ module Deja
           end
           initial_node.send("#{rel_type}=", relationship_array.compact) if initial_node.class.relationship_names.include?(rel_type.to_sym)
         end
-        [last_relationship]
+        last_relationship
       end
 
     end

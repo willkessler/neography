@@ -72,7 +72,7 @@ describe Node do
       it "calling invested_in should return an array of nodes" do
         @node.investments.should be_a(Array)
         @node.investments[0].should be_a(Company)
-        @node.link(:investment).should be_a(Array)
+        @node.link(:investment).should be_a(InvestedIn)
       end
     end
 

@@ -35,7 +35,7 @@ module Deja
 
       def find(id_or_index)
         relationship = Deja::Query.load_relationship(id_or_index)
-        relationize(relationship).first
+        relationize(relationship)
       end
 
       def where(key, value)
@@ -45,7 +45,7 @@ module Deja
       def find_between_nodes(start_node, end_node)
         relationship = Deja::Query.load_relationship_from_nodes(start_node.id, end_node.id, self.label)
         return nil if relationship.blank?
-        relationize(relationship).first
+        relationize(relationship)
       end
 
       # Returns all (from_node, to_node pairs) for this relationship
