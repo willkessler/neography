@@ -24,6 +24,13 @@ module Deja
   autoload :Error
   autoload :Bridge
   autoload :Model
+  autoload :TypeCaster
+
+  autoload_under 'types' do
+    autoload :Boolean
+  end
+
+  Object.const_set(:Boolean, Deja::Boolean)
 
   extend Deja::RestIndex
 
