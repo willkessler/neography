@@ -1,4 +1,5 @@
 require 'rspec'
+require 'timecop'
 
 # Load Deja lib
 CURRENT_DIR = File.dirname(__FILE__)
@@ -22,6 +23,6 @@ end
 
 class SpecHelper
   def self.truncate
-    Deja.neo.execute_query("START n=node(*) MATCH n-[r?]->() WHERE ID(n) <> 0 DELETE r DELETE n")
+    # Deja.neo.execute_query("START n=node(*) MATCH n-[r?]->() WHERE ID(n) <> 0 DELETE r DELETE n")
   end
 end

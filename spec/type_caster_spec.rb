@@ -68,5 +68,21 @@ describe TypeCaster do
     it 'should fail on unrecognized data type' do
       expect { person.tags = ['engineer', 'designer', 'entrepreneur'] }.to raise_error TypeError
     end
+
+    it 'should validate date values' do
+      Timecop.freeze do
+        person.born_on = Date.today
+        expect(person.instance_variable_get("@born_on")).to eq(Date.today.strftime("%Y%m%d").to_i)
+        expect(person.born_on).to eq(Date.today)
+      end
+    end
+
+    it 'should validate time values' do
+      Timecop.freeze do
+        person.knighted_at = Time.now
+        expect(person.instance_variable_get("@knighted_at")).to eq(Time.now.to_i)
+        expect(person.knighted_at.to_i).to eq(Time.now.to_i)
+      end
+    end
   end
 end
