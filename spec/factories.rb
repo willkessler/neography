@@ -14,6 +14,8 @@ class Person < Deja::Node
   attribute :bank_balance, Float
   attribute :vip, Boolean
   attribute :tags, Array
+  attribute :born_on, Date
+  attribute :knighted_at, Time
 
   relationship :invested_in, :out => :investment
   relationship :friends_with, :out => :friends

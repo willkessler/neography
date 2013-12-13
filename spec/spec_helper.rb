@@ -1,4 +1,5 @@
 require 'rspec'
+require 'timecop'
 
 # Load Deja lib
 CURRENT_DIR = File.dirname(__FILE__)
