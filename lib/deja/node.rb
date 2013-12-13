@@ -105,10 +105,8 @@ module Deja
 
           alias_method "#{aliases[:out_plural]}<<", "#{aliases[:out_plural]}="
 
-          define_method aliases[:out_singular] do |&b|
-            relation = send(aliases[:out_plural]).first
-            b.call(relation[0], relation[1]) if b
-            relation
+          define_method aliases[:out_singular] do |opts = {}|
+            send(aliases[:out_plural], opts).first
           end
         end
 
@@ -126,10 +124,8 @@ module Deja
 
           alias_method "#{aliases[:in_plural]}<<", "#{aliases[:in_plural]}="
 
-          define_method aliases[:in_singular] do |&b|
-            relation = send(aliases[:in_plural]).first
-            b.call(relation[0], relation[1]) if b
-            relation
+          define_method aliases[:in_singular] do |opts = {}|
+            send(aliases[:in_plural]).first
           end
         end
       end
