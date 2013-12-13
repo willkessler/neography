@@ -20,8 +20,10 @@ module Deja
         if opts[:in]
           in_singular = opts[:in].to_s.singularize
           in_plural   = opts[:in].to_s.pluralize
-          @aliases_hash[in_singular] = [name, :in, :singular]
-          @aliases_hash[in_plural] = [name, :in, :plural]
+          @aliases_hash[in_singular] = {
+            :relationship => name, :direction => :in, :form => :singular}
+          @aliases_hash[in_plural] = {
+            :relationship => name, :direction => :in, :form => :plural}
           @relationship_names[name] ||= {}
           @relationship_names[name].merge!({
                       :in_singular  => in_singular,
@@ -32,8 +34,10 @@ module Deja
         if opts[:out]
           out_singular = opts[:out].to_s.singularize
           out_plural   = opts[:out].to_s.pluralize
-          @aliases_hash[out_singular] = [name, :out, :singular]
-          @aliases_hash[out_plural] = [name, :out, :plural]
+          @aliases_hash[out_singular] = {
+            :relationship => name, :direction => :out, :form => :singular}
+          @aliases_hash[out_plural] = {
+            :relationship => name, :direction => :out, :form => :plural}
           @relationship_names[name] ||= {}
           @relationship_names[name].merge!({
                       :out_singular => out_singular,
@@ -152,8 +156,8 @@ module Deja
       rel_alias = rel_alias.to_s
       return false unless self.class.aliases_hash[rel_alias]
       Deja::Query.count_relationships(@id,
-        self.class.aliases_hash[rel_alias][0],
-        self.class.aliases_hash[rel_alias][1])
+        self.class.aliases_hash[rel_alias][:relationship],
+        self.class.aliases_hash[rel_alias][:direction])
     end
 
     def link(rel_alias)
@@ -161,12 +165,12 @@ module Deja
       rel_aliases = self.class.aliases_hash[rel_alias]
       return false unless rel_aliases
       related_nodes(
-        :include   => rel_aliases[0],
-        :direction => rel_aliases[1])
-      if rel_aliases[2] == :singular
-        instance_variable_get("@#{rel_aliases[0]}").first
+        :include   => rel_aliases[:relationship],
+        :direction => rel_aliases[:direction])
+      if rel_aliases[:form] == :singular
+        instance_variable_get("@#{rel_aliases[:relationship]}").first
       else
-        instance_variable_get("@#{rel_aliases[0]}")
+        instance_variable_get("@#{rel_aliases[:relationship]}")
       end
     end
 
