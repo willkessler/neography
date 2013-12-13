@@ -164,9 +164,8 @@ module Deja
       rel_alias = rel_alias.to_s
       rel_aliases = self.class.aliases_hash[rel_alias]
       return false unless rel_aliases
-      related_nodes(
-        :include   => rel_aliases[:relationship],
-        :direction => rel_aliases[:direction])
+      related_nodes(:include   => rel_aliases[:relationship],
+                    :direction => rel_aliases[:direction])
       if rel_aliases[:form] == :singular
         instance_variable_get("@#{rel_aliases[:relationship]}").first
       else
