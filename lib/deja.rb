@@ -30,6 +30,8 @@ module Deja
     autoload :Boolean
   end
 
+  Object.const_set(:Boolean, Deja::Boolean)
+
   extend Deja::RestIndex
 
   class << self; attr_accessor :neo, :tx, :batch ; end

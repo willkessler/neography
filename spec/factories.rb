@@ -1,5 +1,3 @@
-
-
 class Company < Deja::Node
   attribute :name, String
   attribute :permalink, String, :index => true
@@ -12,6 +10,10 @@ class Person < Deja::Node
   attribute :name, String
   attribute :permalink, String, :index => true
   attribute :type, String
+  attribute :age, Integer
+  attribute :bank_balance, Float
+  attribute :vip, Boolean
+  attribute :tags, Array
 
   relationship :invested_in, :out => :investment
   relationship :friends_with, :out => :friends
