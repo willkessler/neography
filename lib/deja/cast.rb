@@ -54,7 +54,7 @@ module Deja
               end
               last_relationship = relationship
               relationship.instance_variable_set('@id', rel[:rel][:id])
-              [related_node, relationship]
+              relationship
             end
           end
           initial_node.send("#{rel_type}=", relationship_array.compact) if initial_node.class.relationship_names.include?(rel_type.to_sym)

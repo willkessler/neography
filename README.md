@@ -10,9 +10,9 @@ It also makes use of the [Neo4j-Cypher gem](https://github.com/andreasronge/neo4
 
 Setup:
 -----
-To setup a rest endpoint to issue queries against, bind the Neography Rest object to Deja.neo.
+To setup use deja just require it in your project.
   ```ruby
-  Deja.neo = Neography::Rest.new()
+  require 'deja'
   ```
 Models:
 ------
@@ -28,20 +28,16 @@ To implement a model using Deja, inherit from Deja::Node
   ```
 Relationship Structure:
 -----------------------
-Relationships are returned as (node/rel) pairs(Arrays). This allows us to iterate over both the relationship and the related node in the same step.
+Relationships are returned as the end node of a given relationship.
   ```ruby
-  Person.friends.each do |node, rel|
-    puts node                      # returns the related Node
-    puts rel                       # returns the Relationship
+  Person.friends.each do |friend|
+    puts friend                    # returns the related Node
   end
   ```
 
-Both plural and singular methods are generated for every relationship - the singular form returning the first (node/rel) pair in the plural method. It accepts a block.
+Both plural and singular methods are generated for every relationship - the singular form returning the first node from the plural method. It accepts the same options as plural.
   ```ruby
-  Company.address do |node, rel|
-    puts node
-    puts rel
-  end
+  Company.address(:offset => 5)    # returns the 5th address node              
   ```
 
 Interface:
@@ -87,12 +83,16 @@ To delete a node from the graph, call the **delete** method on the node.
 By default Deja supports lazy loading. To load a given relationship on the fly, simply call method with the same name as the relationship. Deja by default will always reload the relationship each time the method is called
   ```ruby
   node = Person.load(3)
-  node.invested_in.each do |investment, rel|  # fetches the investments from the graph
+  node.investments.each do |investment|       # fetches the investments from the graph
     investment.class                          # returns the Investment node object
+  end
+  ```
+To load a relationship you use the link method:
+  ```ruby
+  node.link(:investments).each do |rel|
     rel.class                                 # returns the InvestedIn relationship object
   end
   ```
-
 ### Count:
 To count the number of related nodes without actually fetching them, call the count method passing in the name of the relationship alias as an argument.
   ```ruby

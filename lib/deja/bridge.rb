@@ -172,9 +172,9 @@
 
       def count_rels(id, rel = nil, direction = nil)
         case direction
-        when :out_plural, :out_singular
+        when :out_plural, :out_singular, :out
           cypher { node(id).outgoing(rel).count }
-        when :in_plural, :in_singular
+        when :in_plural, :in_singular, :in
           cypher { node(id).incoming(rel).count }
         else
           return false
