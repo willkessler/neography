@@ -7,10 +7,11 @@ def full_node_type_test(node)
   node.should be_a(Node)
   node.class.relationship_names.each do |k, v|
     node.send(v[:out_plural]).should be_a(Array)
-    node.send(v[:out_plural]).each do |relnode|
-      relnode.should be_a(Array)
-      relnode[0].should be_a(Node)
-      relnode[1].should be_a(Relationship)
+    node.send(v[:out_plural]).each do |node|
+      node.should be_a(Node)
+    end
+    node.send(:link, v[:out_plural]).each do |rel|
+      rel.should be_a(Relationship)
     end
   end
 end
@@ -18,10 +19,12 @@ end
 def node_type_test(node, rel)
   node.should be_a(Node)
   node.send(rel).should be_a(Array)
-  node.send(rel).each do |relnode|
-    relnode.should be_a(Array)
-    relnode[0].should be_a(Node)
-    relnode[1].should be_a(Relationship)
+  node.send(rel).each do |node|
+    node.should be_a(Node)
+  end
+  node.send(:link, rel).should be_a(Array)
+  node.send(:link, rel).each do |rel|
+    rel.should be_a(Relationship)
   end
 end
 
@@ -66,9 +69,10 @@ describe Node do
         @node.investment
       end
 
-      it "calling invested_in should return an array of rel/node pairs" do
+      it "calling invested_in should return an array of nodes" do
         @node.investments.should be_a(Array)
-        @node.investments[0].should be_a(Array)
+        @node.investments[0].should be_a(Company)
+        @node.link(:investment).should be_a(InvestedIn)
       end
     end
 
@@ -142,7 +146,7 @@ describe Node do
 
       it "should load all related nodes" do
         @node.related_nodes
-        @node.investment.should be_a(Array)
+        @node.investment.should be_a(Node)
         full_node_type_test(@node)
       end
     end
