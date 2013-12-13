@@ -160,16 +160,16 @@ module Deja
         self.class.aliases_hash[rel_alias][:direction])
     end
 
-    def link(rel_alias)
-      rel_alias = rel_alias.to_s
-      rel_aliases = self.class.aliases_hash[rel_alias]
-      return false unless rel_aliases
-      related_nodes(:include   => rel_aliases[:relationship],
-                    :direction => rel_aliases[:direction])
-      if rel_aliases[:form] == :singular
-        instance_variable_get("@#{rel_aliases[:relationship]}").first
+    def link(node_alias)
+      node_alias = node_alias.to_s
+      node_aliases = self.class.aliases_hash[node_alias]
+      return false unless node_aliases
+      related_nodes(:include   => node_aliases[:relationship],
+                    :direction => node_aliases[:direction])
+      if node_aliases[:form] == :singular
+        instance_variable_get("@#{node_aliases[:relationship]}").first
       else
-        instance_variable_get("@#{rel_aliases[:relationship]}")
+        instance_variable_get("@#{node_aliases[:relationship]}")
       end
     end
 
