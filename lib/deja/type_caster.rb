@@ -4,11 +4,11 @@ module Deja
 
     included do
       def typecast(attr_name, value)
+        return nil if value.nil?
+
         data_type = self.class.schema[:attributes][attr_name][:type].to_s
 
         case data_type
-        when 'NilClass'
-          nil
         when 'Integer'
           Integer(value)
         when 'Float'
