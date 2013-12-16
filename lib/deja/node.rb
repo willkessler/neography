@@ -2,27 +2,46 @@ module Deja
   class Node < Model
     class << self
       attr_reader :relationship_names
+      attr_reader :aliases_hash
 
       def relationship_names
         @relationship_names || {}
       end
 
+      def aliases_hash
+        @aliases_hash || {}
+      end
+
       def relationship(name, opts = {})
         raise StandardError, "'out' or 'in' aliases must be specified" unless opts.is_a? Hash and (opts[:out] or opts[:in])
         @relationship_names ||= {}
+        @aliases_hash ||= {}
+
         if opts[:in]
+          in_singular = opts[:in].to_s.singularize
+          in_plural   = opts[:in].to_s.pluralize
+          @aliases_hash[in_singular] = {
+            :relationship => name, :direction => :in, :form => :singular}
+          @aliases_hash[in_plural] = {
+            :relationship => name, :direction => :in, :form => :plural}
           @relationship_names[name] ||= {}
           @relationship_names[name].merge!({
-                      :in_singular  => opts[:in].to_s.singularize,
-                      :in_plural    => opts[:in].to_s.pluralize,
+                      :in_singular  => in_singular,
+                      :in_plural    => in_plural,
                       :in           => opts[:in]
                     })
         end
         if opts[:out]
+          out_singular = opts[:out].to_s.singularize
+          out_plural   = opts[:out].to_s.pluralize
+          @aliases_hash[out_singular] = {
+            :relationship => name, :direction => :out, :form => :singular}
+          @aliases_hash[out_plural] = {
+            :relationship => name, :direction => :out, :form => :plural}
           @relationship_names[name] ||= {}
           @relationship_names[name].merge!({
-                      :out_singular => opts[:out].to_s.singularize,
-                      :out_plural   => opts[:out].to_s.pluralize,
+                      :out_singular => out_singular,
+                      :out_plural   => out_plural,
                       :out          => opts[:out]
                     })
         end
@@ -79,7 +98,7 @@ module Deja
         if aliases[:out_plural] and aliases[:out_singular]
           define_method aliases[:out_plural] do |opts = {}|
             send(:related_nodes, {:include => rel, :direction => :out}.merge(opts))
-            instance_variable_get("@#{rel}")
+            instance_variable_get("@#{rel}").map{|r| r.end_node}
           end
 
           define_method "#{aliases[:out_plural]}=" do |relationship|
@@ -90,17 +109,15 @@ module Deja
 
           alias_method "#{aliases[:out_plural]}<<", "#{aliases[:out_plural]}="
 
-          define_method aliases[:out_singular] do |&b|
-            relation = send(aliases[:out_plural]).first
-            b.call(relation[0], relation[1]) if b
-            relation
+          define_method aliases[:out_singular] do |opts = {}|
+            send(aliases[:out_plural], opts).first
           end
         end
 
         if aliases[:in_plural] and aliases[:in_singular]
           define_method aliases[:in_plural] do |opts = {}|
             send(:related_nodes, {:include => rel, :direction => :in}.merge(opts))
-            instance_variable_get("@#{rel}")
+            instance_variable_get("@#{rel}").map{|r| r.start_node}
           end
 
           define_method "#{aliases[:in_plural]}=" do |relationship|
@@ -111,10 +128,8 @@ module Deja
 
           alias_method "#{aliases[:in_plural]}<<", "#{aliases[:in_plural]}="
 
-          define_method aliases[:in_singular] do |&b|
-            relation = send(aliases[:in_plural]).first
-            b.call(relation[0], relation[1]) if b
-            relation
+          define_method aliases[:in_singular] do |opts = {}|
+            send(aliases[:in_plural]).first
           end
         end
       end
@@ -138,12 +153,24 @@ module Deja
     end
 
     def count(rel_alias)
-      self.class.relationship_names.each do |name, aliases|
-        aliases.each do |direction, alias_val|
-          return Deja::Query.count_relationships(@id, name, direction) if alias_val == rel_alias.to_s
-        end
+      rel_alias = rel_alias.to_s
+      return false unless self.class.aliases_hash[rel_alias]
+      Deja::Query.count_relationships(@id,
+        self.class.aliases_hash[rel_alias][:relationship],
+        self.class.aliases_hash[rel_alias][:direction])
+    end
+
+    def link(node_alias)
+      node_alias = node_alias.to_s
+      node_aliases = self.class.aliases_hash[node_alias]
+      return false unless node_aliases
+      related_nodes(:include   => node_aliases[:relationship],
+                    :direction => node_aliases[:direction])
+      if node_aliases[:form] == :singular
+        instance_variable_get("@#{node_aliases[:relationship]}").first
+      else
+        instance_variable_get("@#{node_aliases[:relationship]}")
       end
-      return false
     end
 
     def connections
