@@ -29,14 +29,8 @@ module Deja
       def attr_accessorize(name, opts)
         send(:attr_accessor, name)
         define_attribute_methods name
-        define_method("#{name}") do
-          #reversecast(name, instance_variable_get("@#{name}"))
-          instance_variable_get("@#{name}")
-        end
         define_method("#{name}=") do |new_value|
-          casted_value = typecast(name, new_value)
-          send("#{name}_will_change!") if (casted_value != instance_variable_get("@#{name}") && !instance_variable_get("@#{name}").nil?)
-          #instance_variable_set("@#{name}", casted_value)
+          send("#{name}_will_change!") if (new_value != instance_variable_get("@#{name}") && !instance_variable_get("@#{name}").nil?)
           instance_variable_set("@#{name}", new_value)
         end
       end
