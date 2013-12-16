@@ -1,6 +1,7 @@
 module Deja
   module NeoParse
     extend ActiveSupport::Concern
+    include TypeCaster
 
     module ClassMethods
       def normalize(hash, type = :eager)
@@ -26,7 +27,7 @@ module Deja
               attr_hash[:start_node] = record['start'].split('/').last.to_i if record['start']
               attr_hash[:end_node]   = record['end'].split('/').last.to_i if record['end']
               record['data'].each do |key, value|
-                attr_hash[key.to_sym] = value
+                attr_hash[key.to_sym] = record['data']['type'].nil? ? value : TypeCaster.reversecast(key.to_sym, value, record['data']['type'])
               end
               attr_hash
             end
