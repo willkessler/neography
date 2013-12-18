@@ -52,11 +52,11 @@ module Deja
       end
 
       def composed_attributes(attrs = nil)
-        @@composed_attributes[self.name] ||= []
+        @@composed_attributes[self.name] ||= {}
 
         if attrs
-          @@composed_attributes[self.name] += attrs
-          @@composed_attributes[self.name].uniq!
+          @@composed_attributes[self.name].merge!(attrs)
+          # @@composed_attributes[self.name].uniq!
         else
           @@composed_attributes[self.name]
         end
