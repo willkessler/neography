@@ -170,12 +170,13 @@ module Deja
 
     def update!(opts = {})
       opts.each { |attribute, value| send("#{attribute}=", value) }
+      updated_node = nil
       run_callbacks :save do
         run_callbacks :update do
-          Deja::Query.update_node(@id, persisted_attributes)
+          updated_node = Deja::Query.update_node(@id, persisted_attributes)
+          self.class.objectify(updated_node)
         end
       end
-      self
     end
 
     def destroy
