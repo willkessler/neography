@@ -6,9 +6,12 @@ require 'active_model'
 require 'active_support'
 
 require 'oj'
+require 'yaml'
 
 module Deja
   extend ActiveSupport::Autoload
+
+  ENV['RAILS_ENV'] ||= 'development'
 
   autoload :RestIndex
   autoload :Node
@@ -36,6 +39,12 @@ module Deja
 
   class << self; attr_accessor :neo, :tx, :batch ; end
 
+  config_hash = YAML.load_file("#{File.dirname(File.expand_path(__FILE__))}/config/graph.yml")
+  Neography.configure do |config|
+    config_hash[ENV['RAILS_ENV']].each do |k, v|
+      config.send("#{k}=".to_sym, v)
+    end
+  end
   Deja.neo = Neography::Rest.new()
   Deja.set_node_auto_index_status(true)
   Deja.set_relationship_auto_index_status(true)

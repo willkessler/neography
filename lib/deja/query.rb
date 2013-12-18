@@ -36,7 +36,7 @@ module Deja
       def update_node(node_id, attributes = {})
         cypher_query = Deja::Bridge.update_node(node_id, attributes)
         result_hash  = Deja.execute_cypher(cypher_query)
-        result_hash["data"].empty? ? false : true
+        normalize(result_hash)
       end
 
       def count_nodes(index)
