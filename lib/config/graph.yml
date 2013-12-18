@@ -20,7 +20,6 @@ staging:
   gremlin_path: "/ext/GremlinPlugin/graphdb/execute_script"
   log_file: "neography.log"
   log_enabled: false
-  slow_log_threshold: 0    # time in ms for query logging
   max_threads: 20
   authentication: nil  # 'basic' or 'digest'
   username: nil
@@ -34,7 +33,6 @@ test:
   gremlin_path: "/ext/GremlinPlugin/graphdb/execute_script"
   log_file: "neography.log"
   log_enabled: false
-  slow_log_threshold: 0    # time in ms for query logging
   max_threads: 20
   authentication: nil  # 'basic' or 'digest'
   username: nil
@@ -48,7 +46,6 @@ production:
   gremlin_path: "/ext/GremlinPlugin/graphdb/execute_script"
   log_file: "neography.log"
   log_enabled: false
-  slow_log_threshold: 0    # time in ms for query logging
   max_threads: 20
   authentication: nil  # 'basic' or 'digest'
   username: nil

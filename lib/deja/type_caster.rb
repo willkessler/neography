@@ -6,7 +6,7 @@ module Deja
     def self.reversecast(attr_name, value, klass)
       return nil if value.nil?
 
-      data_type = klass.constantize.schema[:attributes][attr_name][:type].to_s
+      data_type = (klass.constantize.schema[:attributes][attr_name] || klass.constantize.composed_attributes[attr_name])[:type].to_s
 
       case data_type
       when 'Integer'
@@ -30,7 +30,7 @@ module Deja
     def self.typecast(attr_name, value, klass)
       return nil if value.nil?
 
-      data_type = klass.constantize.schema[:attributes][attr_name][:type].to_s
+      data_type = (klass.constantize.schema[:attributes][attr_name] || klass.constantize.composed_attributes[attr_name])[:type].to_s
 
       case data_type
       when 'Integer'
