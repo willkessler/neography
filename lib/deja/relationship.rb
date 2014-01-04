@@ -6,6 +6,7 @@ module Deja
       attr_reader :directionality, :cardinality
 
       @directionality = {}
+      @cardinality = {}
 
       def from(from_type=nil, opts={})
         raise StandardError, "'from' and 'to' must be specified" unless from_type and opts.is_a? Hash and opts[:to]
@@ -19,7 +20,9 @@ module Deja
         @directionality[from_type] ||= []
         @directionality[from_type] << to_type
 
-        @cardinality = opts[:cardinality] || nil
+        @cardinality ||= {}
+        @cardinality[:in] = opts[:cardinality].try(:[], :in)
+        @cardinality[:out] = opts[:cardinality].try(:[], :out)
       end
 
       def valid_direction?(from_type=nil, to_type=nil)
@@ -33,6 +36,10 @@ module Deja
 
       def label
         return self.name.underscore.to_sym
+      end
+
+      def cardinality(dir)
+        @cardinality[dir]
       end
 
       def find(id_or_index)
