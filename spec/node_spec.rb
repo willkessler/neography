@@ -29,8 +29,8 @@ def node_type_test(node, rel)
 end
 
 def build_nodes
-  @first_node = FactoryGirl.build(:person);
-  @second_node = FactoryGirl.build(:company);
+  @first_node = FactoryGirl.build(:person)
+  @second_node = FactoryGirl.build(:company)
 end
 
 class InvestedIn < Relationship; end
@@ -268,7 +268,7 @@ describe Node do
   describe "relationship filters and options" do
     before :each do
       @first_node.save()
-      @second_node = FactoryGirl.create(:person);
+      @second_node = FactoryGirl.create(:person)
       10.times do
         InvestedIn.new(@first_node, FactoryGirl.create(:company)).create
       end
@@ -283,13 +283,15 @@ describe Node do
 
     context "given an order" do
       it "should order results given capitals" do
-        desc = @first_node.investments(:order => 'name DESC').collect {|node, rel| node.name }
-        asc = @first_node.investments(:order => 'name ASC').collect {|node, rel| node.name }
+        desc = @first_node.investments(:order => 'name DESC').collect {|node| node.name }
+        @first_node.invested_in = nil # so it loads investments fresh into memory in the next line
+        asc = @first_node.investments(:order => 'name ASC').collect {|node| node.name }
         desc.should eq(asc.reverse)
       end
 
       it "should order results given lower case" do
         desc = @first_node.investments(:order => 'name desc').collect {|node, rel| node.name }
+        @first_node.invested_in = nil # so it loads investments fresh into memory in the next line
         asc = @first_node.investments(:order => 'name asc').collect {|node, rel| node.name }
         desc.should eq(asc.reverse)
       end

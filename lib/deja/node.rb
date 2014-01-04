@@ -99,15 +99,15 @@ module Deja
           define_method aliases[:out_plural] do |opts = {}|
             if instance_variable_get("@#{rel}").blank?
               send(:related_nodes, {:include => rel, :direction => :out}.merge(opts))
-              instance_variable_get("@#{rel}").map{|r| r.end_node}
+              instance_variable_get("@#{rel}").map {|r| r.end_node}
             else
-              instance_variable_get("@#{rel}").inject([]) { |memo, node_rel| memo << node_rel.first; memo; }
+              instance_variable_get("@#{rel}").inject([]) { |memo, rel| memo << rel.end_node; memo; }
             end
           end
 
           define_method "#{aliases[:out_plural]}=" do |relationship|
             current_rel = instance_variable_get("@#{rel}") || []
-            current_rel << [relationship.end_node, relationship]
+            current_rel << relationship
             instance_variable_set("@#{rel}", current_rel)
           end
 
@@ -122,15 +122,15 @@ module Deja
           define_method aliases[:in_plural] do |opts = {}|
             if instance_variable_get("@#{rel}").blank?
               send(:related_nodes, {:include => rel, :direction => :in}.merge(opts))
-              instance_variable_get("@#{rel}").map{|r| r.start_node}
+              instance_variable_get("@#{rel}").map {|r| r.start_node}
             else
-              instance_variable_get("@#{rel}").inject([]) { |memo, node_rel| memo << node_rel.first; memo; }
+              instance_variable_get("@#{rel}").inject([]) { |memo, rel| memo << rel.start_node; memo; }
             end
           end
 
           define_method "#{aliases[:in_plural]}=" do |relationship|
             current_rel = instance_variable_get("@#{rel}") || []
-            current_rel << [relationship.start_node, relationship]
+            current_rel << relationship
             instance_variable_set("@#{rel}", current_rel)
           end
 
