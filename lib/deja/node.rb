@@ -97,8 +97,12 @@ module Deja
       self.class_eval do
         if aliases[:out_plural] and aliases[:out_singular]
           define_method aliases[:out_plural] do |opts = {}|
-            send(:related_nodes, {:include => rel, :direction => :out}.merge(opts))
-            instance_variable_get("@#{rel}").map{|r| r.end_node}
+            if instance_variable_get("@#{rel}").blank?
+              send(:related_nodes, {:include => rel, :direction => :out}.merge(opts))
+              instance_variable_get("@#{rel}").map{|r| r.end_node}
+            else
+              instance_variable_get("@#{rel}").inject([]) { |memo, node_rel| memo << node_rel.first; memo; }
+            end
           end
 
           define_method "#{aliases[:out_plural]}=" do |relationship|
@@ -116,8 +120,12 @@ module Deja
 
         if aliases[:in_plural] and aliases[:in_singular]
           define_method aliases[:in_plural] do |opts = {}|
-            send(:related_nodes, {:include => rel, :direction => :in}.merge(opts))
-            instance_variable_get("@#{rel}").map{|r| r.start_node}
+            if instance_variable_get("@#{rel}").blank?
+              send(:related_nodes, {:include => rel, :direction => :in}.merge(opts))
+              instance_variable_get("@#{rel}").map{|r| r.start_node}
+            else
+              instance_variable_get("@#{rel}").inject([]) { |memo, node_rel| memo << node_rel.first; memo; }
+            end
           end
 
           define_method "#{aliases[:in_plural]}=" do |relationship|
