@@ -3,7 +3,7 @@ module Deja
     attr_accessor :start_node, :end_node
 
     class << self
-      attr_reader :directionality
+      attr_reader :directionality, :cardinality
 
       @directionality = {}
 
@@ -18,6 +18,8 @@ module Deja
         @directionality ||= {}
         @directionality[from_type] ||= []
         @directionality[from_type] << to_type
+
+        @cardinality = opts[:cardinality] || nil
       end
 
       def valid_direction?(from_type=nil, to_type=nil)
@@ -31,6 +33,10 @@ module Deja
 
       def label
         return self.name.underscore.to_sym
+      end
+
+      def cardinality
+        @cardinality
       end
 
       def find(id_or_index)
