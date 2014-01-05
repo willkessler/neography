@@ -35,10 +35,6 @@ module Deja
         return self.name.underscore.to_sym
       end
 
-      def cardinality
-        @cardinality
-      end
-
       def find(id_or_index)
         relationship = Deja::Query.load_relationship(id_or_index)
         relationize(relationship)
