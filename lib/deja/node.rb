@@ -172,8 +172,7 @@ module Deja
       node_alias = node_alias.to_s
       node_aliases = self.class.aliases_hash[node_alias]
       return false unless node_aliases
-      related_nodes(:include   => node_aliases[:relationship],
-                    :direction => node_aliases[:direction])
+      related_nodes(:include => node_aliases[:relationship], :direction => node_aliases[:direction]) if instance_variable_get("@#{node_aliases[:relationship]}").blank?
       if node_aliases[:form] == :singular
         instance_variable_get("@#{node_aliases[:relationship]}").first
       else
