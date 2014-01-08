@@ -111,8 +111,6 @@ module Deja
             instance_variable_set("@#{rel}", current_rel)
           end
 
-          alias_method "#{aliases[:out_plural]}<<", "#{aliases[:out_plural]}="
-
           define_method aliases[:out_singular] do |opts = {}|
             send(aliases[:out_plural], opts).first
           end
@@ -133,8 +131,6 @@ module Deja
             current_rel << relationship
             instance_variable_set("@#{rel}", current_rel)
           end
-
-          alias_method "#{aliases[:in_plural]}<<", "#{aliases[:in_plural]}="
 
           define_method aliases[:in_singular] do |opts = {}|
             send(aliases[:in_plural]).first
