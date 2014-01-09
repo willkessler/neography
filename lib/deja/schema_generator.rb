@@ -20,10 +20,11 @@ module Deja
       end
 
       def attribute(name, type, opts = {})
+        sym_name = name.to_sym
         self.define_class_key
-        @@all_attributes[self.name][name] = opts.merge(:type => type)
-        attr_accessorize(name, opts)
-        add_property_to_index(name) if opts[:index]
+        @@all_attributes[self.name][sym_name] = opts.merge(:type => type)
+        attr_accessorize(sym_name, opts)
+        add_property_to_index(sym_name) if opts[:index]
       end
 
       def attr_accessorize(name, opts)
