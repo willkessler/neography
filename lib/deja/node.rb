@@ -12,6 +12,10 @@ module Deja
         @aliases_hash || {}
       end
 
+      def exists?(key, value)
+        !!Deja.neo.get_node_auto_index(key, value)
+      end
+
       def relationship(name, opts = {})
         raise StandardError, "'out' or 'in' aliases must be specified" unless opts.is_a? Hash and (opts[:out] or opts[:in])
         @relationship_names ||= {}

@@ -34,6 +34,10 @@ module Deja
         @directionality.key?(from_type) and @directionality[from_type].include?(to_type)
       end
 
+      def exists?(key, value)
+        !!Deja.neo.get_relationship_auto_index(key, value)
+      end
+
       def label
         return self.name.underscore.to_sym
       end
