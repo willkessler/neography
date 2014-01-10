@@ -35,7 +35,7 @@ module Deja
       end
 
       def exists?(key, value)
-        Deja.neo.get_relationship_auto_index(key, value) ? true : false
+        !!Deja.neo.get_relationship_auto_index(key, value)
       end
 
       def label
