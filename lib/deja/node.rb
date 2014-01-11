@@ -49,7 +49,10 @@ module Deja
                       :out          => opts[:out]
                     })
         end
+
         attr_writer name
+        attr_writer "#{name}_out"
+        attr_writer "#{name}_in"
       end
 
       def outgoing_rel(type, cardinality="plural")
@@ -101,18 +104,18 @@ module Deja
       self.class_eval do
         if aliases[:out_plural] and aliases[:out_singular]
           define_method aliases[:out_plural] do |opts = {}|
-            if instance_variable_get("@#{rel}").blank?
+            if instance_variable_get("@#{rel}_out").blank?
               send(:related_nodes, {:include => rel, :direction => :out}.merge(opts))
-              instance_variable_get("@#{rel}").map {|r| r.end_node}
+              (instance_variable_get("@#{rel}_out") || []).map {|r| r.end_node}
             else
-              instance_variable_get("@#{rel}").inject([]) { |memo, rel| memo << rel.end_node; memo; }
+              instance_variable_get("@#{rel}_out").inject([]) { |memo, rel| memo << rel.end_node; memo; }
             end
           end
 
           define_method "#{aliases[:out_plural]}=" do |relationship|
-            current_rel = instance_variable_get("@#{rel}") || []
+            current_rel = instance_variable_get("@#{rel}_out") || []
             current_rel << relationship
-            instance_variable_set("@#{rel}", current_rel)
+            instance_variable_set("@#{rel}_out", current_rel)
           end
 
           define_method aliases[:out_singular] do |opts = {}|
@@ -122,18 +125,18 @@ module Deja
 
         if aliases[:in_plural] and aliases[:in_singular]
           define_method aliases[:in_plural] do |opts = {}|
-            if instance_variable_get("@#{rel}").blank?
+            if instance_variable_get("@#{rel}_in").blank?
               send(:related_nodes, {:include => rel, :direction => :in}.merge(opts))
-              instance_variable_get("@#{rel}").map {|r| r.start_node}
+              (instance_variable_get("@#{rel}_in") || []).map {|r| r.start_node}
             else
-              instance_variable_get("@#{rel}").inject([]) { |memo, rel| memo << rel.start_node; memo; }
+              instance_variable_get("@#{rel}_in").inject([]) { |memo, rel| memo << rel.start_node; memo; }
             end
           end
 
           define_method "#{aliases[:in_plural]}=" do |relationship|
-            current_rel = instance_variable_get("@#{rel}") || []
+            current_rel = instance_variable_get("@#{rel}_in") || []
             current_rel << relationship
-            instance_variable_set("@#{rel}", current_rel)
+            instance_variable_set("@#{rel}_in", current_rel)
           end
 
           define_method aliases[:in_singular] do |opts = {}|
@@ -146,8 +149,12 @@ module Deja
     def related_nodes(opts = {})
       related_nodes = Deja::Query.load_related_nodes(@id, opts)
 
-      if related_nodes.empty? then
-        instance_variable_set("@#{opts[:include]}", [])
+      if related_nodes.empty?
+        if opts[:direction]
+          instance_variable_set("@#{opts[:include]}_#{opts[:direction]}", [])
+        else
+          instance_variable_set("@#{opts[:include]}", [])
+        end
       else
         erectify(related_nodes, opts[:direction])
       end
@@ -155,7 +162,9 @@ module Deja
 
     def relationships
       self.class.relationship_names.keys.inject({}) do |memo, rel_name|
-        memo[rel_name] = instance_variable_get("@#{rel_name}") if instance_variable_get("@#{rel_name}")
+        memo[rel_name] = []
+        memo[rel_name] += instance_variable_get("@#{rel_name}_out") || []
+        memo[rel_name] += instance_variable_get("@#{rel_name}_in") || []
         memo
       end
     end
@@ -172,11 +181,11 @@ module Deja
       node_alias = node_alias.to_s
       node_aliases = self.class.aliases_hash[node_alias]
       return false unless node_aliases
-      related_nodes(:include => node_aliases[:relationship], :direction => node_aliases[:direction]) if instance_variable_get("@#{node_aliases[:relationship]}").blank?
+      related_nodes(:include => node_aliases[:relationship], :direction => node_aliases[:direction]) if instance_variable_get("@#{node_aliases[:relationship]}_#{node_aliases[:direction]}").blank?
       if node_aliases[:form] == :singular
-        instance_variable_get("@#{node_aliases[:relationship]}").first
+        instance_variable_get("@#{node_aliases[:relationship]}_#{node_aliases[:direction]}").first
       else
-        instance_variable_get("@#{node_aliases[:relationship]}")
+        instance_variable_get("@#{node_aliases[:relationship]}_#{node_aliases[:direction]}")
       end
     end
 
