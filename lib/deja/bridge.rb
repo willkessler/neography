@@ -125,9 +125,9 @@
 
       def get_nodes(id, opts = {})
         return single_node(id, opts) if opts[:include] == :none
-        opts[:direction]   ||= :both
+        direction = opts[:direction] || :both
         rels = opts[:include] == :all ? nil : opts[:include]
-        case opts[:direction]
+        case direction
         when :out  then outgoing_rel(id, rels, opts)
         when :in   then incoming_rel(id, rels, opts)
         when :both then in_out_rel(id, rels, opts)

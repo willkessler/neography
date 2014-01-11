@@ -57,7 +57,11 @@ module Deja
               relationship
             end
           end
-          initial_node.send("#{rel_type}=", relationship_array.compact) if initial_node.class.relationship_names.include?(rel_type.to_sym)
+          if direction
+            initial_node.send("#{rel_type}_#{direction}=", relationship_array.compact) if initial_node.class.relationship_names.include?(rel_type.to_sym)
+          else
+            initial_node.send("#{rel_type}=", relationship_array.compact) if initial_node.class.relationship_names.include?(rel_type.to_sym)
+          end
         end
         last_relationship
       end
