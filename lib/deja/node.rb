@@ -185,7 +185,7 @@ module Deja
       if node_aliases[:form] == :singular
         instance_variable_get("@#{node_aliases[:relationship]}_#{node_aliases[:direction]}").first
       else
-        instance_variable_get("@#{node_aliases[:relationship]}_#{node_aliases[:direction]}")
+        (instance_variable_get("@#{node_aliases[:relationship]}_#{node_aliases[:direction]}") || [])
       end
     end
 
