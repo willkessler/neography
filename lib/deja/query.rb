@@ -4,7 +4,7 @@ module Deja
 
     class << self
       def load_node(neo_id, options = {})
-        options[:return_root] ||= :root_only
+        options[:return_root] = options[:include] ? :root_rel_end : :root_only
         options[:include] ||= :none
         cypher_query = Deja::Bridge.get_nodes(neo_id, options)
         result_hash  = Deja.execute_cypher(cypher_query)
