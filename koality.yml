@@ -1,18 +1,19 @@
 languages:
-  ruby: 2.0.0-p247
+  ruby: 2.0.0-p353
 setup:
 - scripts:
-  - wget -O - http://debian.neo4j.org/neotechnology.gpg.key | sudo apt-key add -
-  - echo 'deb http://debian.neo4j.org/repo stable/' > /etc/apt/sources.list.d/neo4j.list
-  - apt-get update
-  - apt-get install neo4j=1.9.4 -y --force-yes
-  - sudo mkdir /crunchbase && sudo chmod a+w /crunchbase
-  - for repo in `grep ":path => '/crunchbase/" Gemfile | cut -d ' ' -f 2 | sed -r "s/[',]//g"`; do git clone git@github.com:/crunchbase/$repo.git /crunchbase/$repo; done
+  - export RAILS_ENV=test
+  - echo "export RAILS_ENV=test" >> ~/.bash_profile
+  # The next line happens in the PR for this repo
   - bundle install
+  # The next line parses the Gemfile for crunchbase dependencies,
+  # updates the repos on the box, and bundle installs for the latest
+  # gem dependencies
+  - for repo in `grep ":path => '/crunchbase/" Gemfile | cut -d ' ' -f 2 | sed -r "s/[',]//g"`; do cd /crunchbase/$repo && git pull && bundle install; done
 test:
   machines: 1
   scripts:
   - tests:
-      script: rake ci_spec
+      script: bundle exec rake ci_spec
       timeout: 1800
       xunit: spec/reports
