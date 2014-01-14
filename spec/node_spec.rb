@@ -64,8 +64,8 @@ describe Node do
         @node.permalink.should eq(@first_node.permalink)
       end
 
-      it "calling invested_in should call related_nodes" do
-        @node.should_receive(:related_nodes).and_call_original
+      it "calling invested_in should not call related_nodes" do
+        @node.should_not_receive(:related_nodes).and_call_original
         @node.investment
       end
 
