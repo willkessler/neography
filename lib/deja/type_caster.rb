@@ -28,7 +28,7 @@ module Deja
 
     # cast to neo4j basic types and raise errors when invalid/unrecognized data type
     def self.typecast(attr_name, value, klass)
-      return nil if value.nil?
+      return nil if value.blank?
 
       data_type = (klass.constantize.schema[:attributes][attr_name] || klass.constantize.composed_attributes[attr_name])[:type].to_s
 
