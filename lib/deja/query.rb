@@ -19,8 +19,8 @@ module Deja
       end
 
       def create_node(attributes = {})
-        # skip nil/empty attributes
-        attributes.select!{ |attribute, value| value.present? }
+        # skip nil/unset attributes
+        attributes.reject!{ |attribute, value| value.nil? }
 
         begin
           cypher_query = Deja::Bridge.create_node(attributes)
@@ -73,8 +73,8 @@ module Deja
       end
 
       def create_relationship(start_node, end_node, label, attributes = {})
-        # skip nil/empty attributes
-        attributes.select!{ |attribute, value| value.present? }
+        # skip nil/unset attributes
+        attributes.reject!{ |attribute, value| value.nil? }
 
         begin
           cypher_query = Deja::Bridge.create_relationship(start_node, end_node, label, attributes)
