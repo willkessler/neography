@@ -138,7 +138,7 @@ describe Node do
 
       it "should call related_nodes on relations" do
         @node.should_receive(:related_nodes).and_call_original
-        @node.investments(:filter => :person).each do |node, rel|
+        @node.investments(:where => {:type => 'Person'}).each do |node, rel|
            node.should be_a(Node)
            rel.should be_a(Relationship)
         end
@@ -275,9 +275,9 @@ describe Node do
       InvestedIn.new(@first_node, @second_node).create
     end
 
-    context "given a filter" do
+    context "given a where clause" do
       it "should filter results" do
-        @first_node.investments(:filter => :person).size.should be 1
+        @first_node.investments(:where => {:type => 'Person'}).size.should be 1
       end
     end
 
