@@ -8,18 +8,6 @@ describe Query do
   end
 
   describe ".create_node" do
-    context "with no attributes" do
-      it "should raise an exception" do
-        Deja::Query.create_node().should be_nil
-      end
-    end
-
-    context "with nil attribute" do
-      it "should raise an exception" do
-        Deja::Query.create_node(nil).should be_nil
-      end
-    end
-
     context "with one attribute" do
       it "returns a node id" do
         response = Deja::Query.create_node(:name => 'Jerry Wang')
