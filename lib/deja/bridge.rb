@@ -28,7 +28,7 @@
       end
 
       def apply_options(context, options = {})
-        context = filter(context, options[:filter]) if options[:filter]
+        context = where(context, options[:where]) if options[:where]
         context = order(context, options[:order])   if options[:order]
         context = limit(context, options[:limit])   if options[:limit]
         context = skip(context, options[:offset])   if options[:offset]
@@ -36,8 +36,8 @@
         return_query(context, options[:return_root])
       end
 
-      def filter(context, filter)
-        context.where{|n| n[:type] == filter.to_s.camelize}
+      def where(context, filters)
+        context.where{|n| filters.each{|k, v| n[k] == v.to_s}}
       end
 
       def order(context, order_string)

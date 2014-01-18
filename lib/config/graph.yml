@@ -13,7 +13,7 @@ development:
   password: nil
 staging:
   protocol: "http://"
-  server: "localhost"
+  server: "internal-Neo4J-LB-1693655064.us-west-2.elb.amazonaws.com"
   port: 7474
   directory: ""  # prefix this path with '/'
   cypher_path: "/cypher"
