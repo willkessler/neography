@@ -81,6 +81,11 @@ module Deja
           @@indexed_attributes[self.name] << property
         end
       end
+
+      def update(index, opts={})
+        updated_rel = Deja::Query.update_relationship(index, opts)
+        objectify(updated_rel)
+      end
     end
 
     # initialize(start_node, end_node, options = {})
