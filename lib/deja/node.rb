@@ -88,6 +88,11 @@ module Deja
       def count(index)
         Deja::Query.count_nodes(index)
       end
+
+      def update(index, opts={})
+        updated_node = Deja::Query.update_node(index, opts)
+        objectify(updated_node)
+      end
     end
 
     def initialize(*args)
