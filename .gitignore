@@ -4,4 +4,11 @@
 deja_test.rb
 test.rb
 neo4j
-Gemfile.server.lock
+# /spec/dummy/config/database.yml
+# /spec/dummy/db/migrate
+# /spec/dummy/db/schema.rb
+/spec/reports
+/spec/dummy/log/*
+# /db/migrate
+# /db/schema.rb
+# /config/database.yml
