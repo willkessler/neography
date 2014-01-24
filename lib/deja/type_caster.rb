@@ -43,7 +43,7 @@ module Deja
       when 'String'
         String(value)
       when 'Date'
-        Date.parse(value.to_s).strftime("%Y%m%d").to_i
+        Date.parse(value.to_s).strftime("%Y-%m-%d").to_s
       when 'Time'
         value.to_i
       else
