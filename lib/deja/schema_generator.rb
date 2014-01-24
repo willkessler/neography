@@ -79,11 +79,15 @@ module Deja
 
       def inspect_validations
         validators.inject({}) do |memo, validator|
-          validator.attributes.each do |attr|
-            memo[attr] ||= {}
-            memo[attr][validator.kind] = validator.options
+          if validator.respond_to? :attributes
+            validator.attributes.each do |attr|
+              memo[attr] ||= {}
+              memo[attr][validator.kind] = validator.options
+            end
+            memo
+          else
+            memo
           end
-          memo
         end
       end
     end
