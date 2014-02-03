@@ -7,16 +7,19 @@ module Deja
       @@all_attributes ||= {}
       @@indexed_attributes ||= {}
       @@composed_attributes ||= {}
+      @@editable_attributes ||= {}
 
       def schema
         {
           :attributes => inspect_attributes,
+          :editable_attributes => inspect_editable_attributes,
           :validations => inspect_validations
         }
       end
 
       def define_class_key
         @@all_attributes[self.name] ||= {}
+        @@editable_attributes[self.name] ||= []
       end
 
       def attribute(name, type, opts = {})
@@ -25,6 +28,7 @@ module Deja
         @@all_attributes[self.name][sym_name] = opts.merge(:type => type)
         attr_accessorize(sym_name, opts)
         add_property_to_index(sym_name) if opts[:index]
+        @@editable_attributes[self.name] << sym_name if opts[:editable] != false
       end
 
       def attr_accessorize(name, opts)
@@ -34,6 +38,10 @@ module Deja
           send("#{name}_will_change!") if (new_value != instance_variable_get("@#{name}") && !instance_variable_get("@#{name}").nil?)
           instance_variable_set("@#{name}", new_value)
         end
+      end
+
+      def editable_attributes
+        @@editable_attributes
       end
 
       def indexed_attributes
@@ -68,12 +76,21 @@ module Deja
       def inspect_attributes
         klass = self
         attrs = {}
-
         while @@all_attributes.has_key?(klass.name)
           attrs.merge!(@@all_attributes[klass.name])
           klass = klass.superclass
         end
 
+        attrs
+      end
+
+      def inspect_editable_attributes
+        klass = self
+        attrs = []
+        while @@editable_attributes.has_key?(klass.name)
+          attrs += @@editable_attributes[klass.name]
+          klass = klass.superclass
+        end
         attrs
       end
 
