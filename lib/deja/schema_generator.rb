@@ -1,3 +1,5 @@
+require 'cb_commons'
+
 module Deja
   module SchemaGenerator
     extend ActiveSupport::Concern
@@ -82,7 +84,9 @@ module Deja
           if validator.respond_to? :attributes
             validator.attributes.each do |attr|
               memo[attr] ||= {}
-              memo[attr][validator.kind] = validator.options
+              options = validator.options.deep_dup
+              options[:with] = json_regexp(options[:with]) if options.has_key?(:with)
+              memo[attr][validator.kind] = options
             end
             memo
           else
@@ -90,6 +94,19 @@ module Deja
           end
         end
       end
+
+      def json_regexp(regexp)
+        regexp.inspect.
+        sub('\\A' , '^').
+        sub('\\Z' , '$').
+        sub('\\z' , '$').
+        sub(/^\// , '').
+        sub(/\/[a-z]*$/ , '').
+        gsub(/\(\?#.+\)/ , '').
+        gsub(/\(\?-\w+:/ , '(').
+        gsub(/\s/ , '')
+      end
+
     end
   end
 end
