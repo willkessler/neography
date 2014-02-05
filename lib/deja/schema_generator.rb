@@ -1,5 +1,3 @@
-require 'cb_commons'
-
 module Deja
   module SchemaGenerator
     extend ActiveSupport::Concern
@@ -79,14 +77,20 @@ module Deja
         attrs
       end
 
-      def inspect_validations
+      def inspect_validations(for_json = false)
         validators.inject({}) do |memo, validator|
           if validator.respond_to? :attributes
             validator.attributes.each do |attr|
               memo[attr] ||= {}
-              options = validator.options.deep_dup
-              options[:with] = json_regexp(options[:with]) if options.has_key?(:with)
-              memo[attr][validator.kind] = options
+
+              if for_json
+                options = validator.options.deep_dup
+                options[:with] = json_regexp(options[:with]) if options.has_key?(:with)
+                memo[attr][validator.kind] = options
+              else
+                memo[attr][validator.kind] = validator.options
+              end
+
             end
             memo
           else
@@ -95,18 +99,23 @@ module Deja
         end
       end
 
-      def json_regexp(regexp)
-        regexp.inspect.
-        sub('\\A' , '^').
-        sub('\\Z' , '$').
-        sub('\\z' , '$').
-        sub(/^\// , '').
-        sub(/\/[a-z]*$/ , '').
-        gsub(/\(\?#.+\)/ , '').
-        gsub(/\(\?-\w+:/ , '(').
-        gsub(/\s/ , '')
-      end
+      # The following method (extracted from rails) adds support for sharing ruby regular expressions with javascript via JSON.
 
+      # For more details, see http://www.edgerails.info/2013/1/21/whats-new-55/ and
+      # https://github.com/rails/rails/blob/b67043393b5ed6079989513299fe303ec3bc133b/actionpack/lib/action_dispatch/routing/inspector.rb#L42
+
+      def json_regexp(regexp)
+        str = regexp.inspect.
+              sub('\\A', '^').
+              sub('\\Z', '$').
+              sub('\\z', '$').
+              sub(/^\//, '').
+              sub(/\/[a-z]*$/, '').
+              gsub(/\(\?#.+\)/, '').
+              gsub(/\(\?-\w+:/, '(').
+              gsub(/\s/, '')
+        Regexp.new(str).source
+      end
     end
   end
 end

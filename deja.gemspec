@@ -23,7 +23,6 @@ Gem::Specification.new do |s|
 	s.add_development_dependency 'ci_reporter'
   s.add_development_dependency 'timecop'
 
-  s.add_dependency 'cb_commons'
   s.add_dependency 'activemodel', '~> 4.0.0'
   s.add_dependency 'activesupport', '~> 4.0.0'
   s.add_dependency 'neography', '~> 1.1.3'
