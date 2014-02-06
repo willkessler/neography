@@ -30,11 +30,21 @@ describe Deja::SchemaGenerator do
     Example.schema[:validations][:code].should have_key :presence
     Example.schema[:validations][:code].should have_key :numericality
   end
+
+  it 'includes editable attributes' do
+    Example.schema[:editable_attributes].size.should == 2
+    Example.schema[:editable_attributes].should include(:name, :code)
+  end
+
+  it 'excludes non-editable attributes' do
+    Example.schema[:editable_attributes].should_not include(:created_at)
+  end
 end
 
 class Example < Deja::Node
   attribute :name, String
   attribute :code, String
+  attribute :created_at, Time, :editable => false
 
   validates :name, :presence => true
   validates :code, :presence => true
