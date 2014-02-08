@@ -4,16 +4,56 @@ setup:
 - scripts:
   - export RAILS_ENV=test
   - echo "export RAILS_ENV=test" >> ~/.bash_profile
-  # The next line happens in the PR for this repo
-  - bundle install
-  # The next line parses the Gemfile for crunchbase dependencies,
-  # updates the repos on the box, and bundle installs for the latest
-  # gem dependencies
-  - for repo in `grep ":path => '/crunchbase/" Gemfile | cut -d ' ' -f 2 | sed -r "s/[',]//g"`; do cd /crunchbase/$repo && git pull && bundle install; done
+  #####################################
+  # Remove repo to be tested
+  # -----------------------------------
+  # All of the repositories in the
+  # project are already cloned to
+  # /crunchbase/, so we want to remove
+  # the one that is being tested and
+  # slot in the new to-be-tested code
+  # in its place.
+  #####################################
+  - rm -rf /crunchbase/$KOALITY_REPOSITORY
+  - mv /crunchbase/* /home/crunchbase/
+  - rm -rf /crunchbase
+  - sudo ln -s /home/crunchbase /crunchbase
+  - sudo chown crunchbase:crunchbase /crunchbase
+  - for repo in `grep ":path => '/crunchbase/" Gemfile | cut -d ' ' -f 2 | sed -r "s/[',]//g"`; do cd /crunchbase/$repo && git pull && if [ -e bower.json ] ; then sudo -u crunchbase bower install ; fi && bundle install; done
+  - for dir in `grep "/crunchbase/$KOALITY_REPOSITORY" /crunchbase/*/Gemfile | cut -d ':' -f 1 | sed -e "s/\/Gemfile//g"`; do cd $dir && git pull && if [ -e bower.json ] ; then sudo -u crunchbase bower install ; fi && bundle install; done
+  - cd /crunchbase/integration && git pull && bundle install
+  ####################################
+  # Create and Seed the Database
+  # ----------------------------------
+  # For all tests, seed the database.
+  ####################################
+  - cd /crunchbase/integration && bundle exec rake db:create && bundle exec rake db:migrate && bundle exec rake db:symlink
 test:
   machines: 1
   scripts:
-  - tests:
+  - pull request:
+      path: /crunchbase/$KOALITY_REPOSITORY
       script: bundle exec rake ci_spec
       timeout: 1800
       xunit: spec/reports
+  factories:
+  - setup factory:
+      script:
+      #########################################
+      # Test affected repos
+      # ---------------------------------------
+      # Look up and test each repository that
+      # depends upon the repository that is
+      # being tested.
+      #########################################
+      - |
+        for dir in `grep "/crunchbase/$KOALITY_REPOSITORY" /crunchbase/*/Gemfile | cut -d ':' -f 1 | sed -e "s/\/Gemfile//g"`; do
+          if [ -e $dir/Rakefile ] && grep -q "ci_spec" $dir/Rakefile
+            then
+              echo "      - `echo $dir | cut -d '/' -f 3`:"
+              echo "          path: $dir"
+              echo "          script: bundle exec rake ci_spec"
+              echo "          xunit: spec/reports"
+              echo "          timeout: 1800"
+          fi
+        done
