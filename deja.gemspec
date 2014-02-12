@@ -18,9 +18,11 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
 
   s.add_development_dependency 'factory_girl'
+  s.add_development_dependency 'guard', '~> 1.8.3'
+  s.add_development_dependency 'guard-rspec', '~> 3.0.3'
   s.add_development_dependency 'pry'
-  s.add_development_dependency 'rspec', '~>2.13.0'
-	s.add_development_dependency 'ci_reporter'
+  s.add_development_dependency 'rspec', '~> 2.13.0'
+  s.add_development_dependency 'ci_reporter'
   s.add_development_dependency 'timecop'
 
   s.add_dependency 'activemodel', '~> 4.0.0'
