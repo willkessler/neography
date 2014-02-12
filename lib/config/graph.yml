@@ -11,6 +11,7 @@ development:
   authentication: nil  # 'basic' or 'digest'
   username: nil
   password: nil
+
 staging:
   protocol: "http://"
   server: "internal-Neo4J-LB-1693655064.us-west-2.elb.amazonaws.com"
@@ -24,6 +25,7 @@ staging:
   authentication: nil  # 'basic' or 'digest'
   username: nil
   password: nil
+
 test:
   protocol: "http://"
   server: "localhost"
@@ -37,6 +39,21 @@ test:
   authentication: nil  # 'basic' or 'digest'
   username: nil
   password: nil
+
+qa:
+  protocol: "http://"
+  server: "localhost"
+  port: 7474
+  directory: ""  # prefix this path with '/'
+  cypher_path: "/cypher"
+  gremlin_path: "/ext/GremlinPlugin/graphdb/execute_script"
+  log_file: "neography.log"
+  log_enabled: false
+  max_threads: 20
+  authentication: nil  # 'basic' or 'digest'
+  username: nil
+  password: nil
+
 production:
   protocol: "http://"
   server: "localhost"
