@@ -39,7 +39,7 @@ module Deja
 
   config_hash = YAML.load_file("#{File.dirname(File.expand_path(__FILE__))}/config/graph.yml")
   Neography.configure do |config|
-    config_hash[CB.environment].each do |k, v|
+    config_hash[ENV['RAILS_ENV'] || 'development'].each do |k, v|
       config.send("#{k}=".to_sym, v)
     end
   end
