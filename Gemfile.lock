@@ -1,16 +1,10 @@
-GIT
-  remote: https://github.com/andreasronge/neo4j-cypher.git
-  revision: b28d74f679eebbf2f3500d5a736838aee1a10f74
-  specs:
-    neo4j-cypher (1.0.2)
-
 PATH
   remote: .
   specs:
     deja (0.1)
       activemodel (~> 4.0.0)
       activesupport (~> 4.0.0)
-      neo4j-cypher (~> 1.0.1)
+      neo4j-cypher (~> 1.0.3)
       neography (~> 1.1.3)
       oj (~> 2.1.4)
 
@@ -56,6 +50,7 @@ GEM
     method_source (0.8.2)
     minitest (4.7.5)
     multi_json (1.8.4)
+    neo4j-cypher (1.0.3)
     neography (1.1.4)
       httpclient (>= 2.3.3)
       json (>= 1.7.7)
@@ -100,7 +95,6 @@ DEPENDENCIES
   factory_girl
   guard (~> 1.8.3)
   guard-rspec (~> 3.0.3)
-  neo4j-cypher!
   neography (~> 1.1.3)
   pry
   rspec (~> 2.13.0)
