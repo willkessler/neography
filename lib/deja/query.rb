@@ -3,8 +3,8 @@ module Deja
     include Deja::NeoParse
 
     class << self
-      def cypher(query_string, id = nil)
-        result_hash  = Deja.execute_cypher_read(query_string)
+      def cypher(query_string)
+        result_hash = Deja.execute_cypher(query_string)
         return_array = normalize(result_hash)
         Deja::Node.objectify(return_array)
       end
