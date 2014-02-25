@@ -4,9 +4,8 @@ module Deja
 
     class << self
       def cypher(query_string, id = nil)
-        return_root  = id ? :lazy : :eager
         result_hash  = Deja.execute_cypher_read(query_string)
-        return_array = normalize(result_hash, return_root)
+        return_array = normalize(result_hash)
         Deja::Node.objectify(return_array)
       end
 
