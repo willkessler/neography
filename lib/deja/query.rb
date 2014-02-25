@@ -3,6 +3,13 @@ module Deja
     include Deja::NeoParse
 
     class << self
+      def cypher(query_string, id = nil)
+        return_root  = id ? :lazy : :eager
+        result_hash  = Deja.execute_cypher_read(query_string)
+        return_array = normalize(result_hash, return_root)
+        Deja::Node.objectify(return_array)
+      end
+
       def load_node(neo_id, options = {})
         options[:return_root] = options[:include] ? :root_rel_end : :root_only
         options[:include] ||= :none
