@@ -113,7 +113,8 @@ module Deja
               send(:related_nodes, {:include => rel, :direction => :out}.merge(opts))
               (instance_variable_get("@#{rel}_out") || []).map {|r| r.end_node}
             else
-              instance_variable_get("@#{rel}_out").inject([]) { |memo, rel| memo << rel.end_node; memo; }
+              rels = opts[:limit] ? instance_variable_get("@#{rel}_out").first(opts[:limit]) : instance_variable_get("@#{rel}_out")
+              rels.inject([]) { |memo, rel| memo << rel.end_node; memo; }
             end
           end
 
@@ -134,7 +135,8 @@ module Deja
               send(:related_nodes, {:include => rel, :direction => :in}.merge(opts))
               (instance_variable_get("@#{rel}_in") || []).map {|r| r.start_node}
             else
-              instance_variable_get("@#{rel}_in").inject([]) { |memo, rel| memo << rel.start_node; memo; }
+              rels = opts[:limit] ? instance_variable_get("@#{rel}_in").first(opts[:limit]) : instance_variable_get("@#{rel}_in")
+              rels.inject([]) { |memo, rel| memo << rel.start_node; memo; }
             end
           end
 
