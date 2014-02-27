@@ -13,6 +13,8 @@ module Deja
         value.to_i
       when 'Float'
         value.to_f
+      when 'BigDecimal'
+        BigDecimal.new(value.to_s)
       when 'String'
         value.to_s
       when 'Deja::Boolean'
@@ -37,6 +39,8 @@ module Deja
         Integer(value)
       when 'Float'
         Float(value)
+      when 'BigDecimal'
+        BigDecimal(value.to_s).to_s
       when 'Deja::Boolean'
         raise TypeError, "invalid boolean value passed in: '#{value}'" unless Boolean.boolean?(value)
         Boolean.true?(value)
