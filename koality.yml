@@ -14,15 +14,17 @@ setup:
   # slot in the new to-be-tested code
   # in its place.
   #####################################
-  - rm -rf /crunchbase/$KOALITY_REPOSITORY
-  - mv /crunchbase/* /home/crunchbase/
-  - rm -rf /crunchbase
-  - sudo ln -s /home/crunchbase /crunchbase
-  - sudo chown crunchbase:crunchbase /crunchbase
-  - cd /home/crunchbase/$KOALITY_REPOSITORY && bundle install && if [ -e bower.json ] ; then sudo -u crunchbase bower update ; fi
-  - for repo in `grep ":path => '/crunchbase/" Gemfile | cut -d ' ' -f 2 | sed -r "s/[',]//g"`; do cd /crunchbase/$repo && git pull && if [ -e bower.json ] ; then sudo -u crunchbase bower update ; fi && bundle install; done
-  - for dir in `grep "/crunchbase/$KOALITY_REPOSITORY" /crunchbase/*/Gemfile | cut -d ':' -f 1 | sed -e "s/\/Gemfile//g"`; do cd $dir && git pull && if [ -e bower.json ] ; then sudo -u crunchbase bower update ; fi && bundle install; done
-  - cd /crunchbase/integration && git pull && bundle install
+  #- rm -rf /crunchbase/$KOALITY_REPOSITORY
+  #- mv /crunchbase/* /home/crunchbase/
+  #- rm -rf /crunchbase
+  #- sudo ln -s /home/crunchbase /crunchbase
+  #- sudo chown crunchbase:crunchbase /crunchbase
+  - cd /crunchbase/integration && git pull origin develop && bundle install
+  - cd /crunchbase/$KOALITY_REPOSITORY && bundle install
+  #- cd /crunchbase && /crunchbase/integration/bin/recurse git pull origin develop
+  #- cd /crunchbase && /crunchbase/integration/bin/recurse bundle install
+  #- cd /crunchbase/site && sudo -u crunchbase bower update
+  #- cd /crunchbase/admin && sudo -u crunchbase bower update
   ####################################
   # Create and Seed the Database
   # ----------------------------------
@@ -37,9 +39,9 @@ test:
       script: bundle exec rake ci_spec
       timeout: 1800
       xunit: spec/reports
-  factories:
-  - setup factory:
-      script:
+#  factories:
+#  - setup factory:
+#      script:
       #########################################
       # Test affected repos
       # ---------------------------------------
@@ -47,14 +49,14 @@ test:
       # depends upon the repository that is
       # being tested.
       #########################################
-      - |
-        for dir in `grep "/crunchbase/$KOALITY_REPOSITORY" /crunchbase/*/Gemfile | cut -d ':' -f 1 | sed -e "s/\/Gemfile//g"`; do
-          if [ -e $dir/Rakefile ] && grep -q "ci_spec" $dir/Rakefile
-            then
-              echo "      - `echo $dir | cut -d '/' -f 3`:"
-              echo "          path: $dir"
-              echo "          script: bundle exec rake ci_spec"
-              echo "          xunit: spec/reports"
-              echo "          timeout: 1800"
-          fi
-        done
+#      - |
+#        for dir in `grep "/crunchbase/$KOALITY_REPOSITORY" /crunchbase/*/Gemfile | cut -d ':' -f 1 | sed -e "s/\/Gemfile//g"`; do
+#          if [ -e $dir/Rakefile ] && grep -q "ci_spec" $dir/Rakefile
+#            then
+#              echo "      - `echo $dir | cut -d '/' -f 3`:"
+#              echo "          path: $dir"
+#              echo "          script: bundle exec rake ci_spec"
+#              echo "          xunit: spec/reports"
+#              echo "          timeout: 1800"
+#          fi
+#        done
