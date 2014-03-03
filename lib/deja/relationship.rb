@@ -101,7 +101,9 @@ module Deja
       run_callbacks :save do
         run_callbacks :create do
           @id = Deja::Query.create_relationship(@start_node.id, @end_node.id, self.class.label, persisted_attributes)
-          raise Deja::Error::OperationFailed, "Failed to create relationship" unless @id
+          unless Deja.batch
+            raise Deja::Error::OperationFailed, "Failed to create relationship" unless @id
+          end
         end
       end
       self

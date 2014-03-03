@@ -212,7 +212,9 @@ module Deja
       run_callbacks :save do
         run_callbacks :create do
           @id = Deja::Query.create_node(persisted_attributes)
-          raise Deja::Error::OperationFailed, "Failed to create node" unless @id
+          unless Deja.batch
+            raise Deja::Error::OperationFailed, "Failed to create node" unless @id
+          end
         end
       end
       self

@@ -23,6 +23,7 @@ end
 
 class SpecHelper
   def self.truncate
+    return if ENV['RAILS_ENV'] == 'production'
     Deja.neo.execute_query("START n=node(*) MATCH n-[r?]->() WHERE ID(n) <> 0 DELETE r DELETE n")
   end
 end

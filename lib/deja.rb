@@ -16,7 +16,6 @@ module Deja
   autoload :Cast
   autoload :Query
   autoload :Batch
-  autoload :Transaction
   autoload :Relationship
   autoload :SchemaGenerator
   autoload :RelNodeWrapper
@@ -26,6 +25,7 @@ module Deja
   autoload :Bridge
   autoload :Model
   autoload :TypeCaster
+  autoload :Parameterizer
 
   autoload_under 'types' do
     autoload :Boolean
@@ -35,7 +35,7 @@ module Deja
 
   extend Deja::RestIndex
 
-  class << self; attr_accessor :neo, :tx, :batch ; end
+  class << self; attr_accessor :neo, :batch ; end
 
   config_hash = YAML.load_file("#{File.dirname(File.expand_path(__FILE__))}/config/graph.yml")
   Neography.configure do |config|
@@ -47,17 +47,35 @@ module Deja
   Deja.set_node_auto_index_status(true)
   Deja.set_relationship_auto_index_status(true)
 
-  def self.execute_cypher(query)
-    if Deja.tx
-      Deja.neo.in_transaction(Deja.tx, query.to_s)
-    elsif Deja.batch
-      Deja.batch << [:execute_query, query.to_s]
+  def self.cypher_read(query)
+    parameterizing = true
+    if parameterizing
+      query, params = Deja::Parameterizer.parameterize_query(query)
+      execute_cypher(query, params)
     else
-      self.neo.execute_query(query.to_s)
+      execute_cypher(query.to_s)
     end
   end
 
-  def self.execute_gremlin(query)
-    self.neo.execute_script(query)
+  def self.cypher_cud(query)
+    parameterizing = true
+    if parameterizing
+      query, params = Deja::Parameterizer.parameterize_query(query)
+      execute_cypher_batch(query, params)
+    else
+      execute_cypher_batch(query.to_s)
+    end
+  end
+
+  def self.execute_cypher(query, params = nil)
+    self.neo.execute_query(query, params)
+  end
+
+  def self.execute_cypher_batch(query, params = nil)
+    if Deja.batch
+      Deja.batch << [:execute_query, query, params]
+    else
+      execute_cypher(query, params)
+    end
   end
 end
