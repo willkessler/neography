@@ -154,16 +154,16 @@ module Deja
     end
 
     def related_nodes(opts = {})
-      related_nodes = Deja::Query.load_related_nodes(@id, opts)
+      nodes = Deja::Query.load_related_nodes(@id, opts)
 
-      if related_nodes.empty?
+      if nodes.empty?
         if opts[:direction]
           instance_variable_set("@#{opts[:include]}_#{opts[:direction]}", [])
         else
           instance_variable_set("@#{opts[:include]}", [])
         end
       else
-        erectify(related_nodes, opts[:direction])
+        erectify(nodes, opts[:direction])
       end
     end
 
