@@ -81,19 +81,24 @@ module Deja
       query_string.scan(/SET\s([^\.]+)/).first.first
     end
 
+    def self.join_update_params(target, params)
+      params.keys.map{|k| "#{target}.#{k}={#{k}}"}.join(',')
+    end
+
     def self.parameterize_update(query_string)
       target = extract_update_target(query_string)
       start_node, end_node = extract_start_end(query_string)
       first_part = query_string.partition('SET')[0..1].join('')
       first_part.sub!(start_node, '{start_node}')
       last_part = query_string.rpartition('RETURN')[1..2].join('')
-      params = extract_params(query_string, regex_update_params)
+      params = extract_params(query_string, regex_update_params)[:data]
+      joined_params = join_update_params(target, params)
       params['start_node'] = num?(start_node) ? start_node.to_i : start_node[1..-2]
       if end_node
         first_part.sub!(end_node, '{end_node}')
         params['end_node'] = num?(end_node) ? end_node.to_i : end_node[1..-2]
       end
-      return "#{first_part} #{target}={data} #{last_part}", params
+      return "#{first_part} #{joined_params} #{last_part}", params
     end
 
     def self.parameterize_read(query_string)
