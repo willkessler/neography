@@ -170,7 +170,13 @@
         }
       end
 
-      def count_rels(id, rel = nil, direction = nil)
+      def count_relationships(index)
+        cypher {
+          Deja::Bridge.rel(index, self).count
+        }
+      end
+
+      def count_related_nodes(id, rel = nil, direction = nil)
         case direction
         when :out_plural, :out_singular, :out
           cypher { node(id).outgoing(rel).count }

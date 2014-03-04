@@ -55,6 +55,10 @@ module Deja
         find({:index => 'relationship_auto_index', :key =>  key, :value => value})
       end
 
+      def count(index)
+        Deja::Query.count_relationships(index)
+      end
+
       def find_between_nodes(start_node, end_node)
         relationship = Deja::Query.load_relationship_from_nodes(start_node.id, end_node.id, self.label)
         return nil if relationship.blank?
