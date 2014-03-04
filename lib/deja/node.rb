@@ -179,7 +179,7 @@ module Deja
     def count(rel_alias)
       rel_alias = rel_alias.to_s
       return false unless self.class.aliases_hash[rel_alias]
-      Deja::Query.count_relationships(@id,
+      Deja::Query.count_related_nodes(@id,
         self.class.aliases_hash[rel_alias][:relationship],
         self.class.aliases_hash[rel_alias][:direction])
     end

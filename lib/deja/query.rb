@@ -54,8 +54,14 @@ module Deja
         rel_count    = result_hash['data'].first.first
       end
 
-      def count_relationships(id, type, direction)
-        cypher_query = Deja::Bridge.count_rels(id, type, direction)
+      def count_relationships(index)
+        cypher_query = Deja::Bridge.count_relationships(index)
+        result_hash  = Deja.cypher_read(cypher_query)
+        rel_count    = result_hash['data'].first.first
+      end
+
+      def count_related_nodes(id, type, direction)
+        cypher_query = Deja::Bridge.count_related_nodes(id, type, direction)
         result_hash  = Deja.cypher_read(cypher_query)
         rel_count    = result_hash['data'].first.first
       end
