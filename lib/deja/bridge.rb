@@ -84,7 +84,7 @@
         cypher do
           Deja::Bridge.node(id, self).tap do |n|
             attributes.each do |key, value|
-              n[key] = value
+              n[key] = value.is_a?(String) ? value.gsub(/['"]/) { |s| "\\#{s}" } : value
             end
           end.ret
         end
@@ -112,9 +112,10 @@
         cypher do
           Deja::Bridge.rel(id, self).tap do |r|
             attributes.each do |key, value|
-              r[key] = value
+              r[key] = value.is_a?(String) ? value.gsub(/['"]/) { |s| "\\#{s}" } : value
             end
-          end.ret        end
+          end.ret
+        end
       end
 
       def delete_relationship(id)
