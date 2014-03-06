@@ -110,6 +110,7 @@ module Deja
         if aliases[:out_plural] and aliases[:out_singular]
           define_method aliases[:out_plural] do |opts = {}|
             if instance_variable_get("@#{rel}_out").blank? || opts[:refresh]
+              instance_variable_set("@#{rel}_out", [])
               send(:related_nodes, {:include => rel, :direction => :out}.merge(opts))
               (instance_variable_get("@#{rel}_out") || []).map {|r| r.end_node}
             else
@@ -132,6 +133,7 @@ module Deja
         if aliases[:in_plural] and aliases[:in_singular]
           define_method aliases[:in_plural] do |opts = {}|
             if instance_variable_get("@#{rel}_in").blank? || opts[:refresh]
+              instance_variable_set("@#{rel}_in", [])
               send(:related_nodes, {:include => rel, :direction => :in}.merge(opts))
               (instance_variable_get("@#{rel}_in") || []).map {|r| r.start_node}
             else
@@ -155,16 +157,7 @@ module Deja
 
     def related_nodes(opts = {})
       nodes = Deja::Query.load_related_nodes(@id, opts)
-
-      if nodes.empty?
-        if opts[:direction]
-          instance_variable_set("@#{opts[:include]}_#{opts[:direction]}", [])
-        else
-          instance_variable_set("@#{opts[:include]}", [])
-        end
-      else
-        erectify(nodes, opts[:direction])
-      end
+      erectify(nodes, opts[:direction]) if nodes.present?
     end
 
     def relationships
