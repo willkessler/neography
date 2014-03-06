@@ -33,6 +33,10 @@ module Deja
       str == 'true' || str == 'false' || str == 'null'
     end
 
+    def self.null?(str)
+      str == 'NULL'
+    end
+
     def self.join_params(params)
       params.keys.map{|k| "#{k}:{#{k}}"}.join(',')
     end
@@ -67,6 +71,8 @@ module Deja
       params.each do |k, v|
         if num?(v)
           params[k] = v.to_i
+        elsif null?(v)
+          params[k] = nil
         elsif bool?(v)
           params[k] = (v == 'true')
         else
