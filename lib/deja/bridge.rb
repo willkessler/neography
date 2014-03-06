@@ -40,6 +40,13 @@
         context.where{|n| filters.each{|k, v| n[k] == v.to_s}}
       end
 
+      def filter(context, filters)
+        filters.each do |k, v|
+          context = context.where { |r| r[k] == v.to_s }
+        end
+        context
+      end
+
       def order(context, order_string)
         property, order = order_string.split(' ')
         if order.casecmp('ASC') == 0
@@ -145,8 +152,10 @@
       end
 
       def outgoing_rel(id, rels = nil, opts = nil)
+        opts[:filter] ||= {}
+
         cypher {
-          r = Deja::Bridge.node(id, self).outgoing(rel(*rels).as(:relation)).as(:end)
+          r = Deja::Bridge.node(id, self).outgoing(Deja::Bridge.filter(rel(*rels), opts[:filter]).as(:relation)).as(:end)
           Deja::Bridge.apply_options(r, opts)
         }
       end

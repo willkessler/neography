@@ -22,7 +22,7 @@ To implement a model using Deja, inherit from Deja::Node
     attr_accessor :name, :permalink, :type
 
     relationship :invested_in, :out => investment, :in => investor
-    relationship :friends, :out => friend 
+    relationship :friends, :out => friend
     relationship :hates, :out => hates
   end
   ```
@@ -37,7 +37,7 @@ Relationships are returned as the end node of a given relationship.
 
 Both plural and singular methods are generated for every relationship - the singular form returning the first node from the plural method. It accepts the same options as plural.
   ```ruby
-  Company.address(:offset => 5)    # returns the 5th address node              
+  Company.address(:offset => 5)    # returns the 5th address node
   ```
 
 Interface:
@@ -104,7 +104,7 @@ To order by a given property on end nodes of a relationship, pass an order optio
   ```ruby
   node.investments(:order => 'name ASC')      # returns the related nodes ordered by name
   ```
-  
+
 ### Limit:
 To limit the results of relationship load query, pass in a limit argument.
   ```ruby
@@ -115,6 +115,18 @@ To limit the results of relationship load query, pass in a limit argument.
 To offset the results of relationship load query, pass in a offset argument.
   ```ruby
   node.investments(:offset => 5)              # returns all investments offset by the first 5
+  ```
+
+### Where:
+To filter the related nodes based on node property values, use the ```:where``` option
+  ```ruby
+  node.investments(:where => { :terms => 'cash' })    # returns all investments that are 'cash' (only supports string values at the moment)
+  ```
+
+### Filter:
+To filter the related nodes based on relationship property values, use the ```:filter``` option
+  ```ruby
+  node.investments(:filter => { :show => 'true' })    # returns all investments have show property set to true (only supports string values at the moment)
   ```
 
 ### Index Methods:
