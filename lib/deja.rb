@@ -68,11 +68,6 @@ module Deja
   end
 
   def self.execute_cypher(query, params = nil)
-    CB.logger.debug " ----- Cypher Query ------ "
-    CB.logger.debug query
-    CB.logger.debug params
-    CB.logger.debug " ------------------------- "
-
     self.neo.execute_query(query, params)
   end
 
