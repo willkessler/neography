@@ -162,14 +162,14 @@
 
       def incoming_rel(id, rels = nil, opts = nil)
         cypher {
-          r = Deja::Bridge.node(id, self).incoming(rel(*rels).as(:relation)).as(:end)
+          r = Deja::Bridge.node(id, self).incoming(Deja::Bridge.filter(rel(*rels), opts[:filter]).as(:relation)).as(:end)
           Deja::Bridge.apply_options(r, opts)
         }
       end
 
       def in_out_rel(id, rels = nil, opts = nil)
         cypher {
-          r = Deja::Bridge.node(id, self).both(rel(*rels).as(:relation)).as(:end)
+          r = Deja::Bridge.node(id, self).both(Deja::Bridge.filter(rel(*rels), opts[:filter]).as(:relation)).as(:end)
           Deja::Bridge.apply_options(r, opts)
         }
       end
