@@ -14,17 +14,22 @@ setup:
   # slot in the new to-be-tested code
   # in its place.
   #####################################
-  #- rm -rf /crunchbase/$KOALITY_REPOSITORY
-  #- mv /crunchbase/* /home/crunchbase/
-  #- rm -rf /crunchbase
-  #- sudo ln -s /home/crunchbase /crunchbase
-  #- sudo chown crunchbase:crunchbase /crunchbase
+  - rm -rf /crunchbase/$KOALITY_REPOSITORY
+  - mv /crunchbase/* /home/crunchbase/
+  - rm -rf /crunchbase
+  - sudo ln -s /home/crunchbase /crunchbase
+  - sudo chown crunchbase:crunchbase /crunchbase
   - cd /crunchbase/integration && git pull origin develop && bundle install
+  - cd /crunchbase && /crunchbase/integration/bin/recurse git pull origin develop
+  - cd /crunchbase && /crunchbase/integration/bin/recurse bundle install
+  ####################################
+  # Bundle Install for PR
+  # ----------------------------------
+  # Bundle install on the repo that
+  # is being tested.
+  ####################################
   - cd /crunchbase/$KOALITY_REPOSITORY && bundle install
-  #- cd /crunchbase && /crunchbase/integration/bin/recurse git pull origin develop
-  #- cd /crunchbase && /crunchbase/integration/bin/recurse bundle install
-  #- cd /crunchbase/site && sudo -u crunchbase bower update
-  #- cd /crunchbase/admin && sudo -u crunchbase bower update
+  - cd /crunchbase/$KOALITY_REPOSITORY && if [ -e bower.json ]; then sudo -u crunchbase bower update; fi
   ####################################
   # Create and Seed the Database
   # ----------------------------------
