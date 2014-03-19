@@ -14,22 +14,14 @@ setup:
   # slot in the new to-be-tested code
   # in its place.
   #####################################
+  - export REPOS=(admin background_jobs cacheable cb_commons daemonizer deja graph_manager integration models moneypenny mr_clean queue_adapter review_manager riak_mapper site user_manager version_manager version_worker write_manager)
+  - for i in ${REPOS[@]}; do git clone -b develop git@github.com:crunchbase/$i.git /crunchbase/$i; done
   - rm -rf /crunchbase/$KOALITY_REPOSITORY
   - mv /crunchbase/* /home/crunchbase/
   - rm -rf /crunchbase
   - sudo ln -s /home/crunchbase /crunchbase
-  - sudo chown crunchbase:crunchbase /crunchbase
-  - cd /crunchbase/integration && git pull origin develop && bundle install
-  - cd /crunchbase && /crunchbase/integration/bin/recurse git pull origin develop
-  - cd /crunchbase && /crunchbase/integration/bin/recurse bundle install
-  ####################################
-  # Bundle Install for PR
-  # ----------------------------------
-  # Bundle install on the repo that
-  # is being tested.
-  ####################################
-  - cd /crunchbase/$KOALITY_REPOSITORY && bundle install
-  - cd /crunchbase/$KOALITY_REPOSITORY && if [ -e bower.json ]; then sudo -u crunchbase bower update; fi
+  - sudo chown -R crunchbase:crunchbase /home/crunchbase
+  - for i in ${REPOS[@]}; do cd /crunchbase/$i && if [ -e Gemfile ]; then bundle install; fi; if [ -e bower.json ]; then su crunchbase -c "bower install"; fi; done
   ####################################
   # Create and Seed the Database
   # ----------------------------------
