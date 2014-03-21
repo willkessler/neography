@@ -124,8 +124,10 @@ module Deja
     end
 
     def destroy
-      Deja::Query.delete_relationship(@id) if @id
-      @id = nil
+      run_callbacks :delete do
+        Deja::Query.delete_relationship(@id) if @id
+        @id = nil
+      end
       true
     end
 
