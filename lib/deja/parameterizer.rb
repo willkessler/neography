@@ -42,7 +42,7 @@ module Deja
     end
 
     def self.extract_start_end(query_string)
-      regex = /=(node|relationship|rel)(:[a-zA-Z_]+)?\(([^\)]+)\)/
+      regex = /=(node|relationship|rel)(:[a-zA-Z_]+)?\(([^\)]+(\)')?)/
       start_node, end_node = query_string.scan(regex).map{|arr| arr[2] }
 
       start_node = start_node.include?('=') ? start_node.split('=')[1] : start_node
