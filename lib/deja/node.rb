@@ -3,6 +3,7 @@ module Deja
     class << self
       attr_reader :relationship_names
       attr_reader :aliases_hash
+      attr_reader :uncache_alias_paths
 
       def relationship_names
         @relationship_names || {}
@@ -10,6 +11,10 @@ module Deja
 
       def aliases_hash
         @aliases_hash || {}
+      end
+
+      def uncache_alias_paths
+        @uncache_alias_paths ||= []
       end
 
       def exists?(key, value)
@@ -48,6 +53,38 @@ module Deja
                       :out_plural   => out_plural,
                       :out          => opts[:out]
                     })
+        end
+
+        if opts[:dependent]
+          # supports multiple dependency formats
+          # 1) :dependent => { :destroy => [], :uncache => [] }
+          # 2) :dependent => { :uncache => [] }
+          # dependencies = [opts[:dependent]] unless opts[:dependent].is_a? Array
+          uncache_policies = opts[:dependent][:uncache]
+          if uncache_policies
+            @uncache_alias_paths ||= []
+
+            # add the directly related (1st degree) aliases by default since we want to always clear them
+            if opts[:in]
+              in_plural = opts[:in].to_s.pluralize.to_sym
+              @uncache_alias_paths << in_plural
+            end
+
+            if opts[:out]
+              out_plural = opts[:out].to_s.pluralize.to_sym
+              @uncache_alias_paths << out_plural
+            end
+
+            # Are there additional policies?
+            # Examples
+            #   1. org => job => person would be represented as [ { through: :job, to: :person } ]
+            #   2. org => funding_round => investor_investment => investor would be
+            #      [ { through: funding_round, to: { through: investor_investment, to: investor } } ]
+            # Additional policies is basically an array of policies. Combining the two above, it would be:
+            # [{ through: :job, to: :person }, { through: funding_round, to: { through: investor_investment, to: investor } }]
+            # Capiscé?
+            uncache_policies.map { |uncache_policy| @uncache_alias_paths << uncache_policy }
+          end
         end
 
         attr_writer name
