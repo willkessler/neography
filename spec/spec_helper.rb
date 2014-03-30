@@ -18,7 +18,7 @@ def generate_text(length=8)
 end
 RSpec.configure do |config|
   # Before all specs, for each spec file
-  config.before(:all) { SpecHelper.truncate }
+  # config.before(:all) { SpecHelper.truncate }
 end
 
 class SpecHelper
