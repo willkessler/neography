@@ -190,16 +190,16 @@
       def count_related_nodes(id, rel = nil, direction = nil)
         case direction
         when :out_plural, :out_singular, :out
-          cypher { node(id).outgoing(rel).count }
+          cypher { Deja::Bridge.node(id).outgoing(rel).count }
         when :in_plural, :in_singular, :in
-          cypher { node(id).incoming(rel).count }
+          cypher { Deja::Bridge.node(id).incoming(rel).count }
         else
           return false
         end
       end
 
       def count_connections(id)
-        cypher { node(id).both().count }
+        cypher { Deja::Bridge.node(id).both().count }
       end
     end
   end
