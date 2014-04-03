@@ -23,6 +23,8 @@ module Deja
         Date.parse(value.to_s)
       when 'Time'
         Time.at(value)
+      when 'Array'
+        JSON.parse(value) rescue nil
       else
         value
       end
@@ -50,6 +52,8 @@ module Deja
         Date.parse(value.to_s).strftime("%Y-%m-%d").to_s
       when 'Time'
         value.to_i
+      when 'Array'
+        value.is_a?(Array) ? value.to_json : raise TypeError, "value passed into #{attr_name} is not an array"
       else
         raise TypeError, "undefined data type #{data_type} for attribute #{name}"
       end
