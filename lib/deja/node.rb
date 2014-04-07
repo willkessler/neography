@@ -41,9 +41,14 @@ module Deja
                     })
 
           define_method in_plural do |opts = {}|
-            instance_variable_set("@#{name}_in", [])
-            send(:related_nodes, {:include => name, :direction => :in}.merge(opts))
-            (instance_variable_get("@#{name}_in") || []).map {|r| r.start_node}
+            if instance_variable_get("@#{name}_in").blank? || opts[:refresh]
+              instance_variable_set("@#{name}_in", [])
+              send(:related_nodes, {:include => name, :direction => :in}.merge(opts))
+              (instance_variable_get("@#{name}_in") || []).map {|r| r.start_node}
+            else
+              rels = opts[:limit] ? instance_variable_get("@#{name}_in").first(opts[:limit]) : instance_variable_get("@#{name}_in")
+              rels.inject([]) { |memo, name| memo << name.start_node; memo; }
+            end
           end
 
           define_method "#{in_plural}=" do |relationship|
@@ -72,9 +77,14 @@ module Deja
                     })
 
           define_method out_plural do |opts = {}|
-            instance_variable_set("@#{name}_out", [])
-            send(:related_nodes, {:include => name, :direction => :out}.merge(opts))
-            (instance_variable_get("@#{name}_out") || []).map {|r| r.end_node}
+            if instance_variable_get("@#{name}_out").blank? || opts[:refresh]
+              instance_variable_set("@#{name}_out", [])
+              send(:related_nodes, {:include => name, :direction => :out}.merge(opts))
+              (instance_variable_get("@#{name}_out") || []).map {|r| r.end_node}
+            else
+              rels = opts[:limit] ? instance_variable_get("@#{name}_out").first(opts[:limit]) : instance_variable_get("@#{name}_out")
+              rels.inject([]) { |memo, name| memo << name.end_node; memo; }
+            end
           end
 
           define_method "#{out_plural}=" do |relationship|
