@@ -13,7 +13,7 @@ class Person < Deja::Node
   attribute :age, Integer
   attribute :bank_balance, Float
   attribute :vip, Boolean
-  attribute :tags, Array
+  attribute :tags, Hash
   attribute :born_on, Date
   attribute :knighted_at, Time
 
