@@ -14,7 +14,7 @@ development:
 
 staging:
   protocol: "http://"
-  server: "internal-Neo4J-LB-1693655064.us-west-2.elb.amazonaws.com"
+  server: "internal-Neo4j-LB-1523566093.us-west-2.elb.amazonaws.com"
   port: 7474
   directory: ""  # prefix this path with '/'
   cypher_path: "/cypher"
