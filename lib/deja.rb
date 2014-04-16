@@ -58,7 +58,7 @@ module Deja
   end
 
   def self.cypher_cud(query)
-    parameterizing = true
+    parameterizing = false
     if parameterizing
       query, params = Deja::Parameterizer.parameterize_query(query)
       execute_cypher_batch(query, params)
